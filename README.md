@@ -1,4 +1,7 @@
-# QProv 💥 Quantum Provenance 💡 [![build images](https://github.com/UST-QuAntiL/QProv/workflows/build%20images/badge.svg)](https://github.com/orgs/UST-QuAntiL/packages?repo_name=QProv)
+# QProv 💥 Quantum Provenance 💡 
+
+[![build images](https://github.com/UST-QuAntiL/QProv/workflows/build%20images/badge.svg)](https://github.com/orgs/UST-QuAntiL/packages?repo_name=QProv)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 A Provenance System for Quantum Computing
 
@@ -82,6 +85,12 @@ echo '[{"provider": "ibmq", "token": "<ibmq api key>"}]' | http POST http://127.
 http POST http://127.0.0.1:7331/collect  # if token is set via QPROV_IBMQ_TOKEN
 ```
 
-## architecture (draft, outdated)
+## Haftungsausschluss
 
-![QProv Architecture](.github/img/QProv_1.png "QProv Architecture")
+Dies ist ein Forschungsprototyp.
+Die Haftung für entgangenen Gewinn, Produktionsausfall, Betriebsunterbrechung, entgangene Nutzungen, Verlust von Daten und Informationen, Finanzierungsaufwendungen sowie sonstige Vermögens- und Folgeschäden ist, außer in Fällen von grober Fahrlässigkeit, Vorsatz und Personenschäden, ausgeschlossen.
+
+## Disclaimer of Warranty
+
+Unless required by applicable law or agreed to in writing, Licensor provides the Work (and each Contributor provides its Contributions) on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied, including, without limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE.
+You are solely responsible for determining the appropriateness of using or redistributing the Work and assume any risks associated with Your exercise of permissions under this License.
