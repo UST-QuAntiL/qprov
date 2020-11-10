@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.quantil</groupId>
+		<artifactId>qprov</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<groupId>org.quantil.qprov</groupId>
+	<artifactId>collector</artifactId>
+	<packaging>jar</packaging>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>collector</name>
+	<description>Provenance System for Quantum Computing</description>
+
+	<properties>
+		<!-- <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> -->
+		<default.package>org.quantil.qprov.collector</default.package>
+		<jackson-databind-nullable-version>0.2.0</jackson-databind-nullable-version>
+		<jackson.version>2.11.1</jackson.version>
+		<java.version>15</java.version>
+		<jersey.version>2.27</jersey.version>
+		<junit.version>4.8.1</junit.version>
+		<modelmapper.version>2.3.0</modelmapper.version>
+		<openapi-generator.version>4.3.1</openapi-generator.version>
+		<scribejava-apis.version>6.9.0</scribejava-apis.version>
+		<slf4j-api.version>1.7.30</slf4j-api.version>
+		<springfox.version>2.9.2</springfox.version>
+		<start-class>org.quantil.qprov.collector.QProvCollector</start-class>
+		<swagger-annotations.version>2.1.5</swagger-annotations.version>
+	</properties>
+
+	<!-- <repositories>
+		<repository>
+			<id>github</id>
+			<name>GitHub UST-QuAntiL/QProv Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/UST-QuAntiL/QProv</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories> -->
+
+	<!-- <distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub UST-QuAntiL/QProv Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/UST-QuAntiL/QProv</url>
+		</repository>
+	</distributionManagement>-->
+
+	<dependencies>
+		<!-- supporting yaml properties file -->
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-hateoas</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.projectreactor</groupId>
+			<artifactId>reactor-spring</artifactId>
+			<version>1.0.1.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-rest-hal-explorer</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.restdocs</groupId>
+			<artifactId>spring-restdocs-mockmvc</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openprovenance.prov</groupId>
+			<artifactId>prov-model</artifactId>
+			<version>0.9.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openprovenance.prov</groupId>
+			<artifactId>prov-interop</artifactId>
+			<version>0.9.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openprovenance.prov</groupId>
+			<artifactId>prov-xml</artifactId>
+			<version>0.9.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openprovenance.prov</groupId>
+			<artifactId>prov-n</artifactId>
+			<version>0.9.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openprovenance.prov</groupId>
+			<artifactId>prov-dot</artifactId>
+			<version>0.9.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.plugin</groupId>
+			<artifactId>spring-plugin-core</artifactId>
+			<version>2.0.0.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+		</dependency>
+
+		<!-- dependencies are needed for the client being generated -->
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-annotations</artifactId>
+			<version>${swagger-annotations.version}</version>
+		</dependency>
+
+		<!-- JSON processing: jackson -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.jaxrs</groupId>
+			<artifactId>jackson-jaxrs-base</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.jaxrs</groupId>
+			<artifactId>jackson-jaxrs-json-provider</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openapitools</groupId>
+			<artifactId>jackson-databind-nullable</artifactId>
+			<version>${jackson-databind-nullable-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j-api.version}</version>
+		</dependency>
+
+		<!-- map from provider api to jpa entities -->
+		<dependency>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
+			<version>${modelmapper.version}</version>
+		</dependency>
+
+		<!-- QProv -->
+		<dependency>
+			<groupId>org.quantil.qprov</groupId>
+			<artifactId>core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<!-- <dependency>
+			<groupId>org.quantil.qprov</groupId>
+			<artifactId>ibmq</artifactId>
+			<version>${project.version}</version>
+		</dependency> -->
+	</dependencies>
+
+	<build>
+		<plugins>
+
+			<!--<plugin>
+				<groupId>org.openapitools</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+				&lt;!&ndash; RELEASE_VERSION &ndash;&gt;
+				<version>${openapi-generator.version}</version>
+				&lt;!&ndash; /RELEASE_VERSION &ndash;&gt;
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							&lt;!&ndash; specify the swagger yaml &ndash;&gt;
+							<inputSpec>https://api.quantum-computing.ibm.com/v2/openapi.json</inputSpec>
+
+							&lt;!&ndash; target to generate java client code &ndash;&gt;
+							<generatorName>java</generatorName>
+
+							&lt;!&ndash; ibmq api is not valid...^^ &ndash;&gt;
+							<skipValidateSpec>true</skipValidateSpec>
+
+							&lt;!&ndash; pass any necessary config options &ndash;&gt;
+							<configOptions>
+								<dateLibrary>java8</dateLibrary>
+
+								<parentGroupId>org.quantil</parentGroupId>
+								<parentArtifactId>qprov</parentArtifactId>
+								<parentVersion>${project.version}</parentVersion>
+
+								<groupId>org.quantil.qprov</groupId>
+								<artifactId>ibmq</artifactId>
+								<artifactVersion>${project.version}</artifactVersion>
+
+								<developerName>Ben Lebherz</developerName>
+								<developerEmail>git@benleb.de</developerEmail>
+								<developerOrganization>University of Stuttgart / IAAS</developerOrganization>
+								<developerOrganizationUrl>https://www.iaas.uni-stuttgart.de/en/</developerOrganizationUrl>
+							</configOptions>
+
+							<output>${project.basedir}/target/generated-sources/org.quantil.qprov.ibmq</output>
+							<apiPackage>org.quantil.qprov.ibmq.client.api</apiPackage>
+							<modelPackage>org.quantil.qprov.ibmq.client.model</modelPackage>
+							<invokerPackage>org.quantil.qprov.ibmq.client</invokerPackage>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>-->
+
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>2.3.4.RELEASE</version>
+				<configuration>
+					<mainClass>${start-class}</mainClass>
+					<image>
+						<!-- <name>ghcr.io/ust-quantil/qprov/${project.artifactId}:${project.version}</name> -->
+						<name>docker.pkg.github.com/ust-quantil/qprov/${project.artifactId}:${project.version}</name>
+						<verboseLogging>true</verboseLogging>
+					</image>
+					<layers>
+						<enabled>true</enabled>
+					</layers>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>3.3.1</version>
+				<configuration>
+					<attachClasses>true</attachClasses>
+				</configuration>
+			</plugin>
+            <!--<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>15</source>
+                    <target>15</target>
+                </configuration>
+            </plugin>-->
+        </plugins>
+	</build>
+</project>

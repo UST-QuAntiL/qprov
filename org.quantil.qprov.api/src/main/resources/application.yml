@@ -1,0 +1,83 @@
+# spring boot
+spring:
+  output: {ansi: {enabled: ALWAYS}}
+  mvc: {log-request-details: true}
+  jackson: {serialization: {WRITE_DATES_AS_TIMESTAMPS: false}}
+  jpa:
+    generate-ddl: true
+    hibernate: {ddl-auto: create-drop}
+    show-sql: true
+    properties: {hibernate: {dialect: org.hibernate.dialect.PostgreSQLDialect}}
+  datasource:
+    url: "jdbc:h2:mem:${QPROV_DB_DATABSE:qprov}"
+    driver-class-name: org.h2.Driver
+    username: "${QPROV_DB_USERNAME:qprov}"
+    password: "${QPROV_DB_PASSWORD:qprov}"
+    initialization-mode: always
+    continue-on-error: true
+    sql-script-encoding: UTF-8
+
+# tomcat
+server: {port: "${QPROV_API_PORT:1337}", {servlet: {contextPath: "/"}}}
+
+# logging
+logging:
+  level:
+    mvc: "${LOGGING_LEVEL_MVC:debug}"
+    org.quantil.qprov: "${LOGGING_LEVEL_QPROV:debug}"
+    springdoc: "${LOGGING_LEVEL_SPRINGDOC:debug}"
+    springfox: {documentation: "${LOGGING_LEVEL_WEB:debug}"}
+    springframework: "${LOGGING_LEVEL_SPRINGFRAMEWORK:debug}"
+    web: "${LOGGING_LEVEL_WEB:debug}"
+
+# api
+springdoc:
+  default-produces-media-type: "application/hal+json"
+  model-and-view-allowed: true
+  show-actuator: true
+  swagger-ui:
+    display-request-duration: true
+    operationsSorter: alpha
+
+---
+# spring boot
+spring:
+  profiles: development
+  output: {ansi: {enabled: ALWAYS}}
+  mvc: {log-request-details: true}
+  jackson: {serialization: {WRITE_DATES_AS_TIMESTAMPS: false}}
+  jpa:
+    generate-ddl: true
+    hibernate: {ddl-auto: create-drop}
+    show-sql: true
+    properties: {hibernate: {dialect: org.hibernate.dialect.PostgreSQLDialect}}
+  datasource:
+    url: "jdbc:postgresql://${QPROV_DB_HOST:127.0.0.1}:${QPROV_DB_PORT:5432}/${QPROV_DB_DATABSE:qprov}"
+    driver-class-name: org.postgresql.Driver
+    username: "${QPROV_DB_USERNAME:qprov}"
+    password: "${QPROV_DB_PASSWORD:qprov}"
+    initialization-mode: always
+    continue-on-error: true
+    sql-script-encoding: UTF-8
+
+# tomcat
+server: {port: "${QPROV_API_PORT:1337}", {servlet: {contextPath: "/"}}}
+
+# logging
+logging:
+  level:
+    mvc: "${LOGGING_LEVEL_MVC:debug}"
+    org.quantil.qprov: "${LOGGING_LEVEL_QPROV:debug}"
+    springdoc: "${LOGGING_LEVEL_SPRINGDOC:debug}"
+    springfox: {documentation: "${LOGGING_LEVEL_WEB:debug}"}
+    springframework: "${LOGGING_LEVEL_SPRINGFRAMEWORK:debug}"
+    web: "${LOGGING_LEVEL_WEB:debug}"
+
+# api
+springdoc:
+  default-produces-media-type: "application/hal+json"
+  model-and-view-allowed: false
+  show-actuator: false
+  swagger-ui:
+    display-request-duration: true
+    operationsSorter: alpha

@@ -1,0 +1,12 @@
+debug: "${DEBUG:false}"
+
+# spring boot
+spring:
+  output: {ansi: {enabled: ALWAYS}}
+
+# logging
+logging:
+  level:
+    org.quantil.qprov: "${LOGGING_LEVEL_QPROV:debug}"
+    springdoc: "${LOGGING_LEVEL_SPRINGDOC:debug}"
+    springframework: "${LOGGING_LEVEL_SPRINGFRAMEWORK:debug}"
