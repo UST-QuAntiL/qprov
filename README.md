@@ -13,10 +13,6 @@ A Provenance System for Quantum Computing
 
 * [collector](org.quantil.qprov.collector/)
   * fetches data from cloud quantum resource providers like IBMQ or rigetti
-  
-  * [ibmq](org.quantil.qprov.core/target/generated-sources/org.quantil.qprov.ibmq) example api client used by the collector / IBMQ Provider
-    * *generated* api client for IBMQ platform REST API
-    * ***note:** this module will be generated at buildtime!*
 
 * [API](org.quantil.qprov.api/)
   * provides access to the collected data

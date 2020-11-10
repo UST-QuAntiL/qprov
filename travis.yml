@@ -1,0 +1,10 @@
+dist: bionic
+sudo: required
+language: java
+jdk:
+    - openjdk14
+services:
+    - docker
+
+script:
+    - mvn package --fail-at-end

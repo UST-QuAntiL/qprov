@@ -7,29 +7,15 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<groupId>org.quantil.qprov</groupId>
 	<artifactId>api</artifactId>
-	<packaging>jar</packaging>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>api</name>
-	<description>Provenance System for Quantum Computing</description>
 
 	<properties>
-		<!-- <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> -->
 		<default.package>org.quantil.qprov.api</default.package>
 		<jackson.version>2.11.3</jackson.version>
 		<springdoc.version>1.4.8</springdoc.version>
 		<start-class>org.quantil.qprov.api.QProvAPI</start-class>
 		<openapi-generator.version>4.3.1</openapi-generator.version>
 	</properties>
-
-	<distributionManagement>
-		<repository>
-			<id>github</id>
-			<name>GitHub UST-QuAntiL/QProv Apache Maven Packages</name>
-			<url>https://maven.pkg.github.com/UST-QuAntiL/QProv</url>
-		</repository>
-	</distributionManagement>
 
 	<dependencies>
 		<!-- supporting yaml properties file -->
