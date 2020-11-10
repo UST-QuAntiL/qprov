@@ -1,4 +1,4 @@
-package org.quantil.qprov.api;
+package org.quantil.qprov.web;
 
 import lombok.Data;
 import org.springframework.web.bind.annotation.ResponseBody;

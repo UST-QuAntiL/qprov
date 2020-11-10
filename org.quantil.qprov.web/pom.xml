@@ -7,13 +7,11 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>api</artifactId>
+	<artifactId>web</artifactId>
 
 	<properties>
-		<default.package>org.quantil.qprov.api</default.package>
 		<jackson.version>2.11.3</jackson.version>
 		<springdoc.version>1.4.8</springdoc.version>
-		<start-class>org.quantil.qprov.api.QProvAPI</start-class>
 		<openapi-generator.version>4.3.1</openapi-generator.version>
 	</properties>
 

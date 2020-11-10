@@ -1,4 +1,4 @@
-package org.quantil.qprov.api;
+package org.quantil.qprov.web;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Contact;

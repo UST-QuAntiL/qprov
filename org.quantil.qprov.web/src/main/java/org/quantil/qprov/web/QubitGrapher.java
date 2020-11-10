@@ -1,4 +1,4 @@
-package org.quantil.qprov.api;
+package org.quantil.qprov.web;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

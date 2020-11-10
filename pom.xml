@@ -23,7 +23,7 @@
 
 	<modules>
 		<module>org.quantil.qprov.core</module>
-		<module>org.quantil.qprov.api</module>
+		<module>org.quantil.qprov.web</module>
 		<module>org.quantil.qprov.collector</module>
 	</modules>
 

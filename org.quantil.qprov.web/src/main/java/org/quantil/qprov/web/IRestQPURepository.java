@@ -1,4 +1,4 @@
-package org.quantil.qprov.api;
+package org.quantil.qprov.web;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jetbrains.annotations.NotNull;
