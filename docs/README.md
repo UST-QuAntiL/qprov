@@ -1,19 +1,16 @@
 # Docs
 
+## Quantum Provenance Data Model
+
+The UML class diagram representing the quantum provenance data model, that underlies the QProv system can be found [here](data-model).
+
+## Provenance Collector
+
+[This section](collector) describes details about the functionality of the provenance collector, which accesses the APIs from quantum hardware providers to retrieve available provenance data.
+Furthermore, it describes how to configure the collector for the automatic retrieval of the provenance data.
+
 ## Developer information
 
-[Here](dev) you can find developer information how to set-up IntelliJ for the development oft the QProv system.
+[Here](dev) you can find developer information how to set-up IntelliJ for the development of the QProv system.
 
 TODO
-
-## modules
-
-* [core](org.quantil.qprov.core/)
-  * provides common things like model, utils, ... to the other modules (`api` and `collector`)
-  * generates the sources for the api clients of the collector
-
-* [collector](org.quantil.qprov.collector/)
-  * fetches data from cloud quantum resource providers like IBMQ or rigetti
-
-* [API](org.quantil.qprov.api/)
-  * provides access to the collected data

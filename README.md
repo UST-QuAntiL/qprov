@@ -3,11 +3,11 @@
 [![build images](https://github.com/UST-QuAntiL/QProv/workflows/build%20images/badge.svg)](https://github.com/orgs/UST-QuAntiL/packages?repo_name=QProv)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-A provenance system for quantum computing.
-
-Please refer to the [documentation](docs) for details of the possible usage of the system.
-
+A provenance system for quantum computing, which allows collecting and analyzing important provenance data types about quantum computations.
 The underlying provenance data model of the QProv system can be found [here](docs/data-model).
+Therefore, it can be used to support different use cases, such as selecting suitable quantum hardware for the execution of a quantum circuit, providing a basis for transpiler and optimizer, or finding the origins of errors in quantum computations.
+
+Please refer to the [documentation](docs) for details of the possible usage of the system, as well as details to set up the system for development.
 
 ## Build
 
@@ -16,43 +16,43 @@ The underlying provenance data model of the QProv system can be found [here](doc
 
 ## Running via Docker
 
-TODO
+The easiest way to get started is using Docker-Compose: [quantil-docker](https://github.com/UST-QuAntiL/quantil-docker)
 
-## Running on Tomcat
+Alternatively you can build and run the QProv Docker images by your own:
 
-TODO
+1. Build the collector:
+    `docker build -t collector -f Dockerfile-Collector .`
+2. Build the QProv system:
+    `docker build -t qprov -f Dockerfile-Web`
+3. Run the Docker containers: `docker run -p 8080:8080 qprov` and `docker run -p 8081:8080 qprov`
 
-## notes
+Then, the QProv system can be assessed on <http://localhost:8080/qprov>. 
 
-### api
+The collection of current data can either be triggered via the collector API (POST on <http://localhost:8081/qprov-collector/collect>) or it can be configured to run the collection periodically (please refer to the [documentation](docs)).
 
-openapi spec:
+You can also use the pre-built images:
 
-* openapi json: <http://127.0.0.1:1337/v3/api-docs>
-* openapi yaml: <http://127.0.0.1:1337/v3/api-docs.yaml>
+    docker run -p 8080:8080 planqk/qprov
+    docker run -p 8081:8080 planqk/qprov-collector
 
-swagger ui & config
+## Running on embedded Tomcat
 
-* swagger ui: <http://127.0.0.1:1337/swagger-ui.html>
-* swagger config: <http://127.0.0.1:1337/v3/api-docs/swagger-config>
+The built products can also be executed directly using the embedded Tomcat server:
 
-hal (??)
+    java -jar org.quantil.qprov.collector.jar
+    java -jar org.quantil.qprov.web.jar
 
-* explorer  
-  <http://127.0.0.1:1337/explorer/index.html#uri=http://127.0.0.1:1337>
+## API documentation
 
-### collector
+The QProv systems provides a Swagger UI, as well as an HAL browser, which can be accessed on the following URLs:
 
-currently the collection can be triggered via a HTTP endpoint.  
-example using [httpie](https://github.com/httpie/httpie) (you can also use the famous `curl`)
-
-```bash
-echo '[{"provider": "ibmq", "token": "<ibmq api key>"}]' | http POST http://127.0.0.1:7331/collect
-```
-
-```bash
-http POST http://127.0.0.1:7331/collect  # if token is set via QPROV_IBMQ_TOKEN
-```
+* Swagger UI: <http://localhost:8080/qprov/swagger-ui.html>
+* HAL browser: <http://localhost:8080/qprov/explorer>
+  
+Furthermore, the OpenAPI specification can be found here:
+  
+* OpenAPI Json: <http://localhost:8080/qprov/v3/api-docs>
+* OpenAPI Yaml: <http://localhost:8080/qprov/v3/api-docs.yaml>
 
 ## Haftungsausschluss
 
