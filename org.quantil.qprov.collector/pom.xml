@@ -17,7 +17,6 @@
 		<junit.version>4.8.1</junit.version>
 		<modelmapper.version>2.3.0</modelmapper.version>
 		<openapi-generator.version>4.3.1</openapi-generator.version>
-		<scribejava-apis.version>6.9.0</scribejava-apis.version>
 		<slf4j-api.version>1.7.30</slf4j-api.version>
 		<springfox.version>2.9.2</springfox.version>
 		<start-class>org.quantil.qprov.collector.QProvCollector</start-class>
@@ -29,6 +28,12 @@
 		<dependency>
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-core</artifactId>
+			<version>1.6.2</version>
 		</dependency>
 
 		<dependency>
@@ -202,6 +207,19 @@
 			<groupId>org.modelmapper</groupId>
 			<artifactId>modelmapper</artifactId>
 			<version>${modelmapper.version}</version>
+		</dependency>
+
+		<!-- You can find the dependencies for the library configuration you chose by looking in JavaClientCodegen.
+			 Then find the corresponding dependency on Maven Central, and set the versions in the property section below -->
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>4.9.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.gsonfire</groupId>
+			<artifactId>gson-fire</artifactId>
+			<version>1.8.4</version>
 		</dependency>
 
 		<!-- QProv -->
