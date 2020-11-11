@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright (c) 2020 the QProv contributors.
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.quantil.qprov.collector;
 
 import java.util.List;
@@ -7,8 +26,6 @@ import org.quantil.qprov.core.entities.QPU;
 public interface IProvider {
 
     String getProviderId();
-
-    // void setApiToken(String apiToken);
 
     /**
      * check if we need to authenticate before the first query
@@ -32,35 +49,9 @@ public interface IProvider {
     boolean collect();
 
     /**
-     * fetch all data from provider with supplied token
-     *
-     * @param token api token
-     * @return boolean result of fetch attempt
-     */
-    boolean collect(String token);
-
-    /**
      * fetch qpu data from provider
      *
      * @return list of collected qpus
      */
     List<QPU> collectQPUs();
-
-    /**
-     * get available qpus
-     * @return list of qpus
-     */
-    //Iterable<QPU> getQPUs();
-
-    /**
-     * get qubits of a qpu
-     * @param qpuName name of the device
-     */
-    //Iterable<Qubit> getQubits(String qpuName);
-
-    /**
-     * get characteristics of a qubit
-     * @param qubitId id of the qubit
-     */
-    //QubitCharacteristics getQubitCharacteristics(String qubitId);
 }

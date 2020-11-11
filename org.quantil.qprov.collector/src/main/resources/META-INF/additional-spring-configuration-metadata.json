@@ -4,10 +4,5 @@
       "name": "provider.ibmq.apiToken",
       "type": "java.lang.String",
       "description": "Description for provider.ibmq.apiToken."
-    },
-    {
-      "name": "springfox.documentation.swagger.v3.path",
-      "type": "java.lang.String",
-      "description": "Description for springfox.documentation.swagger.v3.path."
     }
   ] }

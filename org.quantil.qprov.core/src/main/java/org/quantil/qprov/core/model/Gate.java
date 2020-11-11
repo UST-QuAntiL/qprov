@@ -17,21 +17,38 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.web;
+package org.quantil.qprov.core.model;
 
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import java.util.UUID;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
-@Configuration
-@ComponentScan("org.quantil.qprov")
-@EnableWebMvc
-public class QProvAPIConfig implements WebMvcConfigurer {
+import org.hibernate.annotations.GenericGenerator;
+import org.openprovenance.prov.model.Statement;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
+@EqualsAndHashCode(callSuper = true)
+@Data
+@Entity
+public class Gate extends org.openprovenance.prov.xml.Entity implements ProvExtension<Gate> {
+
+    @Id
+    @Getter
+    @Setter
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "databaseId", updatable = false, nullable = false)
+    private UUID databaseId;
 
     @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**");
+    public Statement toStandardCompliantProv(Gate extensionStatement) {
+        //TODO
+        return null;
     }
 }

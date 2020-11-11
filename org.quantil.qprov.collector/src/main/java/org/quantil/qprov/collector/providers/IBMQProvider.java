@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright (c) 2020 the QProv contributors.
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package org.quantil.qprov.collector.providers;
 
 import java.util.ArrayList;
@@ -27,17 +46,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class IBMQProvider implements IProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(IBMQProvider.class);
-
     public static final String PROVIDER_ID = "ibmq";
 
     public static final String IBMQ_DEFAULT_HUB = "ibm-q";
+
     public static final String IBMQ_DEFAULT_GROUP = "open";
+
     public static final String IBMQ_DEFAULT_PROJECT = "main";
+
+    private static final Logger logger = LoggerFactory.getLogger(IBMQProvider.class);
 
     private final String envApiToken;
 
-    public ApiClient defaultClient;
+    private ApiClient defaultClient;
 
     public IBMQProvider(Environment env) {
         this.envApiToken = env.getProperty("QPROV_IBMQ_TOKEN");
@@ -45,7 +66,7 @@ public class IBMQProvider implements IProvider {
 
     public boolean authenticate(String token) {
 
-        String userApiToken;
+        final String userApiToken;
 
         // search for the token...
         if (envApiToken != null) {
@@ -62,18 +83,17 @@ public class IBMQProvider implements IProvider {
 
         // authenticate
         logger.info("IBMQProvider() try to get an accessToken via supplied apiToken: {}", userApiToken);
-        ApiToken apiToken = new ApiToken();
+        final ApiToken apiToken = new ApiToken();
         apiToken.setApiToken(userApiToken);
 
         try {
             // get a short-lived access token with the api token
-            AccessToken accessToken;
-            accessToken = new LoginApi(this.defaultClient).loginLoginWithApiToken(apiToken);
+            final AccessToken accessToken = new LoginApi(this.defaultClient).loginLoginWithApiToken(apiToken);
 
             logger.info("IBMQProvider() successfully got an accessToken: {}", accessToken);
 
             // configure "API Token" authorization with obtained accessToken
-            ApiKeyAuth apiKeyAuth = (ApiKeyAuth) this.defaultClient.getAuthentication("API Token");
+            final ApiKeyAuth apiKeyAuth = (ApiKeyAuth) this.defaultClient.getAuthentication("API Token");
             apiKeyAuth.setApiKey(accessToken.getId());
 
             return true;
@@ -95,16 +115,11 @@ public class IBMQProvider implements IProvider {
     }
 
     @Override
-    public boolean collect(String token) {
-        this.authenticate(token);
-        return collect();
-    }
-    @Override
     public boolean collect() {
-        List<Hub> hubs = collectHubs();
+        final List<Hub> hubs = collectHubs();
         hubs.forEach((Hub hub) -> logger.info(hub.toString()));
 
-        List<QPU> qpus = collectQPUs();
+        final List<QPU> qpus = collectQPUs();
         qpus.forEach((QPU qpu) -> logger.info(qpu.toString()));
 
         return true;
@@ -112,7 +127,7 @@ public class IBMQProvider implements IProvider {
 
     public List<Hub> collectHubs() {
         try {
-            GetProvidersInformationApi providersInformationApi = new GetProvidersInformationApi(this.defaultClient);
+            final GetProvidersInformationApi providersInformationApi = new GetProvidersInformationApi(this.defaultClient);
             return providersInformationApi.getProvidersInformationAllHubsAsCollaborator();
         } catch (ApiException e) {
             System.err.println("Exception when calling GetProvidersInformationApi#getProvidersInformationAllHubsAsCollaborator");
@@ -125,31 +140,32 @@ public class IBMQProvider implements IProvider {
     }
 
     public List<QPU> collectQPUs() {
-        List<Device> devices;
-        List<QPU> qpus = new ArrayList<>();
+        final List<Device> devices;
+        final List<QPU> qpus = new ArrayList<>();
 
         try {
-            GetBackendInformationApi backendInformationApi = new GetBackendInformationApi(defaultClient);
-            devices = backendInformationApi.getBackendInformationGetProjectDevicesWithVersion(IBMQ_DEFAULT_HUB, IBMQ_DEFAULT_GROUP, IBMQ_DEFAULT_PROJECT);
+            final GetBackendInformationApi backendInformationApi = new GetBackendInformationApi(defaultClient);
+            devices = backendInformationApi
+                    .getBackendInformationGetProjectDevicesWithVersion(IBMQ_DEFAULT_HUB, IBMQ_DEFAULT_GROUP, IBMQ_DEFAULT_PROJECT);
 
             devices.forEach((Device device) -> {
 
                 try {
-
-                    DeviceProperties deviceProperties = backendInformationApi.getBackendInformationGetDeviceProperties(IBMQ_DEFAULT_HUB, IBMQ_DEFAULT_GROUP, IBMQ_DEFAULT_PROJECT, device.getBackendName(), null, null);
+                    final DeviceProperties deviceProperties = backendInformationApi
+                            .getBackendInformationGetDeviceProperties(IBMQ_DEFAULT_HUB, IBMQ_DEFAULT_GROUP, IBMQ_DEFAULT_PROJECT,
+                                    device.getBackendName(), null, null);
 
                     if (deviceProperties.getBackendName() != null) {
 
-                        ModelMapper modelMapper = new ModelMapper();
+                        final ModelMapper modelMapper = new ModelMapper();
 
-                        QPU qpu = modelMapper.map(device, QPU.class);
-                        QPUProperties qpuProperties = modelMapper.map(deviceProperties, QPUProperties.class);
+                        final QPU qpu = modelMapper.map(device, QPU.class);
+                        final QPUProperties qpuProperties = modelMapper.map(deviceProperties, QPUProperties.class);
 
                         qpu.setProvider(PROVIDER_ID);
                         qpu.setProperties(qpuProperties);
                         qpus.add(qpu);
                     }
-
                 } catch (ApiException e) {
                     System.err.println("Exception when calling GetBackendInformationApi#getBackendInformationGetProjectDevicesWithVersion");
                     System.err.println("Status code: " + e.getCode());
@@ -157,9 +173,7 @@ public class IBMQProvider implements IProvider {
                     System.err.println("Response headers: " + e.getResponseHeaders());
                     e.printStackTrace();
                 }
-
             });
-
         } catch (ApiException e) {
             System.err.println("Exception when calling GetBackendInformationApi#getBackendInformationGetProjectDevicesWithVersion");
             System.err.println("Status code: " + e.getCode());
