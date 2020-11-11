@@ -19,16 +19,22 @@
 
 package org.quantil.qprov.core.model.agents;
 
-import java.util.Date;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.openprovenance.prov.model.Statement;
+import org.openprovenance.prov.xml.Agent;
+import org.quantil.qprov.core.Utils;
 import org.quantil.qprov.core.model.ProvExtension;
 
 import lombok.Data;
@@ -40,7 +46,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtension<QPU> {
+public class Provider extends org.openprovenance.prov.xml.Agent implements ProvExtension<Provider> {
 
     @Id
     @Getter
@@ -52,16 +58,22 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
 
     private String name;
 
-    private Date lastCalibrated;
+    private URL offeringURL;
 
-    @ManyToOne
+    @OneToMany(mappedBy = "provider",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    private Provider provider;
+    private Set<QPU> qpus = new HashSet<>();
 
     @Override
-    public Statement toStandardCompliantProv(QPU extensionStatement) {
-        // TODO
-        return null;
+    public Statement toStandardCompliantProv(Provider extensionStatement) {
+        final Agent agent = new Agent();
+        agent.setId(Utils.generateQualifiedName(name));
+
+        // TODO: set name and URL in Others element
+        return agent;
     }
 }
