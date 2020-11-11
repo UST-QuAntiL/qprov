@@ -5,7 +5,7 @@
 
 A provenance system for quantum computing, which allows collecting and analyzing important provenance data types about quantum computations.
 The underlying provenance data model of the QProv system can be found [here](docs/data-model).
-Therefore, it can be used to support different use cases, such as selecting suitable quantum hardware for the execution of a quantum circuit, providing a basis for transpiler and optimizer, or finding the origins of errors in quantum computations.
+Therefore, it can be used to support different use cases, such as [selecting suitable quantum hardware](https://github.com/UST-QuAntiL/nisq-analyzer) for the execution of a quantum circuit, providing a basis for transpilers and optimizers, or finding the origins of errors in quantum computations.
 
 Please refer to the [documentation](docs) for details of the possible usage of the system, as well as details to set up the system for development.
 
@@ -26,7 +26,7 @@ Alternatively you can build and run the QProv Docker images by your own:
     `docker build -t qprov -f Dockerfile-Web`
 3. Run the Docker containers: `docker run -p 8080:8080 qprov` and `docker run -p 8081:8080 qprov`
 
-Then, the QProv system can be assessed on <http://localhost:8080/qprov>. 
+Then, the QProv system can be accessed on <http://localhost:8080/qprov>. 
 
 The collection of current data can either be triggered via the collector API (POST on <http://localhost:8081/qprov-collector/collect>) or it can be configured to run the collection periodically (please refer to the [documentation](docs)).
 
