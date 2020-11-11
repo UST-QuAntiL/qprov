@@ -7,23 +7,15 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>core</artifactId>
+	<artifactId>org.quantil.qprov.core</artifactId>
 
 	<properties>
-		<default.package>org.quantil.qprov.core</default.package>
 		<jackson-databind-nullable.version>0.2.0</jackson-databind-nullable.version>
 		<springfox.version>2.9.2</springfox.version>
 		<swagger-annotations.version>1.5.8</swagger-annotations.version>
 	</properties>
 
 	<dependencies>
-
-		<!-- supporting yaml properties file -->
-		<dependency>
-			<groupId>org.yaml</groupId>
-			<artifactId>snakeyaml</artifactId>
-		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
@@ -231,4 +223,34 @@
 			<artifactId>postgresql</artifactId>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>${maven.checkstyle.version}</version>
+				<configuration>
+					<failOnViolation>false</failOnViolation>
+					<violationSeverity>warning</violationSeverity>
+				</configuration>
+				<executions>
+					<execution>
+						<id>checkstyle</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>com.thomasjensen.checkstyle.addons</groupId>
+						<artifactId>checkstyle-addons</artifactId>
+						<version>${checkstyle.addons.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+		</plugins>
+	</build>
 </project>

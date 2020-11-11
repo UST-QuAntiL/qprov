@@ -18,7 +18,10 @@ spring:
     sql-script-encoding: UTF-8
 
 # tomcat
-server: {port: "${QPROV_API_PORT:1337}", {servlet: {contextPath: "/"}}}
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    contextPath: "/qprov"
 
 # logging
 logging:
@@ -37,6 +40,9 @@ springdoc:
   show-actuator: true
   swagger-ui:
     display-request-duration: true
+    path: "/swagger-ui"
+    config-url: "/qprov/v3/api-docs/swagger-config"
+    url: "/qprov/v3/api-docs/"
     operationsSorter: alpha
 
 ---
@@ -59,9 +65,6 @@ spring:
     initialization-mode: always
     continue-on-error: true
     sql-script-encoding: UTF-8
-
-# tomcat
-server: {port: "${QPROV_API_PORT:1337}", {servlet: {contextPath: "/"}}}
 
 # logging
 logging:

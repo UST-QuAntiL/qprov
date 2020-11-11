@@ -24,8 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-// @Configuration
-// @ConfigurationProperties(prefix = "provider.ibmq")
 @Component
 public class IBMQProvider implements IProvider {
 

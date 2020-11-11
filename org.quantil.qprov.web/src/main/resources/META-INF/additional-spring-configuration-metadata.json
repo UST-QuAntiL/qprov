@@ -1,8 +1,0 @@
-{
-  "properties": [
-    {
-      "name": "provider.ibmq.apiToken",
-      "type": "java.lang.String",
-      "description": "Description for provider.ibmq.apiToken."
-    }
-  ] }

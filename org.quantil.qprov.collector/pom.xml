@@ -7,10 +7,9 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>collector</artifactId>
+	<artifactId>org.quantil.qprov.collector</artifactId>
 
 	<properties>
-		<!-- <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> -->
 		<default.package>org.quantil.qprov.collector</default.package>
 		<jackson-databind-nullable-version>0.2.0</jackson-databind-nullable-version>
 		<jackson.version>2.11.1</jackson.version>
@@ -201,8 +200,8 @@
 
 		<!-- QProv -->
 		<dependency>
-			<groupId>org.quantil.qprov</groupId>
-			<artifactId>core</artifactId>
+			<groupId>org.quantil</groupId>
+			<artifactId>org.quantil.qprov.core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
@@ -210,25 +209,43 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>2.3.4.RELEASE</version>
-				<configuration>
-					<mainClass>${start-class}</mainClass>
-					<image>
-						<!-- <name>ghcr.io/ust-quantil/qprov/${project.artifactId}:${project.version}</name> -->
-						<name>docker.pkg.github.com/ust-quantil/qprov/${project.artifactId}:${project.version}</name>
-						<verboseLogging>true</verboseLogging>
-					</image>
-					<layers>
-						<enabled>true</enabled>
-					</layers>
-				</configuration>
+				<groupId>org.openapitools</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+				<version>${openapi-generator.version}</version>
 				<executions>
 					<execution>
+						<phase>generate-sources</phase>
 						<goals>
-							<goal>repackage</goal>
+							<goal>generate</goal>
 						</goals>
+						<configuration>
+							<!-- specify the openapi json/yaml -->
+							<inputSpec>https://api.quantum-computing.ibm.com/v2/openapi.json</inputSpec>
+
+							<!-- target to generate java client code -->
+							<generatorName>java</generatorName>
+
+							<!-- ibmq api is not valid...^^ -->
+							<skipValidateSpec>true</skipValidateSpec>
+
+							<!-- pass any necessary config options -->
+							<configOptions>
+								<dateLibrary>java8</dateLibrary>
+
+								<parentGroupId>org.quantil</parentGroupId>
+								<parentArtifactId>qprov</parentArtifactId>
+								<parentVersion>${project.version}</parentVersion>
+
+								<groupId>org.quantil.qprov</groupId>
+								<artifactId>ibmq</artifactId>
+								<artifactVersion>${project.version}</artifactVersion>
+							</configOptions>
+
+							<output>${project.basedir}/target/generated-sources/org.quantil.qprov.ibmq</output>
+							<apiPackage>org.quantil.qprov.ibmq.client.api</apiPackage>
+							<modelPackage>org.quantil.qprov.ibmq.client.model</modelPackage>
+							<invokerPackage>org.quantil.qprov.ibmq.client</invokerPackage>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>

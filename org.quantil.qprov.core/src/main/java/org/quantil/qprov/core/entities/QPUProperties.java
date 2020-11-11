@@ -34,7 +34,4 @@ public class QPUProperties implements Serializable {
     /*@OneToMany(cascade = CascadeType.ALL)
     private List<List<Object>> qubits = new ArrayList<List<Object>>();*/
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Qubit> general = new ArrayList<>();
-
 }

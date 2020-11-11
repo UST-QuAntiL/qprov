@@ -7,7 +7,8 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>web</artifactId>
+	<artifactId>org.quantil.qprov.web</artifactId>
+	<packaging>war</packaging>
 
 	<properties>
 		<jackson.version>2.11.3</jackson.version>
@@ -47,10 +48,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.projectreactor</groupId>
@@ -121,11 +118,6 @@
 			<artifactId>openapi-generator</artifactId>
 			<version>5.0.0-beta2</version>
 		</dependency>
-		<dependency>
-			<groupId>org.openapitools</groupId>
-			<artifactId>openapi-generator-maven-plugin</artifactId>
-			<version>5.0.0-beta2</version>
-		</dependency>
 
 		<dependency>
 			<groupId>org.openprovenance.prov</groupId>
@@ -189,11 +181,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-rt-rs-service-description</artifactId>
-			<version>3.4.0</version>
-		</dependency>
-		<dependency>
 			<groupId>com.fasterxml.jackson.jaxrs</groupId>
 			<artifactId>jackson-jaxrs-json-provider</artifactId>
 			<version>2.11.3</version>
@@ -201,100 +188,56 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.quantil.qprov</groupId>
-			<artifactId>core</artifactId>
+			<groupId>org.quantil</groupId>
+			<artifactId>org.quantil.qprov.core</artifactId>
 			<version>${project.version}</version>
 			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
 	<build>
+		<finalName>${project.artifactId}</finalName>
+
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>2.3.4.RELEASE</version>
 				<configuration>
-					<mainClass>${start-class}</mainClass>
-					<image>
-						<!-- <name>ghcr.io/ust-quantil/qprov/${project.artifactId}:${project.version}</name> -->
-						<name>docker.pkg.github.com/ust-quantil/qprov/${project.artifactId}:${project.version}</name>
-						<verboseLogging>true</verboseLogging>
-					</image>
-					<layers>
-						<enabled>true</enabled>
-					</layers>
+					<mainClass>org.quantil.qprov.web.QProvAPI</mainClass>
 				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>3.3.1</version>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>${maven.checkstyle.version}</version>
 				<configuration>
-					<attachClasses>true</attachClasses>
+					<failOnViolation>false</failOnViolation>
+					<violationSeverity>warning</violationSeverity>
 				</configuration>
-			</plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                </configuration>
-            </plugin>
-
-			<plugin>
-				<groupId>org.openapitools</groupId>
-				<artifactId>openapi-generator-maven-plugin</artifactId>
-				<!-- RELEASE_VERSION -->
-				<version>${openapi-generator.version}</version>
-				<!-- /RELEASE_VERSION -->
 				<executions>
 					<execution>
-						<phase>generate-sources</phase>
+						<id>checkstyle</id>
+						<phase>validate</phase>
 						<goals>
-							<goal>generate</goal>
+							<goal>check</goal>
 						</goals>
-						<configuration>
-							<!-- specify the swagger yaml -->
-							<inputSpec>https://api.quantum-computing.ibm.com/v2/openapi.json</inputSpec>
-
-							<!-- target to generate java client code -->
-							<generatorName>java</generatorName>
-
-							<!-- ibmq api is not valid...^^ -->
-							<skipValidateSpec>true</skipValidateSpec>
-
-							<!-- pass any necessary config options -->
-							<configOptions>
-								<dateLibrary>java8</dateLibrary>
-
-								<parentGroupId>org.quantil</parentGroupId>
-								<parentArtifactId>qprov</parentArtifactId>
-								<parentVersion>${project.version}</parentVersion>
-
-								<groupId>org.quantil.qprov</groupId>
-								<artifactId>ibmq</artifactId>
-								<artifactVersion>${project.version}</artifactVersion>
-							</configOptions>
-
-							<output>${project.basedir}/target/generated-sources/org.quantil.qprov.ibmq</output>
-							<apiPackage>org.quantil.qprov.ibmq.client.api</apiPackage>
-							<modelPackage>org.quantil.qprov.ibmq.client.model</modelPackage>
-							<invokerPackage>org.quantil.qprov.ibmq.client</invokerPackage>
-						</configuration>
 					</execution>
 				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>com.thomasjensen.checkstyle.addons</groupId>
+						<artifactId>checkstyle-addons</artifactId>
+						<version>${checkstyle.addons.version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

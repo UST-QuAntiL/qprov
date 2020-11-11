@@ -1,53 +1,26 @@
-# QProv 💥 Quantum Provenance 💡 
+# QProv
 
 [![build images](https://github.com/UST-QuAntiL/QProv/workflows/build%20images/badge.svg)](https://github.com/orgs/UST-QuAntiL/packages?repo_name=QProv)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-A Provenance System for Quantum Computing
+A provenance system for quantum computing.
 
-## modules
+Please refer to the [documentation](docs) for details of the possible usage of the system.
 
-* [core](org.quantil.qprov.core/)
-  * provides common things like model, utils, ... to the other modules (`api` and `collector`)
-  * generates the sources for the api clients of the collector
+The underlying provenance data model of the QProv system can be found [here](docs/data-model).
 
-* [collector](org.quantil.qprov.collector/)
-  * fetches data from cloud quantum resource providers like IBMQ or rigetti
+## Build
 
-* [API](org.quantil.qprov.api/)
-  * provides access to the collected data
+1. Run `mvn package -DskipTests` inside the root folder.
+2. When completed, the built product for the provenance system can be found in `org.quantil.qprov.web/target` and for the provenance collector in `org.quantil.qprov.collector/target`.
 
-## manual build & run
+## Running via Docker
 
-* cleanup (double-check the paths before you run a `rm` command!)
+TODO
 
-    ```bash
-    rm -rf ~/.m2/repository/org/quantil/qprov org.quantil.qprov.*/target
-    ```
+## Running on Tomcat
 
-* build project & docker images
-
-    ```bash
-    mvn -U -T 1C clean install spring-boot:build-image
-    ```
-
-* run collector & api
-
-    ```bash
-    docker run --rm -it --name collector -p 7331:7331 docker.pkg.github.com/ust-quantil/qprov/collector:0.0.1-SNAPSHOT
-    docker run --rm -it --name api -p 1337:1337 docker.pkg.github.com/ust-quantil/qprov/api:0.0.1-SNAPSHOT
-    ```
-
-    a profile can be set with the `SPRING_PROFILES_ACTIVE` env var. profiles are defined in the `../src/main/resource/application.yml` files of every module  
-    > default profile uses h2 databases (for module testing and ci)
-    > profile `development` uses postgresql database (for project testing)
-
-    ```bash
-    docker run --rm -it --name collector -p 7331:7331 -e "SPRING_PROFILES_ACTIVE=development" docker.pkg.github.com/ust-quantil/qprov/collector:0.0.1-SNAPSHOT
-    docker run --rm -it --name api -p 1337:1337 -e "SPRING_PROFILES_ACTIVE=development" docker.pkg.github.com/ust-quantil/qprov/api:0.0.1-SNAPSHOT
-    ```
-
-> For development you can also use the provided [`devCleanBuild.sh`](devCleanBuild.sh)
+TODO
 
 ## notes
 
