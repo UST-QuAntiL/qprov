@@ -18,7 +18,10 @@ spring:
     sql-script-encoding: UTF-8
 
 # tomcat
-server: {port: "${QPROV_COLLECTOR_PORT:7331}", {servlet: {contextPath: "/"}}}
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    contextPath: "/qprov-collector"
 
 # logging
 logging:

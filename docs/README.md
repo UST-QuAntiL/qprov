@@ -1,3 +1,9 @@
+# Docs
+
+## Developer information
+
+[Here](dev) you can find developer information how to set-up IntelliJ for the development oft the QProv system.
+
 TODO
 
 ## modules

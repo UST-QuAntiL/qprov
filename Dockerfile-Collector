@@ -1,0 +1,15 @@
+FROM maven:3.6.3-openjdk-16 as builder
+COPY . /tmp/qprov
+WORKDIR /tmp/qprov
+RUN mvn package -DskipTests
+
+FROM openjdk:16-jdk-alpine
+LABEL maintainer = "Benjamin Weder <benjamin.weder@iaas.uni-stuttgart.de>"
+
+ENV SERVER_PORT 8080
+
+COPY --from=builder /tmp/qprov/org.quantil.qprov.collector/target/org.quantil.qprov.collector.jar /app/
+
+WORKDIR /app
+
+ENTRYPOINT ["java","-jar","org.quantil.qprov.collector.jar"]
