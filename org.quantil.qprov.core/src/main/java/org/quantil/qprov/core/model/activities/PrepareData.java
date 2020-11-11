@@ -17,7 +17,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.core.model;
+package org.quantil.qprov.core.model.activities;
 
 import java.util.UUID;
 import javax.persistence.Column;
@@ -27,6 +27,7 @@ import javax.persistence.Id;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.openprovenance.prov.model.Statement;
+import org.quantil.qprov.core.model.ProvExtension;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -36,7 +37,7 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-public class Gate extends org.openprovenance.prov.xml.Entity implements ProvExtension<Gate> {
+public class PrepareData extends org.openprovenance.prov.xml.Activity implements ProvExtension<PrepareData> {
 
     @Id
     @Getter
@@ -47,8 +48,7 @@ public class Gate extends org.openprovenance.prov.xml.Entity implements ProvExte
     private UUID databaseId;
 
     @Override
-    public Statement toStandardCompliantProv(Gate extensionStatement) {
-        //TODO
+    public Statement toStandardCompliantProv(PrepareData extensionStatement) {
         return null;
     }
 }

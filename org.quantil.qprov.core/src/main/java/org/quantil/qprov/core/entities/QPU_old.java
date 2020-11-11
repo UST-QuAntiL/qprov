@@ -37,7 +37,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class QPU implements Serializable {
+public class QPU_old implements Serializable {
 
     @Column(nullable = false)
     public String provider;

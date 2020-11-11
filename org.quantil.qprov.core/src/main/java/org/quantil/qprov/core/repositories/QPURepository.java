@@ -20,14 +20,14 @@
 package org.quantil.qprov.core.repositories;
 
 import org.jetbrains.annotations.NotNull;
-import org.quantil.qprov.core.entities.QPU;
+import org.quantil.qprov.core.entities.QPU_old;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface QPURepository extends CrudRepository<QPU, Long> {
+public interface QPURepository extends CrudRepository<QPU_old, Long> {
 
-    QPU findByBackendName(String backendName);
+    QPU_old findByBackendName(String backendName);
 
-    @NotNull Iterable<QPU> findAll();
+    @NotNull Iterable<QPU_old> findAll();
 }

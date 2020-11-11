@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.quantil.qprov.collector.IProvider;
-import org.quantil.qprov.core.entities.QPU;
+import org.quantil.qprov.core.entities.QPU_old;
 import org.quantil.qprov.core.entities.QPUProperties;
 import org.quantil.qprov.ibmq.client.ApiClient;
 import org.quantil.qprov.ibmq.client.ApiException;
@@ -119,8 +119,8 @@ public class IBMQProvider implements IProvider {
         final List<Hub> hubs = collectHubs();
         hubs.forEach((Hub hub) -> logger.info(hub.toString()));
 
-        final List<QPU> qpus = collectQPUs();
-        qpus.forEach((QPU qpu) -> logger.info(qpu.toString()));
+        final List<QPU_old> qpus = collectQPUs();
+        qpus.forEach((QPU_old qpu) -> logger.info(qpu.toString()));
 
         return true;
     }
@@ -139,9 +139,9 @@ public class IBMQProvider implements IProvider {
         return new ArrayList<>();
     }
 
-    public List<QPU> collectQPUs() {
+    public List<QPU_old> collectQPUs() {
         final List<Device> devices;
-        final List<QPU> qpus = new ArrayList<>();
+        final List<QPU_old> qpus = new ArrayList<>();
 
         try {
             final GetBackendInformationApi backendInformationApi = new GetBackendInformationApi(defaultClient);
@@ -159,7 +159,7 @@ public class IBMQProvider implements IProvider {
 
                         final ModelMapper modelMapper = new ModelMapper();
 
-                        final QPU qpu = modelMapper.map(device, QPU.class);
+                        final QPU_old qpu = modelMapper.map(device, QPU_old.class);
                         final QPUProperties qpuProperties = modelMapper.map(deviceProperties, QPUProperties.class);
 
                         qpu.setProvider(PROVIDER_ID);

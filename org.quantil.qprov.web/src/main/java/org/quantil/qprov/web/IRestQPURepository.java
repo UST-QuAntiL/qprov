@@ -20,7 +20,7 @@
 package org.quantil.qprov.web;
 
 import org.jetbrains.annotations.NotNull;
-import org.quantil.qprov.core.entities.QPU;
+import org.quantil.qprov.core.entities.QPU_old;
 import org.quantil.qprov.core.repositories.QPURepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
@@ -35,7 +35,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RepositoryRestResource(collectionResourceRel = "qpus", path = "qpus")
 public interface IRestQPURepository extends QPURepository {
 
-    QPU findByBackendName(@Param("backendName") String backendName);
+    QPU_old findByBackendName(@Param("backendName") String backendName);
 
-    @NotNull Iterable<QPU> findAll();
+    @NotNull Iterable<QPU_old> findAll();
 }

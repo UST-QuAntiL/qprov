@@ -17,9 +17,8 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.core.model;
+package org.quantil.qprov.core.model.entities;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,6 +27,7 @@ import javax.persistence.Id;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.openprovenance.prov.model.Statement;
+import org.quantil.qprov.core.model.ProvExtension;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -37,7 +37,7 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-public class Qubit extends org.openprovenance.prov.xml.Entity implements ProvExtension<Qubit> {
+public class ClassicalData extends org.openprovenance.prov.xml.Entity implements ProvExtension<ClassicalData> {
 
     @Id
     @Getter
@@ -47,13 +47,9 @@ public class Qubit extends org.openprovenance.prov.xml.Entity implements ProvExt
     @Column(name = "databaseId", updatable = false, nullable = false)
     private UUID databaseId;
 
-    private BigDecimal t1Time;
-
-    private BigDecimal t2Time;
-
     @Override
-    public Statement toStandardCompliantProv(Qubit qubit) {
-        // TODO
+    public Statement toStandardCompliantProv(ClassicalData extensionStatement) {
+        //TODO
         return null;
     }
 }

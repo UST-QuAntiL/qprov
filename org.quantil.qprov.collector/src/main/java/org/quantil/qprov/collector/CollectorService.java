@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.quantil.qprov.collector.providers.IBMQProvider;
-import org.quantil.qprov.core.entities.QPU;
+import org.quantil.qprov.core.entities.QPU_old;
 import org.quantil.qprov.core.repositories.QPURepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +80,7 @@ public class CollectorService {
         });
 
         logger.debug("QPUs in database:");
-        qpuRepository.findAll().forEach((QPU qpu) -> logger.debug(qpu.toString()));
+        qpuRepository.findAll().forEach((QPU_old qpu) -> logger.debug(qpu.toString()));
 
         return results;
     }
