@@ -8,7 +8,6 @@
 	</parent>
 
 	<artifactId>org.quantil.qprov.web</artifactId>
-	<packaging>war</packaging>
 
 	<properties>
 		<jackson.version>2.11.3</jackson.version>
