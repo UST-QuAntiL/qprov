@@ -21,10 +21,10 @@ package org.quantil.qprov.core.repositories;
 
 import java.util.UUID;
 
-import org.quantil.qprov.core.model.agents.QPU;
+import org.quantil.qprov.core.model.activities.PrepareDataActivity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface QPURepository extends JpaRepository<QPU, UUID> {
+public interface PrepareDataActivityRepository extends JpaRepository<PrepareDataActivity, UUID> {
 }

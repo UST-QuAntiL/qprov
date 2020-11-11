@@ -19,6 +19,7 @@
 
 package org.quantil.qprov.core.model.agents;
 
+import java.util.Date;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -46,6 +47,8 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(name = "databaseId", updatable = false, nullable = false)
     private UUID databaseId;
+
+    private Date lastCalibrated;
 
     @Override
     public Statement toStandardCompliantProv(QPU extensionStatement) {

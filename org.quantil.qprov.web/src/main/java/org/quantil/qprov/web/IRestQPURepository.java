@@ -21,7 +21,7 @@ package org.quantil.qprov.web;
 
 import org.jetbrains.annotations.NotNull;
 import org.quantil.qprov.core.entities.QPU_old;
-import org.quantil.qprov.core.repositories.QPURepository;
+import org.quantil.qprov.core.entities.QPURepository_old;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -33,7 +33,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @CrossOrigin(allowedHeaders = "*", origins = "*")
 @RepositoryRestResource(collectionResourceRel = "qpus", path = "qpus")
-public interface IRestQPURepository extends QPURepository {
+public interface IRestQPURepository extends QPURepository_old {
 
     QPU_old findByBackendName(@Param("backendName") String backendName);
 

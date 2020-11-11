@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.quantil.qprov.collector.providers.IBMQProvider;
 import org.quantil.qprov.core.entities.QPU_old;
-import org.quantil.qprov.core.repositories.QPURepository;
+import org.quantil.qprov.core.entities.QPURepository_old;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,10 +41,10 @@ public class CollectorService {
 
     private final Set<IProvider> availableProviders;
 
-    private final QPURepository qpuRepository;
+    private final QPURepository_old qpuRepository;
 
     @Autowired
-    public CollectorService(QPURepository qpuRepository, IBMQProvider ibmqProvider) {
+    public CollectorService(QPURepository_old qpuRepository, IBMQProvider ibmqProvider) {
         this.qpuRepository = qpuRepository;
         this.availableProviders = Set.of(ibmqProvider);
     }

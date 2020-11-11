@@ -17,14 +17,17 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.core.repositories;
+package org.quantil.qprov.core.entities;
 
-import java.util.UUID;
-
-import org.quantil.qprov.core.model.agents.QPU;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.jetbrains.annotations.NotNull;
+import org.quantil.qprov.core.entities.QPU_old;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface QPURepository extends JpaRepository<QPU, UUID> {
+public interface QPURepository_old extends CrudRepository<QPU_old, Long> {
+
+    QPU_old findByBackendName(String backendName);
+
+    @NotNull Iterable<QPU_old> findAll();
 }

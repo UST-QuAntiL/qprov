@@ -37,7 +37,7 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-public class Compile extends org.openprovenance.prov.xml.Activity implements ProvExtension<Compile> {
+public class PrepareDataActivity extends org.openprovenance.prov.xml.Activity implements ProvExtension<PrepareDataActivity> {
 
     @Id
     @Getter
@@ -48,8 +48,7 @@ public class Compile extends org.openprovenance.prov.xml.Activity implements Pro
     private UUID databaseId;
 
     @Override
-    public Statement toStandardCompliantProv(Compile extensionStatement) {
-        // TODO
+    public Statement toStandardCompliantProv(PrepareDataActivity extensionStatement) {
         return null;
     }
 }
