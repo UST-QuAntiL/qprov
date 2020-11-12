@@ -40,6 +40,12 @@ public final class Constants {
 
     public static final String QPROV_TYPE_CLASSICAL_DATA = "classicalData";
 
+    public static final String QPROV_TYPE_COMPILE = "compileActivity";
+
+    public static final String QPROV_TYPE_EXECUTE = "executeActivity";
+
+    public static final String QPROV_TYPE_PREPARE_DATA = "prepareDataActivity";
+
     /**** QProv type attributes ****/
     public static final String QPROV_TYPE_SUFFIX = "Type";
 
@@ -56,6 +62,16 @@ public final class Constants {
     public static final String QPROV_TYPE_QUANTUM_CIRCUIT_SIZE = "circuitSize";
 
     public static final String QPROV_TYPE_QUANTUM_CIRCUIT_URL = "circuitCodeUrl";
+
+    public static final String QPROV_TYPE_COMPILATION_TIME = "compilationTime";
+
+    public static final String QPROV_TYPE_EXECUTION_TIME = "executionTime";
+
+    public static final String QPROV_TYPE_EXECUTION_SHOTS = "numberOfShots";
+
+    public static final String QPROV_TYPE_EXECUTION_MITIGATION = "appliedMitigationTechnique";
+
+    public static final String QPROV_TYPE_PREPARATION_ENCODING = "appliedEncoding";
 
     private Constants() {
     }

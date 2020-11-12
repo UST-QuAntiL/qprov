@@ -19,8 +19,11 @@
 
 package org.quantil.qprov.core.model.activities;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -28,6 +31,8 @@ import javax.persistence.Id;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.openprovenance.prov.model.Statement;
+import org.quantil.qprov.core.Constants;
+import org.quantil.qprov.core.Utils;
 import org.quantil.qprov.core.model.ProvExtension;
 
 import lombok.Data;
@@ -48,8 +53,16 @@ public class PrepareDataActivity extends org.openprovenance.prov.xml.Activity im
     @Column(name = "databaseId", updatable = false, nullable = false)
     private UUID databaseId;
 
+    private String appliedEncoding;
+
     @Override
     public Set<Statement> toStandardCompliantProv(PrepareDataActivity extensionStatement) {
-        return null;
+        final org.openprovenance.prov.xml.Activity activity = new org.openprovenance.prov.xml.Activity();
+        activity.setId(Utils.generateQualifiedName(databaseId.toString(), null));
+        activity.getType().add(Utils.createTypeElement(Constants.QPROV_TYPE_PREPARE_DATA));
+        activity.getOther().add(Utils
+                .createOtherElement(Constants.QPROV_TYPE_PREPARATION_ENCODING, appliedEncoding,
+                        Constants.QPROV_TYPE_PREPARATION_ENCODING + Constants.QPROV_TYPE_SUFFIX));
+        return Stream.of(activity).collect(Collectors.toCollection(HashSet::new));
     }
 }
