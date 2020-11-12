@@ -17,16 +17,32 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.core.repositories;
+package org.quantil.qprov.core.model;
 
 import java.util.UUID;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
-import org.quantil.qprov.core.model.activities.ExecuteActivity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.stereotype.Repository;
+import org.hibernate.annotations.GenericGenerator;
+import org.openprovenance.prov.xml.Document;
 
-@RepositoryRestResource(exported = false)
-@Repository
-public interface ExecuteActivityRepository extends JpaRepository<ExecuteActivity, UUID> {
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
+@EqualsAndHashCode(callSuper = true)
+@Data
+@Entity
+public class ProvDocument extends Document {
+
+    @Id
+    @Getter
+    @Setter
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "databaseId", updatable = false, nullable = false)
+    private UUID databaseId;
 }

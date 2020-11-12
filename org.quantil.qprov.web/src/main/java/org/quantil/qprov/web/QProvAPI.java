@@ -24,6 +24,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -34,6 +35,7 @@ import io.swagger.v3.oas.annotations.info.License;
 @EnableAsync
 @SpringBootApplication(scanBasePackages = "org.quantil.qprov.*")
 @EntityScan("org.quantil.qprov.*")
+@EnableJpaRepositories("org.quantil.qprov.*")
 @OpenAPIDefinition(info = @Info(
         title = "QProv API",
         version = "0.0.1",

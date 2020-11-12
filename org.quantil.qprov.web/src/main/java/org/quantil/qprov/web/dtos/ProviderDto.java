@@ -17,16 +17,21 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.core.repositories;
+package org.quantil.qprov.web.dtos;
 
-import java.util.UUID;
+import java.net.URL;
 
-import org.quantil.qprov.core.model.activities.ExecuteActivity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.stereotype.Repository;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-@RepositoryRestResource(exported = false)
-@Repository
-public interface ExecuteActivityRepository extends JpaRepository<ExecuteActivity, UUID> {
+/**
+ * Data transfer object for Provider ({@link org.quantil.qprov.core.model.agents.Provider}).
+ */
+@EqualsAndHashCode
+@Data
+public class ProviderDto {
+
+    private String name;
+
+    private URL offeringURL;
 }

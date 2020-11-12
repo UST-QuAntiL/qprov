@@ -17,16 +17,22 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.core.repositories;
+package org.quantil.qprov.web;
 
-import java.util.UUID;
+/**
+ * Constants for the QProv Web module
+ */
+public final class Constants {
 
-import org.quantil.qprov.core.model.activities.ExecuteActivity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.stereotype.Repository;
+    /**** Swagger Tags ****/
+    public static final String TAG_ROOT = "root";
 
-@RepositoryRestResource(exported = false)
-@Repository
-public interface ExecuteActivityRepository extends JpaRepository<ExecuteActivity, UUID> {
+    public static final String TAG_PROVIDER = "provider";
+
+    /**** API paths ****/
+    public static final String PATH_PROVIDERS = "providers";
+
+
+    private Constants() {
+    }
 }

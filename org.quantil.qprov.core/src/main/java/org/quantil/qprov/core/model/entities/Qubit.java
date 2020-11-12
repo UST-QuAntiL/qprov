@@ -92,7 +92,8 @@ public class Qubit extends org.openprovenance.prov.xml.Entity implements ProvExt
 
     @Override
     public Set<Statement> toStandardCompliantProv(Qubit qubit) {
-        // TODO
+        // TODO: sort QubitCharactertistics using calibration date and use latest version for the PROV graph
+        // TODO: add gates for the qubits
         return null;
     }
 }

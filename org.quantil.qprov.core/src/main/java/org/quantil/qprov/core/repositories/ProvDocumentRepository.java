@@ -21,10 +21,12 @@ package org.quantil.qprov.core.repositories;
 
 import java.util.UUID;
 
-import org.openprovenance.prov.model.Document;
+import org.quantil.qprov.core.model.ProvDocument;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.stereotype.Repository;
 
+@RepositoryRestResource(exported = false)
 @Repository
-public interface ProvDocumentRepository extends JpaRepository<Document, UUID> {
+public interface ProvDocumentRepository extends JpaRepository<ProvDocument, UUID> {
 }
