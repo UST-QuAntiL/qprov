@@ -17,26 +17,18 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.core.model.agents;
+package org.quantil.qprov.core.model.entities;
 
+import java.math.BigDecimal;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.openprovenance.prov.model.Statement;
-import org.quantil.qprov.core.model.ProvExtension;
-import org.quantil.qprov.core.model.entities.Gate;
-import org.quantil.qprov.core.model.entities.Qubit;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -44,10 +36,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-@EqualsAndHashCode(callSuper = true)
+/**
+ * Characteristics of a qubit at a certain calibration time
+ */
+@EqualsAndHashCode
 @Data
 @Entity
-public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtension<QPU> {
+public class QubitCharacteristics {
 
     @Id
     @Getter
@@ -57,38 +52,16 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
     @Column(name = "databaseId", updatable = false, nullable = false)
     private UUID databaseId;
 
-    private String name;
+    private Date calibrationTime;
 
-    private Date lastUpdated;
+    private BigDecimal t1Time;
 
-    private Date lastCalibrated;
+    private BigDecimal t2Time;
 
-    private int queueSize;
-
-    @OneToMany(mappedBy = "qpu",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
-    private Set<Gate> gateSet = new HashSet<>();
-
-    @OneToMany(mappedBy = "qpu",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
-    private Set<Qubit> qubits = new HashSet<>();
+    private BigDecimal readoutError;
 
     @ManyToOne
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    private Provider provider;
-
-    @Override
-    public Statement toStandardCompliantProv(QPU extensionStatement) {
-        // TODO
-        return null;
-    }
+    private Qubit qubit;
 }

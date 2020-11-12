@@ -19,20 +19,28 @@
 
 package org.quantil.qprov.core.model.entities;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.openprovenance.prov.model.Statement;
 import org.quantil.qprov.core.model.ProvExtension;
+import org.quantil.qprov.core.model.agents.QPU;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -46,6 +54,21 @@ public class Gate extends org.openprovenance.prov.xml.Entity implements ProvExte
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(name = "databaseId", updatable = false, nullable = false)
     private UUID databaseId;
+
+    private String name;
+
+    @ManyToOne
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private QPU qpu;
+
+    @OneToMany(mappedBy = "gate",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private Set<GateCharacteristics> gateCharacteristics = new HashSet<>();
 
     @Override
     public Statement toStandardCompliantProv(Gate extensionStatement) {

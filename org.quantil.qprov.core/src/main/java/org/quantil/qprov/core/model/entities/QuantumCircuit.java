@@ -19,6 +19,7 @@
 
 package org.quantil.qprov.core.model.entities;
 
+import java.net.URL;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,6 +28,8 @@ import javax.persistence.Id;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.openprovenance.prov.model.Statement;
+import org.quantil.qprov.core.Constants;
+import org.quantil.qprov.core.Utils;
 import org.quantil.qprov.core.model.ProvExtension;
 
 import lombok.Data;
@@ -47,9 +50,36 @@ public class QuantumCircuit extends org.openprovenance.prov.xml.Entity implement
     @Column(name = "databaseId", updatable = false, nullable = false)
     private UUID databaseId;
 
+    private String name;
+
+    private int depth;
+
+    private int width;
+
+    private int size;
+
+    private URL codeUrl;
+
     @Override
     public Statement toStandardCompliantProv(QuantumCircuit extensionStatement) {
-        //TODO
-        return null;
+        final org.openprovenance.prov.xml.Entity entity = new org.openprovenance.prov.xml.Entity();
+        entity.setId(Utils.generateQualifiedName(name, null));
+        entity.getType().add(Utils.createTypeElement(Constants.QPROV_TYPE_QUANTUM_CIRCUIT));
+        entity.getOther().add(Utils
+                .createOtherElement(Constants.QPROV_TYPE_QUANTUM_CIRCUIT_NAME, name,
+                        Constants.QPROV_TYPE_QUANTUM_CIRCUIT_NAME + Constants.QPROV_TYPE_SUFFIX));
+        entity.getOther().add(Utils
+                .createOtherElement(Constants.QPROV_TYPE_QUANTUM_CIRCUIT_DEPTH, name,
+                        Constants.QPROV_TYPE_QUANTUM_CIRCUIT_DEPTH + Constants.QPROV_TYPE_SUFFIX));
+        entity.getOther().add(Utils
+                .createOtherElement(Constants.QPROV_TYPE_QUANTUM_CIRCUIT_WIDTH, name,
+                        Constants.QPROV_TYPE_QUANTUM_CIRCUIT_WIDTH + Constants.QPROV_TYPE_SUFFIX));
+        entity.getOther().add(Utils
+                .createOtherElement(Constants.QPROV_TYPE_QUANTUM_CIRCUIT_SIZE, name,
+                        Constants.QPROV_TYPE_QUANTUM_CIRCUIT_SIZE + Constants.QPROV_TYPE_SUFFIX));
+        entity.getOther().add(Utils
+                .createOtherElement(Constants.QPROV_TYPE_QUANTUM_CIRCUIT_URL, name,
+                        Constants.QPROV_TYPE_QUANTUM_CIRCUIT_URL + Constants.QPROV_TYPE_SUFFIX));
+        return entity;
     }
 }

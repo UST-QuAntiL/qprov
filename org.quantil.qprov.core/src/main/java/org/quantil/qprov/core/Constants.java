@@ -36,12 +36,24 @@ public final class Constants {
     /**** QProv type names ****/
     public static final String QPROV_TYPE_PROVIDER = "provider";
 
+    public static final String QPROV_TYPE_QUANTUM_CIRCUIT = "quantumCircuit";
+
     /**** QProv type attributes ****/
     public static final String QPROV_TYPE_SUFFIX = "Type";
 
     public static final String QPROV_TYPE_PROVIDER_NAME = "providerName";
 
     public static final String QPROV_TYPE_PROVIDER_URL = "offeringUrl";
+
+    public static final String QPROV_TYPE_QUANTUM_CIRCUIT_NAME = "circuitName";
+
+    public static final String QPROV_TYPE_QUANTUM_CIRCUIT_DEPTH = "circuitDepth";
+
+    public static final String QPROV_TYPE_QUANTUM_CIRCUIT_WIDTH = "circuitWidth";
+
+    public static final String QPROV_TYPE_QUANTUM_CIRCUIT_SIZE = "circuitSize";
+
+    public static final String QPROV_TYPE_QUANTUM_CIRCUIT_URL = "circuitCodeUrl";
 
     private Constants() {
     }

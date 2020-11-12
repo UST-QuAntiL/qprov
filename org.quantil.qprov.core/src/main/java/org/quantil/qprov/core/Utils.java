@@ -73,10 +73,10 @@ public final class Utils {
     }
 
     /**
-     * TODO
+     * Create a Type element with a given name
      *
-     * @param typeName
-     * @return
+     * @param typeName the local name of the type
+     * @return the created type element
      */
     public static Type createTypeElement(String typeName) {
         final Type type = new Type();
