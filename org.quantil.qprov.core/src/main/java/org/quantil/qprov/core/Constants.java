@@ -24,9 +24,24 @@ package org.quantil.qprov.core;
  */
 public final class Constants {
 
+    /**** Namespaces and prefixes ****/
     public static final String DEFAULT_NAMESPACE = "http://quantil.org/qprov";
 
     public static final String DEFAULT_NAMESPACE_PREFIX = "qprov";
+
+    public static final String DATA_TYPE_QNAME = "QName";
+
+    public static final String NAMESPACE_XSD_PREFIX = "xsd";
+
+    /**** QProv type names ****/
+    public static final String QPROV_TYPE_PROVIDER = "provider";
+
+    /**** QProv type attributes ****/
+    public static final String QPROV_TYPE_SUFFIX = "Type";
+
+    public static final String QPROV_TYPE_PROVIDER_NAME = "providerName";
+
+    public static final String QPROV_TYPE_PROVIDER_URL = "offeringUrl";
 
     private Constants() {
     }

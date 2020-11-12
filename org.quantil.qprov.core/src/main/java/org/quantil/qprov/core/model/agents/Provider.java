@@ -34,6 +34,7 @@ import javax.persistence.OneToMany;
 import org.hibernate.annotations.GenericGenerator;
 import org.openprovenance.prov.model.Statement;
 import org.openprovenance.prov.xml.Agent;
+import org.quantil.qprov.core.Constants;
 import org.quantil.qprov.core.Utils;
 import org.quantil.qprov.core.model.ProvExtension;
 
@@ -54,6 +55,7 @@ public class Provider extends org.openprovenance.prov.xml.Agent implements ProvE
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(name = "databaseId", updatable = false, nullable = false)
+    @ToString.Exclude
     private UUID databaseId;
 
     private String name;
@@ -71,9 +73,12 @@ public class Provider extends org.openprovenance.prov.xml.Agent implements ProvE
     @Override
     public Statement toStandardCompliantProv(Provider extensionStatement) {
         final Agent agent = new Agent();
-        agent.setId(Utils.generateQualifiedName(name));
-
-        // TODO: set name and URL in Others element
+        agent.setId(Utils.generateQualifiedName(name, null));
+        agent.getType().add(Utils.createTypeElement(Constants.QPROV_TYPE_PROVIDER));
+        agent.getOther().add(Utils
+                .createOtherElement(Constants.QPROV_TYPE_PROVIDER_NAME, name, Constants.QPROV_TYPE_PROVIDER_NAME + Constants.QPROV_TYPE_SUFFIX));
+        agent.getOther().add(Utils
+                .createOtherElement(Constants.QPROV_TYPE_PROVIDER_URL, name, Constants.QPROV_TYPE_PROVIDER_URL + Constants.QPROV_TYPE_SUFFIX));
         return agent;
     }
 }

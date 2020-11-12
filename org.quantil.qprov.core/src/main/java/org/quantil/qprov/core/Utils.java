@@ -19,10 +19,14 @@
 
 package org.quantil.qprov.core;
 
+import java.util.Objects;
+
 import org.openprovenance.prov.interop.InteropFramework;
 import org.openprovenance.prov.model.Namespace;
 import org.openprovenance.prov.model.ProvFactory;
 import org.openprovenance.prov.model.QualifiedName;
+import org.openprovenance.prov.xml.Other;
+import org.openprovenance.prov.xml.Type;
 
 public final class Utils {
 
@@ -32,15 +36,52 @@ public final class Utils {
     }
 
     /**
-     * Generate a PROV QualifiedName using the default namespace from the QProv system
+     * Generate a PROV QualifiedName using the given namespace prefix or the default namespace from the QProv system if none is defined
      *
-     * @param localName the local name for the QualifiedName
-     * @return the QualifiedName using the given local name and the QProv namespace
+     * @param localName       the local name for the QualifiedName
+     * @param namespacePrefix the namespace prefix for the QualifiedName or null if the default namespace should be used
+     * @return the QualifiedName using the given local name and the given or default namespace
      */
-    public static QualifiedName generateQualifiedName(String localName) {
+    public static QualifiedName generateQualifiedName(String localName, String namespacePrefix) {
+        // register all known namespaces
         final Namespace ns = new Namespace();
         ns.addKnownNamespaces();
         ns.register(Constants.DEFAULT_NAMESPACE_PREFIX, Constants.DEFAULT_NAMESPACE);
-        return ns.qualifiedName(Constants.DEFAULT_NAMESPACE_PREFIX, localName, pFactory);
+
+        // use default QProv namespace or given namespace prefix for the QualifiedName
+        if (Objects.isNull(namespacePrefix)) {
+            return ns.qualifiedName(Constants.DEFAULT_NAMESPACE_PREFIX, localName, pFactory);
+        } else {
+            return ns.qualifiedName(namespacePrefix, localName, pFactory);
+        }
+    }
+
+    /**
+     * Create a PROV Other element with the given name, value, and type
+     *
+     * @param name  the name of the Other element to create
+     * @param value the value of the Other element to create
+     * @param type  the type of the Other element to create
+     * @return the created Other element
+     */
+    public static Other createOtherElement(String name, String value, String type) {
+        final Other other = new Other();
+        other.setElementName(generateQualifiedName(name, null));
+        other.setValue(value);
+        other.setType(generateQualifiedName(type, null));
+        return other;
+    }
+
+    /**
+     * TODO
+     *
+     * @param typeName
+     * @return
+     */
+    public static Type createTypeElement(String typeName) {
+        final Type type = new Type();
+        type.setType(generateQualifiedName(Constants.DATA_TYPE_QNAME, Constants.NAMESPACE_XSD_PREFIX));
+        type.setValue(generateQualifiedName(typeName, null));
+        return type;
     }
 }
