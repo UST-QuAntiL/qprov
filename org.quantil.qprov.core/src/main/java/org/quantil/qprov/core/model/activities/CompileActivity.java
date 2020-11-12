@@ -56,6 +56,10 @@ public class CompileActivity extends org.openprovenance.prov.xml.Activity implem
 
     private BigDecimal compilationTime;
 
+    private String optimizationGoal;
+
+    private String randomSeed;
+
     @Override
     public Set<Statement> toStandardCompliantProv(CompileActivity extensionStatement) {
         final org.openprovenance.prov.xml.Activity activity = new org.openprovenance.prov.xml.Activity();
@@ -64,6 +68,12 @@ public class CompileActivity extends org.openprovenance.prov.xml.Activity implem
         activity.getOther().add(Utils
                 .createOtherElement(Constants.QPROV_TYPE_COMPILATION_TIME, compilationTime.toString(),
                         Constants.QPROV_TYPE_COMPILATION_TIME + Constants.QPROV_TYPE_SUFFIX));
+        activity.getOther().add(Utils
+                .createOtherElement(Constants.QPROV_TYPE_COMPILATION_OPTIMIZATION, optimizationGoal,
+                        Constants.QPROV_TYPE_COMPILATION_OPTIMIZATION + Constants.QPROV_TYPE_SUFFIX));
+        activity.getOther().add(Utils
+                .createOtherElement(Constants.QPROV_TYPE_COMPILATION_RANDOM_SEED, randomSeed,
+                        Constants.QPROV_TYPE_COMPILATION_RANDOM_SEED + Constants.QPROV_TYPE_SUFFIX));
         return Stream.of(activity).collect(Collectors.toCollection(HashSet::new));
     }
 }

@@ -28,6 +28,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
@@ -69,6 +70,11 @@ public class Gate extends org.openprovenance.prov.xml.Entity implements ProvExte
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Set<GateCharacteristics> gateCharacteristics = new HashSet<>();
+
+    @ManyToMany(mappedBy = "supportedGates",
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @EqualsAndHashCode.Exclude
+    private Set<Qubit> operatingQubits = new HashSet<>();
 
     @Override
     public Set<Statement> toStandardCompliantProv(Gate extensionStatement) {

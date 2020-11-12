@@ -46,6 +46,12 @@ public final class Constants {
 
     public static final String QPROV_TYPE_PREPARE_DATA = "prepareDataActivity";
 
+    public static final String QPROV_TYPE_COMPILER = "compiler";
+
+    public static final String QPROV_TYPE_PREPARATION_SERVICE = "dataPreparationService";
+
+    public static final String QPROV_TYPE_QPU = "qpu";
+
     /**** QProv type attributes ****/
     public static final String QPROV_TYPE_SUFFIX = "Type";
 
@@ -65,6 +71,10 @@ public final class Constants {
 
     public static final String QPROV_TYPE_COMPILATION_TIME = "compilationTime";
 
+    public static final String QPROV_TYPE_COMPILATION_OPTIMIZATION = "optimizationGoal";
+
+    public static final String QPROV_TYPE_COMPILATION_RANDOM_SEED = "randomSeed";
+
     public static final String QPROV_TYPE_EXECUTION_TIME = "executionTime";
 
     public static final String QPROV_TYPE_EXECUTION_SHOTS = "numberOfShots";
@@ -72,6 +82,26 @@ public final class Constants {
     public static final String QPROV_TYPE_EXECUTION_MITIGATION = "appliedMitigationTechnique";
 
     public static final String QPROV_TYPE_PREPARATION_ENCODING = "appliedEncoding";
+
+    public static final String QPROV_TYPE_COMPILER_NAME = "compilerName";
+
+    public static final String QPROV_TYPE_COMPILER_PROVIDER_NAME = "compilerProviderName";
+
+    public static final String QPROV_TYPE_COMPILER_VERSION = "compilerVersion";
+
+    public static final String QPROV_TYPE_PREPARATION_SERVICE_NAME = "dataPreparationServiceName";
+
+    public static final String QPROV_TYPE_PREPARATION_SERVICE_PROVIDER_NAME = "dataPreparationServiceProviderName";
+
+    public static final String QPROV_TYPE_PREPARATION_SERVICE_VERSION = "dataPreparationServiceVersion";
+
+    public static final String QPROV_TYPE_QPU_NAME = "qpuName";
+
+    public static final String QPROV_TYPE_QPU_UPDATE = "lastUpdate";
+
+    public static final String QPROV_TYPE_QPU_CALIBRATION = "lastCalibration";
+
+    public static final String QPROV_TYPE_QPU_QUEUE = "queueSize";
 
     private Constants() {
     }

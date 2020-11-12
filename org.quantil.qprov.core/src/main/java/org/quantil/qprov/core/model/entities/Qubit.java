@@ -81,6 +81,15 @@ public class Qubit extends org.openprovenance.prov.xml.Entity implements ProvExt
     @ToString.Exclude
     private Set<QubitCharacteristics> qubitCharacteristics = new HashSet<>();
 
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "qubits_gates",
+            joinColumns = @JoinColumn(name = "qubit_id"),
+            inverseJoinColumns = @JoinColumn(name = "gate_id")
+    )
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private Set<Gate> supportedGates = new HashSet<>();
+
     @Override
     public Set<Statement> toStandardCompliantProv(Qubit qubit) {
         // TODO

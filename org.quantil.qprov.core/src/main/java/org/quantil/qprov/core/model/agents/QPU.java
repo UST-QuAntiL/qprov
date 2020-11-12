@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -34,6 +35,8 @@ import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.openprovenance.prov.model.Statement;
+import org.quantil.qprov.core.Constants;
+import org.quantil.qprov.core.Utils;
 import org.quantil.qprov.core.model.ProvExtension;
 import org.quantil.qprov.core.model.entities.Gate;
 import org.quantil.qprov.core.model.entities.Qubit;
@@ -88,7 +91,28 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
 
     @Override
     public Set<Statement> toStandardCompliantProv(QPU extensionStatement) {
-        // TODO
-        return null;
+        final org.openprovenance.prov.xml.Agent agent = new org.openprovenance.prov.xml.Agent();
+
+        // add QPU specific attributes
+        agent.setId(Utils.generateQualifiedName(databaseId.toString(), null));
+        agent.getType().add(Utils.createTypeElement(Constants.QPROV_TYPE_QPU));
+        agent.getOther().add(Utils
+                .createOtherElement(Constants.QPROV_TYPE_QPU_NAME, name,
+                        Constants.QPROV_TYPE_QPU_NAME + Constants.QPROV_TYPE_SUFFIX));
+        agent.getOther().add(Utils
+                .createOtherElement(Constants.QPROV_TYPE_QPU_UPDATE, lastUpdated.toString(),
+                        Constants.QPROV_TYPE_QPU_UPDATE + Constants.QPROV_TYPE_SUFFIX));
+        agent.getOther().add(Utils
+                .createOtherElement(Constants.QPROV_TYPE_QPU_CALIBRATION, lastCalibrated.toString(),
+                        Constants.QPROV_TYPE_QPU_CALIBRATION + Constants.QPROV_TYPE_SUFFIX));
+        agent.getOther().add(Utils
+                .createOtherElement(Constants.QPROV_TYPE_QPU_QUEUE, String.valueOf(queueSize),
+                        Constants.QPROV_TYPE_QPU_QUEUE + Constants.QPROV_TYPE_SUFFIX));
+
+        // add data about contained qubits
+        final Set<Statement> statements = qubits.stream().flatMap(qubit -> qubit.toStandardCompliantProv(qubit).stream()).collect(Collectors.toSet());
+        statements.add(agent);
+
+        return statements;
     }
 }
