@@ -21,7 +21,7 @@ package org.quantil.qprov.collector;
 
 import java.util.List;
 
-import org.quantil.qprov.core.entities.QPU_old;
+import org.quantil.qprov.core.model.agents.QPU;
 
 public interface IProvider {
 
@@ -53,5 +53,5 @@ public interface IProvider {
      *
      * @return list of collected qpus
      */
-    List<QPU_old> collectQPUs();
+    List<QPU> collectQPUs();
 }

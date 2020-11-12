@@ -25,8 +25,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.quantil.qprov.collector.providers.IBMQProvider;
-import org.quantil.qprov.core.entities.QPU_old;
-import org.quantil.qprov.core.entities.QPURepository_old;
+import org.quantil.qprov.core.model.agents.QPU;
+import org.quantil.qprov.core.repositories.QPURepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,10 +41,10 @@ public class CollectorService {
 
     private final Set<IProvider> availableProviders;
 
-    private final QPURepository_old qpuRepository;
+    private final QPURepository qpuRepository;
 
     @Autowired
-    public CollectorService(QPURepository_old qpuRepository, IBMQProvider ibmqProvider) {
+    public CollectorService(QPURepository qpuRepository, IBMQProvider ibmqProvider) {
         this.qpuRepository = qpuRepository;
         this.availableProviders = Set.of(ibmqProvider);
     }
@@ -80,7 +80,7 @@ public class CollectorService {
         });
 
         logger.debug("QPUs in database:");
-        qpuRepository.findAll().forEach((QPU_old qpu) -> logger.debug(qpu.toString()));
+        qpuRepository.findAll().forEach((QPU qpu) -> logger.debug(qpu.toString()));
 
         return results;
     }
