@@ -29,6 +29,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.jetbrains.annotations.NotNull;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -42,7 +43,7 @@ import lombok.ToString;
 @EqualsAndHashCode
 @Data
 @Entity
-public class QubitCharacteristics {
+public class QubitCharacteristics implements Comparable<QubitCharacteristics> {
 
     @Id
     @Getter
@@ -64,4 +65,9 @@ public class QubitCharacteristics {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Qubit qubit;
+
+    @Override
+    public int compareTo(@NotNull QubitCharacteristics o) {
+        return getCalibrationTime().compareTo(o.getCalibrationTime());
+    }
 }

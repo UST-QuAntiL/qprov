@@ -20,7 +20,11 @@
 package org.quantil.qprov.core.model.entities;
 
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -61,7 +65,7 @@ public class QuantumCircuit extends org.openprovenance.prov.xml.Entity implement
     private URL codeUrl;
 
     @Override
-    public Statement toStandardCompliantProv(QuantumCircuit extensionStatement) {
+    public Set<Statement> toStandardCompliantProv(QuantumCircuit extensionStatement) {
         final org.openprovenance.prov.xml.Entity entity = new org.openprovenance.prov.xml.Entity();
         entity.setId(Utils.generateQualifiedName(name, null));
         entity.getType().add(Utils.createTypeElement(Constants.QPROV_TYPE_QUANTUM_CIRCUIT));
@@ -80,6 +84,6 @@ public class QuantumCircuit extends org.openprovenance.prov.xml.Entity implement
         entity.getOther().add(Utils
                 .createOtherElement(Constants.QPROV_TYPE_QUANTUM_CIRCUIT_URL, name,
                         Constants.QPROV_TYPE_QUANTUM_CIRCUIT_URL + Constants.QPROV_TYPE_SUFFIX));
-        return entity;
+        return Stream.of(entity).collect(Collectors.toCollection(HashSet::new));
     }
 }

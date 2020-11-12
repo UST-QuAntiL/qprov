@@ -25,6 +25,7 @@ import org.openprovenance.prov.interop.InteropFramework;
 import org.openprovenance.prov.model.Namespace;
 import org.openprovenance.prov.model.ProvFactory;
 import org.openprovenance.prov.model.QualifiedName;
+import org.openprovenance.prov.model.Value;
 import org.openprovenance.prov.xml.Other;
 import org.openprovenance.prov.xml.Type;
 
@@ -83,5 +84,15 @@ public final class Utils {
         type.setType(generateQualifiedName(Constants.DATA_TYPE_QNAME, Constants.NAMESPACE_XSD_PREFIX));
         type.setValue(generateQualifiedName(typeName, null));
         return type;
+    }
+
+    /**
+     * Create a value element of type string
+     *
+     * @param value the value to use as String
+     * @return the PROV Value element
+     */
+    public static Value createStringValueElement(String value) {
+        return pFactory.newValue(value, pFactory.getName().XSD_STRING);
     }
 }

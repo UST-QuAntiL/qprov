@@ -19,6 +19,8 @@
 
 package org.quantil.qprov.core.model;
 
+import java.util.Set;
+
 import org.openprovenance.prov.model.Statement;
 
 /**
@@ -27,10 +29,11 @@ import org.openprovenance.prov.model.Statement;
 public interface ProvExtension<T> {
 
     /**
-     * Transform the given PROV extension statement to a standard-compliant PROV statement to enable the export of standard-compliant PROV graphs
+     * Transform the given PROV extension statement to a set of standard-compliant PROV statements to enable the export of standard-compliant PROV
+     * graphs
      *
      * @param extensionStatement the PROV statement using extensions
-     * @return the standard-compliant PROV statement
+     * @return a set of standard-compliant PROV statements
      */
-    Statement toStandardCompliantProv(T extensionStatement);
+    Set<Statement> toStandardCompliantProv(T extensionStatement);
 }

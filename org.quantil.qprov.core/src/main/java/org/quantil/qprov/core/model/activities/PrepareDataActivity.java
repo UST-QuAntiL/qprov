@@ -19,6 +19,7 @@
 
 package org.quantil.qprov.core.model.activities;
 
+import java.util.Set;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -48,7 +49,7 @@ public class PrepareDataActivity extends org.openprovenance.prov.xml.Activity im
     private UUID databaseId;
 
     @Override
-    public Statement toStandardCompliantProv(PrepareDataActivity extensionStatement) {
+    public Set<Statement> toStandardCompliantProv(PrepareDataActivity extensionStatement) {
         return null;
     }
 }

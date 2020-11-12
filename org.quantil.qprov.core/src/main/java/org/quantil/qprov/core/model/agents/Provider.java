@@ -23,6 +23,8 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -71,7 +73,7 @@ public class Provider extends org.openprovenance.prov.xml.Agent implements ProvE
     private Set<QPU> qpus = new HashSet<>();
 
     @Override
-    public Statement toStandardCompliantProv(Provider extensionStatement) {
+    public Set<Statement> toStandardCompliantProv(Provider extensionStatement) {
         final Agent agent = new Agent();
         agent.setId(Utils.generateQualifiedName(name, null));
         agent.getType().add(Utils.createTypeElement(Constants.QPROV_TYPE_PROVIDER));
@@ -79,6 +81,6 @@ public class Provider extends org.openprovenance.prov.xml.Agent implements ProvE
                 .createOtherElement(Constants.QPROV_TYPE_PROVIDER_NAME, name, Constants.QPROV_TYPE_PROVIDER_NAME + Constants.QPROV_TYPE_SUFFIX));
         agent.getOther().add(Utils
                 .createOtherElement(Constants.QPROV_TYPE_PROVIDER_URL, name, Constants.QPROV_TYPE_PROVIDER_URL + Constants.QPROV_TYPE_SUFFIX));
-        return agent;
+        return Stream.of(agent).collect(Collectors.toCollection(HashSet::new));
     }
 }

@@ -82,7 +82,7 @@ public class Qubit extends org.openprovenance.prov.xml.Entity implements ProvExt
     private Set<QubitCharacteristics> qubitCharacteristics = new HashSet<>();
 
     @Override
-    public Statement toStandardCompliantProv(Qubit qubit) {
+    public Set<Statement> toStandardCompliantProv(Qubit qubit) {
         // TODO
         return null;
     }

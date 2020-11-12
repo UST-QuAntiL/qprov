@@ -71,7 +71,7 @@ public class Gate extends org.openprovenance.prov.xml.Entity implements ProvExte
     private Set<GateCharacteristics> gateCharacteristics = new HashSet<>();
 
     @Override
-    public Statement toStandardCompliantProv(Gate extensionStatement) {
+    public Set<Statement> toStandardCompliantProv(Gate extensionStatement) {
         //TODO
         return null;
     }

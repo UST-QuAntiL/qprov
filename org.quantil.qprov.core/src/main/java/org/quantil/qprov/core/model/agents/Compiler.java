@@ -19,6 +19,7 @@
 
 package org.quantil.qprov.core.model.agents;
 
+import java.util.Set;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -48,7 +49,7 @@ public class Compiler extends org.openprovenance.prov.xml.Agent implements ProvE
     private UUID databaseId;
 
     @Override
-    public Statement toStandardCompliantProv(Compiler extensionStatement) {
+    public Set<Statement> toStandardCompliantProv(Compiler extensionStatement) {
         // TODO
         return null;
     }

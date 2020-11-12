@@ -87,7 +87,7 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
     private Provider provider;
 
     @Override
-    public Statement toStandardCompliantProv(QPU extensionStatement) {
+    public Set<Statement> toStandardCompliantProv(QPU extensionStatement) {
         // TODO
         return null;
     }

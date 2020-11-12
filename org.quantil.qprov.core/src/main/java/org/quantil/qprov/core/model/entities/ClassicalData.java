@@ -19,7 +19,11 @@
 
 package org.quantil.qprov.core.model.entities;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -27,6 +31,8 @@ import javax.persistence.Id;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.openprovenance.prov.model.Statement;
+import org.quantil.qprov.core.Constants;
+import org.quantil.qprov.core.Utils;
 import org.quantil.qprov.core.model.ProvExtension;
 
 import lombok.Data;
@@ -47,9 +53,14 @@ public class ClassicalData extends org.openprovenance.prov.xml.Entity implements
     @Column(name = "databaseId", updatable = false, nullable = false)
     private UUID databaseId;
 
+    private String classicalDataValue;
+
     @Override
-    public Statement toStandardCompliantProv(ClassicalData extensionStatement) {
-        //TODO
-        return null;
+    public Set<Statement> toStandardCompliantProv(ClassicalData extensionStatement) {
+        final org.openprovenance.prov.xml.Entity entity = new org.openprovenance.prov.xml.Entity();
+        entity.setId(Utils.generateQualifiedName(databaseId.toString(), null));
+        entity.getType().add(Utils.createTypeElement(Constants.QPROV_TYPE_CLASSICAL_DATA));
+        entity.setValue(Utils.createStringValueElement(classicalDataValue));
+        return Stream.of(entity).collect(Collectors.toCollection(HashSet::new));
     }
 }

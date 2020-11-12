@@ -38,6 +38,8 @@ public final class Constants {
 
     public static final String QPROV_TYPE_QUANTUM_CIRCUIT = "quantumCircuit";
 
+    public static final String QPROV_TYPE_CLASSICAL_DATA = "classicalData";
+
     /**** QProv type attributes ****/
     public static final String QPROV_TYPE_SUFFIX = "Type";
 

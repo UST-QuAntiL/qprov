@@ -29,6 +29,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.jetbrains.annotations.NotNull;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -42,7 +43,7 @@ import lombok.ToString;
 @EqualsAndHashCode
 @Data
 @Entity
-public class GateCharacteristics {
+public class GateCharacteristics implements Comparable<GateCharacteristics> {
 
     @Id
     @Getter
@@ -62,4 +63,9 @@ public class GateCharacteristics {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Gate gate;
+
+    @Override
+    public int compareTo(@NotNull GateCharacteristics o) {
+        return getCalibrationTime().compareTo(o.getCalibrationTime());
+    }
 }
