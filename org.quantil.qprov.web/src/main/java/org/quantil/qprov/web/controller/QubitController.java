@@ -93,14 +93,8 @@ public class QubitController {
 
         qubitRepository.findByQpu(qpuOptional.get()).forEach((Qubit qubit) -> {
                     logger.debug("Found Qubit with name: {}", qubit.getName());
-                    final EntityModel<QubitDto> qpuDto = new EntityModel<QubitDto>(QubitDto.createDTO(qubit));
-                    qpuDto.add(linkTo(methodOn(QubitController.class).getQubit(providerId, qpuId, qubit.getDatabaseId()))
-                            .withSelfRel());
-                    for (Qubit connectedQubit : qubit.getConnectedQubits()) {
-                        qpuDto.add(linkTo(methodOn(QubitController.class).getQubit(providerId, qpuId, connectedQubit.getDatabaseId()))
-                                .withRel(Constants.PATH_QUBITS_CONNECTED + connectedQubit.getName()));
-                    }
-                    qubitEntities.add(qpuDto);
+
+                    qubitEntities.add(createQubitDto(providerId, qpuId, qubit));
                     qubitLinks.add(linkTo(methodOn(QubitController.class).getQubit(providerId, qpuId, qubit.getDatabaseId()))
                             .withRel(qubit.getDatabaseId().toString()));
                 }
@@ -133,7 +127,26 @@ public class QubitController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        // TODO
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        // check availability of qpu
+        final Optional<Qubit> qubitOptional = qubitRepository.findById(qubitId);
+        if (qubitOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(createQubitDto(providerId, qpuId, qubitOptional.get()));
+    }
+
+    private EntityModel<QubitDto> createQubitDto(UUID providerId, UUID qpuId, Qubit qubit) {
+        final EntityModel<QubitDto> qpuDto = new EntityModel<QubitDto>(QubitDto.createDTO(qubit));
+        qpuDto.add(linkTo(methodOn(QubitController.class).getQubit(providerId, qpuId, qubit.getDatabaseId()))
+                .withSelfRel());
+        qpuDto.add(linkTo(methodOn(QubitCharacteristicsController.class).getQubitCharacterisitcs(providerId, qpuId, qubit.getDatabaseId(), false))
+                .withRel(Constants.PATH_CHARACTERISTICS));
+        for (Qubit connectedQubit : qubit.getConnectedQubits()) {
+            qpuDto.add(linkTo(methodOn(QubitController.class).getQubit(providerId, qpuId, connectedQubit.getDatabaseId()))
+                    .withRel(Constants.PATH_QUBITS_CONNECTED + connectedQubit.getName()));
+        }
+        // TODO: add links to gates
+        return qpuDto;
     }
 }

@@ -17,20 +17,38 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.core.repositories;
+package org.quantil.qprov.web.dtos;
 
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.UUID;
 
-import org.quantil.qprov.core.model.entities.Qubit;
 import org.quantil.qprov.core.model.entities.QubitCharacteristics;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.stereotype.Repository;
 
-@RepositoryRestResource(exported = false)
-@Repository
-public interface QubitCharacteristicsRepository extends JpaRepository<QubitCharacteristics, UUID> {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-    List<QubitCharacteristics> findByQubitOrderByCalibrationTimeDesc(Qubit qubit);
+/**
+ * Data transfer object for qubit characteristics ({@link org.quantil.qprov.core.model.entities.QubitCharacteristics}).
+ */
+@EqualsAndHashCode
+@Data
+@AllArgsConstructor
+public class QubitCharacteristicsDto {
+
+    private UUID id;
+
+    private Date calibrationTime;
+
+    private BigDecimal t1Time;
+
+    private BigDecimal t2Time;
+
+    private BigDecimal readoutError;
+
+    public static QubitCharacteristicsDto createDTO(QubitCharacteristics qubitCharacteristics) {
+        return new QubitCharacteristicsDto(qubitCharacteristics.getDatabaseId(), qubitCharacteristics.getCalibrationTime(), qubitCharacteristics.getT1Time(),
+                qubitCharacteristics.getT2Time(), qubitCharacteristics.getReadoutError());
+    }
 }

@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -34,8 +35,11 @@ import org.quantil.qprov.collector.IProvider;
 import org.quantil.qprov.core.model.agents.Provider;
 import org.quantil.qprov.core.model.agents.QPU;
 import org.quantil.qprov.core.model.entities.Qubit;
+import org.quantil.qprov.core.model.entities.QubitCharacteristics;
 import org.quantil.qprov.core.repositories.ProviderRepository;
 import org.quantil.qprov.core.repositories.QPURepository;
+import org.quantil.qprov.core.repositories.QubitCharacteristicsRepository;
+import org.quantil.qprov.core.repositories.QubitRepository;
 import org.quantil.qprov.ibmq.client.ApiClient;
 import org.quantil.qprov.ibmq.client.ApiException;
 import org.quantil.qprov.ibmq.client.Configuration;
@@ -70,13 +74,21 @@ public class IBMQProvider implements IProvider {
 
     private final QPURepository qpuRepository;
 
+    private final QubitRepository qubitRepository;
+
+    private final QubitCharacteristicsRepository qubitCharacteristicsRepository;
+
     private final String ibmqToken;
 
     private ApiClient defaultClient;
 
-    public IBMQProvider(ProviderRepository providerRepository, QPURepository qpuRepository, Environment env) {
+    public IBMQProvider(ProviderRepository providerRepository, QPURepository qpuRepository,
+                        QubitRepository qubitRepository,
+                        QubitCharacteristicsRepository qubitCharacteristicsRepository, Environment env) {
         this.providerRepository = providerRepository;
         this.qpuRepository = qpuRepository;
+        this.qubitRepository = qubitRepository;
+        this.qubitCharacteristicsRepository = qubitCharacteristicsRepository;
         this.ibmqToken = env.getProperty("QPROV_IBMQ_TOKEN");
         this.defaultClient = Configuration.getDefaultApiClient();
         this.defaultClient.setBasePath("https://api.quantum-computing.ibm.com/v2");
@@ -146,7 +158,6 @@ public class IBMQProvider implements IProvider {
      * @param device   the IBMQ device to store or update the QPu object for
      * @return the newly created or updated QPU object
      */
-    @SuppressWarnings("checkstyle:NestedForDepth")
     private QPU addQPUToDatabase(Provider provider, Device device) {
         final Optional<QPU> qpuOptional = qpuRepository.findByName(device.getBackendName());
         if (qpuOptional.isPresent()) {
@@ -208,6 +219,97 @@ public class IBMQProvider implements IProvider {
     }
 
     /**
+     * Parse the objects returned by IBM to a Java Map
+     *
+     * @param propertiesList the propertiesList as provided by the IBM API
+     * @return the Map containing the data from the provided properties list
+     */
+    private Map<String, String> transformIbmPropertiesToMap(Object propertiesList) {
+        final String[] propertiesArray = propertiesList.toString()
+                .replaceAll("\\s+", "")
+                .replaceAll("\\{", "")
+                .replaceAll("}", "")
+                .split(",");
+
+        final Map<String, String> map = new HashMap<>();
+        for (String property : propertiesArray) {
+            final String[] propertyParts = property.split("=");
+            if (propertyParts.length != 2) {
+                continue;
+            }
+            map.put(propertyParts[0], propertyParts[1]);
+        }
+        return map;
+    }
+
+    /**
+     * Update the qubit characteristics of the given QPU with the latest calibration data and add to the database
+     *
+     * @param qpu              the QPU to update the qubit characteristics for
+     * @param deviceProperties the device properties retrieved from the IBM API
+     * @param calibrationTime  the time of the calibration the given device properties were retrieved from
+     * @return the updated QPU object
+     */
+    private QPU updateQubitCharacteristicsOfQPU(QPU qpu, DeviceProperties deviceProperties, Date calibrationTime) {
+
+        if (deviceProperties.getQubits().size() != qpu.getQubits().size()) {
+            logger.error("Number of qubits in the device properties ({}) does not equal number of qubits from the QPU ({})!",
+                    deviceProperties.getQubits().size(), qpu.getQubits().size());
+            return qpu;
+        }
+
+        // Sort list of qubits after their name. This has to be done as the API only provides qubit properties in the order of the qubit
+        // names (intergers) and does not provide a reference from the properties to the qubit
+        final List<Qubit> sortedQubits = new ArrayList<>(qpu.getQubits());
+        sortedQubits.sort(Comparator.comparing(a -> Integer.valueOf(a.getName())));
+
+        // iterate through all properties and update corresonding Qubit
+        for (int i = 0; i < deviceProperties.getQubits().size(); i++) {
+
+            // get properties and Qubit which belong together (based on the order)
+            final List<Object> propertiesOfQubitList = deviceProperties.getQubits().get(i);
+            final Qubit currentQubit = sortedQubits.get(i);
+
+            // skip update if latest characteristics have the same time stamp then current calibration data
+            final QubitCharacteristics latestCharacteristics =
+                    qubitCharacteristicsRepository.findByQubitOrderByCalibrationTimeDesc(currentQubit).stream().findFirst().orElse(null);
+            if (Objects.nonNull(latestCharacteristics) && !calibrationTime.after(latestCharacteristics.getCalibrationTime())) {
+                logger.debug("Stored characteristics are up-to-date. No update needed!");
+                continue;
+            }
+
+            // create new characteristics object with the current characteristics
+            final QubitCharacteristics qubitCharacteristics = new QubitCharacteristics();
+            qubitCharacteristics.setQubit(currentQubit);
+            qubitCharacteristics.setCalibrationTime(calibrationTime);
+
+            // retrieve T1, T2, and readout error
+            for (Object propertiesOfQubit : propertiesOfQubitList) {
+                final Map<String, String> propertiesMap = transformIbmPropertiesToMap(propertiesOfQubit);
+
+                switch (propertiesMap.get("name")) {
+                    case "T1":
+                        qubitCharacteristics.setT1Time(new BigDecimal(propertiesMap.get("value")));
+                        break;
+                    case "T2":
+                        qubitCharacteristics.setT2Time(new BigDecimal(propertiesMap.get("value")));
+                        break;
+                    case "readout_error":
+                        qubitCharacteristics.setReadoutError(new BigDecimal(propertiesMap.get("value")));
+                        break;
+                    default:
+                }
+            }
+
+            // update qubit object with new characteristics object
+            currentQubit.getQubitCharacteristics().add(qubitCharacteristics);
+            qubitRepository.save(currentQubit);
+        }
+
+        return qpu;
+    }
+
+    /**
      * Collect the data about the QPUs from IBMQ and add or update existing database entries
      *
      * @param provider the provider object to connect the QPU objects to
@@ -227,7 +329,7 @@ public class IBMQProvider implements IProvider {
 
                 // create QPU in database if not already existing
                 logger.debug("Found QPU with name '{}'. Adding to database!", device.getBackendName());
-                final QPU qpu = addQPUToDatabase(provider, device);
+                QPU qpu = addQPUToDatabase(provider, device);
 
                 try {
                     logger.debug("Getting detailed information for the QPU...");
@@ -249,9 +351,10 @@ public class IBMQProvider implements IProvider {
                     qpu.setLastUpdated(new Date(System.currentTimeMillis()));
                     qpuRepository.save(qpu);
 
-                    logger.debug(device.toString());
+                    // add new qubit characteristics if a new calibration was done since the last retrieval
+                    qpu = updateQubitCharacteristicsOfQPU(qpu, deviceProperties, lastCalibrated);
 
-                    // TODO: retrieve data about gates, qubits, ...
+                    // TODO: retrieve data about gates
                 } catch (ApiException e) {
                     logger.error("Exception while getting details about QPU with name '{}': {}", device.getBackendName(),
                             e.getLocalizedMessage());
