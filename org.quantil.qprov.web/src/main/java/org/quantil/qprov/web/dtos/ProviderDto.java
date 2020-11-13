@@ -20,6 +20,7 @@
 package org.quantil.qprov.web.dtos;
 
 import java.net.URL;
+import java.util.UUID;
 
 import org.quantil.qprov.core.model.agents.Provider;
 
@@ -35,11 +36,13 @@ import lombok.EqualsAndHashCode;
 @AllArgsConstructor
 public class ProviderDto {
 
+    private UUID id;
+
     private String name;
 
     private URL offeringURL;
 
     public static ProviderDto createDTO(Provider provider) {
-        return new ProviderDto(provider.getName(), provider.getOfferingURL());
+        return new ProviderDto(provider.getDatabaseId(), provider.getName(), provider.getOfferingURL());
     }
 }

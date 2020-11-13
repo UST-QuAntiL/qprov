@@ -20,6 +20,7 @@
 package org.quantil.qprov.web.dtos;
 
 import java.util.Date;
+import java.util.UUID;
 
 import org.quantil.qprov.core.model.agents.QPU;
 
@@ -35,6 +36,8 @@ import lombok.EqualsAndHashCode;
 @AllArgsConstructor
 public class QpuDto {
 
+    private UUID id;
+
     private String name;
 
     private String version;
@@ -49,8 +52,10 @@ public class QpuDto {
 
     private int numberOfQubits;
 
+    private boolean isSimulator;
+
     public static QpuDto createDTO(QPU qpu) {
-        return new QpuDto(qpu.getName(), qpu.getVersion(), qpu.getLastUpdated(), qpu.getLastCalibrated(), qpu.getMaxShots(), qpu.getQueueSize(),
-                qpu.getQubits().size());
+        return new QpuDto(qpu.getDatabaseId(), qpu.getName(), qpu.getVersion(), qpu.getLastUpdated(), qpu.getLastCalibrated(), qpu.getMaxShots(),
+                qpu.getQueueSize(), qpu.getQubits().size(), qpu.isSimulator());
     }
 }

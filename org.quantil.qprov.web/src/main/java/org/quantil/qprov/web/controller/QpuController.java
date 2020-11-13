@@ -79,17 +79,13 @@ public class QpuController {
         }
 
         final List<EntityModel<QpuDto>> qpuEntities = new ArrayList<>();
-
         final List<Link> qpuLinks = new ArrayList<>();
+
         qpuRepository.findByProvider(provider.get()).forEach((QPU qpu) -> {
                     logger.debug("Found QPU with name: {}", qpu.getName());
-                    final EntityModel<QpuDto> qpuDto = new EntityModel<QpuDto>(QpuDto.createDTO(qpu));
-                    qpuDto.add(linkTo(methodOn(QpuController.class).getQPU(providerId, qpu.getDatabaseId()))
-                            .withSelfRel());
-                    qpuDto.add(linkTo(methodOn(QubitController.class).getQubits(providerId, qpu.getDatabaseId())).withRel(Constants.PATH_QUBITS));
                     qpuLinks.add(linkTo(methodOn(QpuController.class).getQPU(providerId, qpu.getDatabaseId()))
                             .withRel(qpu.getDatabaseId().toString()));
-                    qpuEntities.add(qpuDto);
+                    qpuEntities.add(createQpuDto(providerId, qpu));
                 }
         );
 
@@ -125,9 +121,17 @@ public class QpuController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
+        return ResponseEntity.ok(createQpuDto(providerId, qpu));
+    }
+
+    private EntityModel<QpuDto> createQpuDto(UUID providerId, QPU qpu) {
         final EntityModel<QpuDto> qpuDto = new EntityModel<QpuDto>(QpuDto.createDTO(qpu));
-        qpuDto.add(linkTo(methodOn(QpuController.class).getQPU(providerId, qpu.getDatabaseId())).withSelfRel());
-        qpuDto.add(linkTo(methodOn(QubitController.class).getQubits(providerId, qpu.getDatabaseId())).withRel(Constants.PATH_QUBITS));
-        return ResponseEntity.ok(qpuDto);
+        qpuDto.add(linkTo(methodOn(QpuController.class).getQPU(providerId, qpu.getDatabaseId()))
+                .withSelfRel());
+        if (!qpu.isSimulator()) {
+            // calibration data about simulators is not available, thus do not add a link to the qubits
+            qpuDto.add(linkTo(methodOn(QubitController.class).getQubits(providerId, qpu.getDatabaseId())).withRel(Constants.PATH_QUBITS));
+        }
+        return qpuDto;
     }
 }

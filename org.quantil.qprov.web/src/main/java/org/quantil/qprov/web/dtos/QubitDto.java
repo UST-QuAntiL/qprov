@@ -19,6 +19,10 @@
 
 package org.quantil.qprov.web.dtos;
 
+import java.util.UUID;
+
+import org.quantil.qprov.core.model.entities.Qubit;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -31,5 +35,11 @@ import lombok.EqualsAndHashCode;
 @AllArgsConstructor
 public class QubitDto {
 
-    // TODO
+    private UUID id;
+
+    private String name;
+
+    public static QubitDto createDTO(Qubit qubit) {
+        return new QubitDto(qubit.getDatabaseId(), qubit.getName());
+    }
 }

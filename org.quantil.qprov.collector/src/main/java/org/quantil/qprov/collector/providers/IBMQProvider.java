@@ -19,16 +19,21 @@
 
 package org.quantil.qprov.collector.providers;
 
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 import org.quantil.qprov.collector.IProvider;
 import org.quantil.qprov.core.model.agents.Provider;
 import org.quantil.qprov.core.model.agents.QPU;
+import org.quantil.qprov.core.model.entities.Qubit;
 import org.quantil.qprov.core.repositories.ProviderRepository;
 import org.quantil.qprov.core.repositories.QPURepository;
 import org.quantil.qprov.ibmq.client.ApiClient;
@@ -141,6 +146,7 @@ public class IBMQProvider implements IProvider {
      * @param device   the IBMQ device to store or update the QPu object for
      * @return the newly created or updated QPU object
      */
+    @SuppressWarnings("checkstyle:NestedForDepth")
     private QPU addQPUToDatabase(Provider provider, Device device) {
         final Optional<QPU> qpuOptional = qpuRepository.findByName(device.getBackendName());
         if (qpuOptional.isPresent()) {
@@ -153,13 +159,51 @@ public class IBMQProvider implements IProvider {
         }
 
         // create a new QPU object representing the retrieved device
-        final QPU qpu = new QPU();
+        QPU qpu = new QPU();
         qpu.setName(device.getBackendName());
         qpu.setProvider(provider);
         qpu.setVersion(device.getBackendVersion());
         qpu.setMaxShots(device.getMaxShots().intValue());
-        qpuRepository.save(qpu);
+        qpu.setSimulator(Objects.nonNull(device.getSimulator()) && device.getSimulator());
 
+        // add qubits
+        if (Objects.nonNull(device.getCouplingMap())) {
+            final Map<String, Qubit> qubits = new HashMap<>();
+            for (List<BigDecimal> coupling : device.getCouplingMap()) {
+                final List<Qubit> alreadyAdded = new ArrayList<>();
+                for (BigDecimal qubitId : coupling) {
+                    final String qubitName = qubitId.toString();
+
+                    // create new qubit if not already done
+                    Qubit qubit = qubits.get(qubitName);
+                    if (Objects.isNull(qubit)) {
+                        qubit = new Qubit();
+                        qubit.setQpu(qpu);
+                        qubit.setName(qubitName);
+
+                        qubits.put(qubitName, qubit);
+                    }
+
+                    // connect qubits within the coupling
+                    for (Qubit toConnect : alreadyAdded) {
+                        toConnect.getConnectedQubits().add(qubit);
+                        qubit.getConnectedQubits().add(toConnect);
+                    }
+                    alreadyAdded.add(qubit);
+                }
+            }
+            qpu.getQubits().addAll(qubits.values());
+        } else {
+            // for simulators and QPUs with one qubit no coupling map exists, therefore just add the qubits
+            for (int i = 0; i < device.getnQubits().intValue(); i++) {
+                final Qubit qubit = new Qubit();
+                qubit.setQpu(qpu);
+                qubit.setName(String.valueOf(i));
+                qpu.getQubits().add(qubit);
+            }
+        }
+
+        qpu = qpuRepository.save(qpu);
         return qpu;
     }
 
@@ -206,7 +250,6 @@ public class IBMQProvider implements IProvider {
                     qpuRepository.save(qpu);
 
                     logger.debug(device.toString());
-                    deviceProperties.getQubits();
 
                     // TODO: retrieve data about gates, qubits, ...
                 } catch (ApiException e) {

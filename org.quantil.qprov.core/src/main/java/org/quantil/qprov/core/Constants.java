@@ -107,6 +107,8 @@ public final class Constants {
 
     public static final String QPROV_TYPE_QPU_VERSION = "qpuVersion";
 
+    public static final String QPROV_TYPE_QPU_SIMULATOR = "isSimulator";
+
     private Constants() {
     }
 }

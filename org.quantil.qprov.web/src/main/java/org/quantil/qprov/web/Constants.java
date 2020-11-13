@@ -36,6 +36,8 @@ public final class Constants {
 
     public static final String PATH_QUBITS = "qubits";
 
+    public static final String PATH_QUBITS_CONNECTED = "connected-qubit-";
+
     private Constants() {
     }
 }

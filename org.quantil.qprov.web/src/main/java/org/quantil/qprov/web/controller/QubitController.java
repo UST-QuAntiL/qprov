@@ -19,18 +19,27 @@
 
 package org.quantil.qprov.web.controller;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.quantil.qprov.core.model.agents.Provider;
 import org.quantil.qprov.core.model.agents.QPU;
+import org.quantil.qprov.core.model.entities.Qubit;
 import org.quantil.qprov.core.repositories.ProviderRepository;
 import org.quantil.qprov.core.repositories.QPURepository;
+import org.quantil.qprov.core.repositories.QubitRepository;
 import org.quantil.qprov.web.Constants;
 import org.quantil.qprov.web.dtos.QubitDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -58,12 +67,65 @@ public class QubitController {
 
     private final QPURepository qpuRepository;
 
+    private final QubitRepository qubitRepository;
+
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "404", description = "Provider or QPU with the ID not available.")
     }, description = "Retrieve all Qubits of the QPU.")
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<QubitDto>>> getQubits(@PathVariable UUID providerId, @PathVariable UUID qpuId) {
+
+        // check availability of provider
+        final Optional<Provider> provider = providerRepository.findById(providerId);
+        if (provider.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // check availability of qpu
+        final Optional<QPU> qpuOptional = qpuRepository.findById(qpuId);
+        if (qpuOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        final List<EntityModel<QubitDto>> qubitEntities = new ArrayList<>();
+        final List<Link> qubitLinks = new ArrayList<>();
+
+        qubitRepository.findByQpu(qpuOptional.get()).forEach((Qubit qubit) -> {
+                    logger.debug("Found Qubit with name: {}", qubit.getName());
+                    final EntityModel<QubitDto> qpuDto = new EntityModel<QubitDto>(QubitDto.createDTO(qubit));
+                    qpuDto.add(linkTo(methodOn(QubitController.class).getQubit(providerId, qpuId, qubit.getDatabaseId()))
+                            .withSelfRel());
+                    for (Qubit connectedQubit : qubit.getConnectedQubits()) {
+                        qpuDto.add(linkTo(methodOn(QubitController.class).getQubit(providerId, qpuId, connectedQubit.getDatabaseId()))
+                                .withRel(Constants.PATH_QUBITS_CONNECTED + connectedQubit.getName()));
+                    }
+                    qubitEntities.add(qpuDto);
+                    qubitLinks.add(linkTo(methodOn(QubitController.class).getQubit(providerId, qpuId, qubit.getDatabaseId()))
+                            .withRel(qubit.getDatabaseId().toString()));
+                }
+        );
+
+        final var collectionModel = new CollectionModel<>(qubitEntities);
+        collectionModel.add(qubitLinks);
+        collectionModel.add(linkTo(methodOn(QubitController.class).getQubits(providerId, qpuId)).withSelfRel());
+        return ResponseEntity.ok(collectionModel);
+    }
+
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400", description = "Qubit belongs not to specified provider and QPU."),
+            @ApiResponse(responseCode = "404", description = "Not Found. Qubit with given ID doesn't exist.")
+    }, description = "Retrieve a specific Qubit and its basic properties.")
+    @GetMapping("/{qubitId}")
+    public ResponseEntity<EntityModel<QubitDto>> getQubit(
+            @PathVariable UUID providerId, @PathVariable UUID qpuId, @PathVariable UUID qubitId) {
+
+        // check availability of provider
+        final Optional<Provider> provider = providerRepository.findById(providerId);
+        if (provider.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
 
         // check availability of qpu
         final Optional<QPU> qpuOptional = qpuRepository.findById(qpuId);
