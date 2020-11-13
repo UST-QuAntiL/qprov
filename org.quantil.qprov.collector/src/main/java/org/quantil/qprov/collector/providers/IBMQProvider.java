@@ -382,7 +382,7 @@ public class IBMQProvider implements IProvider {
 
                 // create QPU in database if not already existing
                 logger.debug("Found QPU with name '{}'. Adding to database!", device.getBackendName());
-                QPU qpu = addQPUToDatabase(provider, device);
+                final QPU qpu = addQPUToDatabase(provider, device);
 
                 try {
                     logger.debug("Getting detailed information for the QPU...");
