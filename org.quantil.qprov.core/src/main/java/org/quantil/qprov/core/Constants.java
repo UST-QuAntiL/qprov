@@ -103,6 +103,10 @@ public final class Constants {
 
     public static final String QPROV_TYPE_QPU_QUEUE = "queueSize";
 
+    public static final String QPROV_TYPE_QPU_MAX_SHOTS = "maxShots";
+
+    public static final String QPROV_TYPE_QPU_VERSION = "qpuVersion";
+
     private Constants() {
     }
 }

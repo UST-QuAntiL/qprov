@@ -19,24 +19,27 @@
 
 package org.quantil.qprov.collector.providers;
 
-import java.util.ArrayList;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
-import org.modelmapper.ModelMapper;
 import org.quantil.qprov.collector.IProvider;
+import org.quantil.qprov.core.model.agents.Provider;
 import org.quantil.qprov.core.model.agents.QPU;
+import org.quantil.qprov.core.repositories.ProviderRepository;
+import org.quantil.qprov.core.repositories.QPURepository;
 import org.quantil.qprov.ibmq.client.ApiClient;
 import org.quantil.qprov.ibmq.client.ApiException;
 import org.quantil.qprov.ibmq.client.Configuration;
 import org.quantil.qprov.ibmq.client.api.GetBackendInformationApi;
-import org.quantil.qprov.ibmq.client.api.GetProvidersInformationApi;
 import org.quantil.qprov.ibmq.client.api.LoginApi;
 import org.quantil.qprov.ibmq.client.auth.ApiKeyAuth;
 import org.quantil.qprov.ibmq.client.model.AccessToken;
 import org.quantil.qprov.ibmq.client.model.ApiToken;
 import org.quantil.qprov.ibmq.client.model.Device;
 import org.quantil.qprov.ibmq.client.model.DeviceProperties;
-import org.quantil.qprov.ibmq.client.model.Hub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -47,6 +50,8 @@ public class IBMQProvider implements IProvider {
 
     public static final String PROVIDER_ID = "ibmq";
 
+    public static final String PROVIDER_URL = "https://quantum-computing.ibm.com/";
+
     public static final String IBMQ_DEFAULT_HUB = "ibm-q";
 
     public static final String IBMQ_DEFAULT_GROUP = "open";
@@ -55,52 +60,160 @@ public class IBMQProvider implements IProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(IBMQProvider.class);
 
-    private final String envApiToken;
+    private final ProviderRepository providerRepository;
+
+    private final QPURepository qpuRepository;
+
+    private final String ibmqToken;
 
     private ApiClient defaultClient;
 
-    public IBMQProvider(Environment env) {
-        this.envApiToken = env.getProperty("QPROV_IBMQ_TOKEN");
+    public IBMQProvider(ProviderRepository providerRepository, QPURepository qpuRepository, Environment env) {
+        this.providerRepository = providerRepository;
+        this.qpuRepository = qpuRepository;
+        this.ibmqToken = env.getProperty("QPROV_IBMQ_TOKEN");
+        this.defaultClient = Configuration.getDefaultApiClient();
+        this.defaultClient.setBasePath("https://api.quantum-computing.ibm.com/v2");
     }
 
-    public boolean authenticate(String token) {
+    /**
+     * Authenticate at IBMQ using the token provided through the environment variables
+     *
+     * @return <code>true</code> if authentication is successful, <code>false</code> otherwise
+     */
+    private boolean authenticate() {
 
-        final String userApiToken;
-
-        // search for the token...
-        if (envApiToken != null) {
-            userApiToken = envApiToken;
-        } else if (!token.isEmpty()) {
-            userApiToken = token;
-        } else {
+        // abort authentication if token is not provided
+        if (Objects.isNull(ibmqToken)) {
+            logger.error("No api token provided!");
             return false;
         }
 
-        // get base client for ibmq api
-        this.defaultClient = Configuration.getDefaultApiClient();
-        this.defaultClient.setBasePath("https://api.quantum-computing.ibm.com/v2");
-
-        // authenticate
-        logger.info("IBMQProvider() try to get an accessToken via supplied apiToken: {}", userApiToken);
         final ApiToken apiToken = new ApiToken();
-        apiToken.setApiToken(userApiToken);
+        apiToken.setApiToken(ibmqToken);
 
         try {
             // get a short-lived access token with the api token
+            logger.debug("IBMQProvider try to get an accessToken via supplied apiToken!");
             final AccessToken accessToken = new LoginApi(this.defaultClient).loginLoginWithApiToken(apiToken);
-
-            logger.info("IBMQProvider() successfully got an accessToken: {}", accessToken);
+            logger.debug("IBMQProvider successfully got an accessToken!");
 
             // configure "API Token" authorization with obtained accessToken
             final ApiKeyAuth apiKeyAuth = (ApiKeyAuth) this.defaultClient.getAuthentication("API Token");
             apiKeyAuth.setApiKey(accessToken.getId());
-
             return true;
         } catch (ApiException e) {
-            e.printStackTrace();
+            logger.error("Error while authenticating at IBMQ: {}", e.getLocalizedMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Check if IBMQ provider already exists in the database and return it or otherwise create it
+     *
+     * @return the retrieved or created IBMQ provider object
+     */
+    private Provider addProviderToDatabase() {
+        final Optional<Provider> providerOptional = providerRepository.findByName(PROVIDER_ID);
+        if (providerOptional.isPresent()) {
+            logger.debug("Provider already present, skipping creation.");
+            return providerOptional.get();
         }
 
-        return false;
+        // create a new Provider object representing the IBMQ provider that is handled by this collector
+        final Provider provider = new Provider();
+        provider.setName(PROVIDER_ID);
+        try {
+            provider.setOfferingURL(new URL(PROVIDER_URL));
+        } catch (MalformedURLException e) {
+            logger.error("Unable to add provider URL due to MalformedURLException!");
+        }
+        providerRepository.save(provider);
+
+        return provider;
+    }
+
+    /**
+     * Add the given device as a QPU to the database or update the information of the already stored QPU object
+     *
+     * @param provider the provider the QPU belongs to
+     * @param device   the IBMQ device to store or update the QPu object for
+     * @return the newly created or updated QPU object
+     */
+    private QPU addQPUToDatabase(Provider provider, Device device) {
+        final Optional<QPU> qpuOptional = qpuRepository.findByName(device.getBackendName());
+        if (qpuOptional.isPresent()) {
+            logger.debug("QPU already present, updating information.");
+            QPU qpu = qpuOptional.get();
+            qpu.setVersion(device.getBackendVersion());
+            qpu.setMaxShots(device.getMaxShots().intValue());
+            qpu = qpuRepository.save(qpu);
+            return qpu;
+        }
+
+        // create a new QPU object representing the retrieved device
+        final QPU qpu = new QPU();
+        qpu.setName(device.getBackendName());
+        qpu.setProvider(provider);
+        qpu.setVersion(device.getBackendVersion());
+        qpu.setMaxShots(device.getMaxShots().intValue());
+        qpuRepository.save(qpu);
+
+        return qpu;
+    }
+
+    /**
+     * TODO
+     *
+     * @param provider
+     * @return
+     */
+    private boolean collectQPUs(Provider provider) {
+
+        try {
+            // get all available QPUs
+            final GetBackendInformationApi backendInformationApi = new GetBackendInformationApi(defaultClient);
+            final List<Device> devices = backendInformationApi
+                    .getBackendInformationGetProjectDevicesWithVersion(IBMQ_DEFAULT_HUB, IBMQ_DEFAULT_GROUP, IBMQ_DEFAULT_PROJECT);
+
+            // get details for each retrieved QPU
+            boolean status = true;
+            for (Device device : devices) {
+
+                // create QPU in database if not already existing
+                logger.debug("Found QPU with name '{}'. Adding to database!", device.getBackendName());
+                final QPU qpu = addQPUToDatabase(provider, device);
+
+                try {
+                    logger.debug("Getting detailed information for the QPU...");
+                    final DeviceProperties deviceProperties = backendInformationApi
+                            .getBackendInformationGetDeviceProperties(IBMQ_DEFAULT_HUB, IBMQ_DEFAULT_GROUP, IBMQ_DEFAULT_PROJECT,
+                                    device.getBackendName(), null, null);
+
+                    logger.debug(device.toString());
+
+                    // TODO
+                    /*if (deviceProperties.getBackendName() != null) {
+
+                        final ModelMapper modelMapper = new ModelMapper();
+
+                        final QPU qpu = modelMapper.map(device, QPU.class);
+                        // TODO: parse into new model
+                        qpus.add(qpu);
+                    }*/
+                } catch (ApiException e) {
+                    logger.error("Exception while getting details about QPU with name '{}': {}", device.getBackendName(),
+                            e.getLocalizedMessage());
+                    status = false;
+                }
+            }
+
+            return status;
+        } catch (ApiException e) {
+            logger.error("Exception while retrieving all available QPUs: {}",
+                    e.getLocalizedMessage());
+            return false;
+        }
     }
 
     @Override
@@ -109,75 +222,20 @@ public class IBMQProvider implements IProvider {
     }
 
     @Override
-    public boolean preAuthenticationNeeded() {
-        return true;
-    }
-
-    @Override
     public boolean collect() {
-        final List<Hub> hubs = collectHubs();
-        hubs.forEach((Hub hub) -> logger.info(hub.toString()));
+        logger.debug("Collection by IBMQProvider started...");
 
-        final List<QPU> qpus = collectQPUs();
-        qpus.forEach((QPU qpu) -> logger.info(qpu.toString()));
-
-        return true;
-    }
-
-    public List<Hub> collectHubs() {
-        try {
-            final GetProvidersInformationApi providersInformationApi = new GetProvidersInformationApi(this.defaultClient);
-            return providersInformationApi.getProvidersInformationAllHubsAsCollaborator();
-        } catch (ApiException e) {
-            System.err.println("Exception when calling GetProvidersInformationApi#getProvidersInformationAllHubsAsCollaborator");
-            System.err.println("Status code: " + e.getCode());
-            System.err.println("Reason: " + e.getResponseBody());
-            System.err.println("Response headers: " + e.getResponseHeaders());
-            e.printStackTrace();
+        if (!authenticate()) {
+            logger.warn("Authentication failed. Aborting retrieval from IBMQProvider. Please check the provided access token!");
+            return false;
         }
-        return new ArrayList<>();
-    }
+        logger.debug("Successfully authenticated. Starting retrieval of QPUs...");
 
-    public List<QPU> collectQPUs() {
-        final List<Device> devices;
-        final List<QPU> qpus = new ArrayList<>();
+        // add the IBMQ provider as object to the database if it was not created in a previous collection and otherwise retrieve it
+        final Provider ibmqProvider = addProviderToDatabase();
 
-        try {
-            final GetBackendInformationApi backendInformationApi = new GetBackendInformationApi(defaultClient);
-            devices = backendInformationApi
-                    .getBackendInformationGetProjectDevicesWithVersion(IBMQ_DEFAULT_HUB, IBMQ_DEFAULT_GROUP, IBMQ_DEFAULT_PROJECT);
-
-            devices.forEach((Device device) -> {
-
-                try {
-                    final DeviceProperties deviceProperties = backendInformationApi
-                            .getBackendInformationGetDeviceProperties(IBMQ_DEFAULT_HUB, IBMQ_DEFAULT_GROUP, IBMQ_DEFAULT_PROJECT,
-                                    device.getBackendName(), null, null);
-
-                    if (deviceProperties.getBackendName() != null) {
-
-                        final ModelMapper modelMapper = new ModelMapper();
-
-                        final QPU qpu = modelMapper.map(device, QPU.class);
-                        // TODO: parse into new model
-                        qpus.add(qpu);
-                    }
-                } catch (ApiException e) {
-                    System.err.println("Exception when calling GetBackendInformationApi#getBackendInformationGetProjectDevicesWithVersion");
-                    System.err.println("Status code: " + e.getCode());
-                    System.err.println("Reason: " + e.getResponseBody());
-                    System.err.println("Response headers: " + e.getResponseHeaders());
-                    e.printStackTrace();
-                }
-            });
-        } catch (ApiException e) {
-            System.err.println("Exception when calling GetBackendInformationApi#getBackendInformationGetProjectDevicesWithVersion");
-            System.err.println("Status code: " + e.getCode());
-            System.err.println("Reason: " + e.getResponseBody());
-            System.err.println("Response headers: " + e.getResponseHeaders());
-            e.printStackTrace();
-        }
-
-        return qpus;
+        final boolean qpuRetrievalSuccess = collectQPUs(ibmqProvider);
+        logger.debug("Retrieval of QPUs returned success: {}", qpuRetrievalSuccess);
+        return qpuRetrievalSuccess;
     }
 }

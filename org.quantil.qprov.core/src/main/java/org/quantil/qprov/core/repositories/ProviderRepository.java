@@ -19,6 +19,7 @@
 
 package org.quantil.qprov.core.repositories;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.quantil.qprov.core.model.agents.Provider;
@@ -29,4 +30,6 @@ import org.springframework.stereotype.Repository;
 @RepositoryRestResource(exported = false)
 @Repository
 public interface ProviderRepository extends JpaRepository<Provider, UUID> {
+
+    Optional<Provider> findByName(String name);
 }

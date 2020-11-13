@@ -19,8 +19,11 @@
 
 package org.quantil.qprov.core.repositories;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import org.quantil.qprov.core.model.agents.Provider;
 import org.quantil.qprov.core.model.agents.QPU;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
@@ -29,4 +32,8 @@ import org.springframework.stereotype.Repository;
 @RepositoryRestResource(exported = false)
 @Repository
 public interface QPURepository extends JpaRepository<QPU, UUID> {
+
+    Optional<QPU> findByName(String name);
+
+    List<QPU> findByProvider(Provider provider);
 }

@@ -17,14 +17,40 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.collector;
+package org.quantil.qprov.web.dtos;
 
+import java.util.Date;
+
+import org.quantil.qprov.core.model.agents.QPU;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+/**
+ * Data transfer object for QPUs ({@link org.quantil.qprov.core.model.agents.QPU}).
+ */
+@EqualsAndHashCode
 @Data
-public class ProviderCredentials {
+@AllArgsConstructor
+public class QpuDto {
 
-    private String provider;
+    private String name;
 
-    private String token;
+    private String version;
+
+    private Date lastUpdated;
+
+    private Date lastCalibrated;
+
+    private int maxShots;
+
+    private int queueSize;
+
+    private int numberOfQubits;
+
+    public static QpuDto createDTO(QPU qpu) {
+        return new QpuDto(qpu.getName(), qpu.getVersion(), qpu.getLastUpdated(), qpu.getLastCalibrated(), qpu.getMaxShots(), qpu.getQueueSize(),
+                qpu.getQubits().size());
+    }
 }

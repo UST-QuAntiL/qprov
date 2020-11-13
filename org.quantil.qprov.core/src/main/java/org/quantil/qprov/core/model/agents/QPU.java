@@ -62,9 +62,13 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
 
     private String name;
 
+    private String version;
+
     private Date lastUpdated;
 
     private Date lastCalibrated;
+
+    private int maxShots;
 
     private int queueSize;
 
@@ -108,6 +112,12 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
         agent.getOther().add(Utils
                 .createOtherElement(Constants.QPROV_TYPE_QPU_QUEUE, String.valueOf(queueSize),
                         Constants.QPROV_TYPE_QPU_QUEUE + Constants.QPROV_TYPE_SUFFIX));
+        agent.getOther().add(Utils
+                .createOtherElement(Constants.QPROV_TYPE_QPU_MAX_SHOTS, String.valueOf(maxShots),
+                        Constants.QPROV_TYPE_QPU_MAX_SHOTS + Constants.QPROV_TYPE_SUFFIX));
+        agent.getOther().add(Utils
+                .createOtherElement(Constants.QPROV_TYPE_QPU_VERSION, version,
+                        Constants.QPROV_TYPE_QPU_VERSION + Constants.QPROV_TYPE_SUFFIX));
 
         // add data about contained qubits
         final Set<Statement> statements = qubits.stream().flatMap(qubit -> qubit.toStandardCompliantProv(qubit).stream()).collect(Collectors.toSet());

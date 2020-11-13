@@ -32,6 +32,8 @@ public final class Constants {
     /**** API paths ****/
     public static final String PATH_PROVIDERS = "providers";
 
+    public static final String PATH_QPUS = "qpus";
+
     private Constants() {
     }
 }

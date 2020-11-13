@@ -19,39 +19,19 @@
 
 package org.quantil.qprov.collector;
 
-import java.util.List;
-
-import org.quantil.qprov.core.model.agents.QPU;
-
 public interface IProvider {
 
+    /**
+     * Get the unique ID of the provider
+     *
+     * @return the provider ID
+     */
     String getProviderId();
 
     /**
-     * check if we need to authenticate before the first query
-     *
-     * @return true or false
-     */
-    boolean preAuthenticationNeeded();
-
-    /**
-     * authenticate to provider api
-     *
-     * @return boolean result of authentication attempt
-     */
-    boolean authenticate(String token);
-
-    /**
-     * fetch all data from provider
+     * Fetch all data from provider
      *
      * @return boolean result of fetch attempt
      */
     boolean collect();
-
-    /**
-     * fetch qpu data from provider
-     *
-     * @return list of collected qpus
-     */
-    List<QPU> collectQPUs();
 }

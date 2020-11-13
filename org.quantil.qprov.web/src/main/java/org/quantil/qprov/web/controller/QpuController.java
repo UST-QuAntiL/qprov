@@ -28,9 +28,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.quantil.qprov.core.model.agents.Provider;
+import org.quantil.qprov.core.model.agents.QPU;
 import org.quantil.qprov.core.repositories.ProviderRepository;
+import org.quantil.qprov.core.repositories.QPURepository;
 import org.quantil.qprov.web.Constants;
 import org.quantil.qprov.web.dtos.ProviderDto;
+import org.quantil.qprov.web.dtos.QpuDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.CollectionModel;
@@ -49,63 +52,61 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Controller to access the quantum hardware providers and the corresponding QPUs that were collected as provenance data
- */
 @io.swagger.v3.oas.annotations.tags.Tag(name = Constants.TAG_PROVIDER)
 @RestController
 @CrossOrigin(allowedHeaders = "*", origins = "*")
-@RequestMapping("/" + Constants.PATH_PROVIDERS)
+@RequestMapping("/" + Constants.PATH_PROVIDERS + "/" + "/{providerId}/" + Constants.PATH_QPUS)
 @AllArgsConstructor
 @Slf4j
-public class ProviderController {
+public class QpuController {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderController.class);
 
     private final ProviderRepository providerRepository;
 
-    @Operation(responses = {
-            @ApiResponse(responseCode = "200")
-    }, description = "Retrieve all quantum hardware providers.")
-    @GetMapping
-    public ResponseEntity<CollectionModel<EntityModel<ProviderDto>>> getProviders() {
-        final List<EntityModel<ProviderDto>> providerEntities = new ArrayList<>();
-
-        final List<Link> providerLinks = new ArrayList<>();
-        providerRepository.findAll().forEach((Provider provider) -> {
-                    logger.debug("Found provider with name: {}", provider.getName());
-                    final EntityModel<ProviderDto> providerDto = new EntityModel<ProviderDto>(ProviderDto.createDTO(provider));
-                    providerDto.add(linkTo(methodOn(ProviderController.class).getProvider(provider.getDatabaseId()))
-                            .withSelfRel());
-                    providerDto.add(linkTo(methodOn(QpuController.class).getQPUs(provider.getDatabaseId())).withRel(Constants.PATH_QPUS));
-                    providerLinks.add(linkTo(methodOn(ProviderController.class).getProvider(provider.getDatabaseId()))
-                            .withRel(provider.getDatabaseId().toString()));
-                    providerEntities.add(providerDto);
-                }
-        );
-
-        final var collectionModel = new CollectionModel<>(providerEntities);
-        collectionModel.add(providerLinks);
-        collectionModel.add(linkTo(methodOn(ProviderController.class).getProviders()).withSelfRel());
-        return ResponseEntity.ok(collectionModel);
-    }
+    private final QPURepository qpuRepository;
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "404", description = "Not Found. Provider with given ID doesn't exist.")
-    }, description = "Retrieve a specific provider and its basic properties.")
-    @GetMapping("/{providerId}")
-    public ResponseEntity<EntityModel<ProviderDto>> getProvider(
-            @PathVariable UUID providerId) {
+            @ApiResponse(responseCode = "404", description = "Provider with the ID not available.")
+    }, description = "Retrieve all QPUs of the provider.")
+    @GetMapping
+    public ResponseEntity<CollectionModel<EntityModel<QpuDto>>> getQPUs(@PathVariable UUID providerId) {
 
+        // check availability of provider
         final Optional<Provider> provider = providerRepository.findById(providerId);
         if (provider.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        final EntityModel<ProviderDto> providerDto = new EntityModel<ProviderDto>(ProviderDto.createDTO(provider.get()));
-        providerDto.add(linkTo(methodOn(ProviderController.class).getProvider(providerId)).withSelfRel());
-        providerDto.add(linkTo(methodOn(QpuController.class).getQPUs(providerId)).withRel(Constants.PATH_QPUS));
-        return ResponseEntity.ok(providerDto);
+        final List<EntityModel<QpuDto>> qpuEntities = new ArrayList<>();
+
+        final List<Link> qpuLinks = new ArrayList<>();
+        qpuRepository.findByProvider(provider.get()).forEach((QPU qpu) -> {
+                    logger.debug("Found QPU with name: {}", qpu.getName());
+                    final EntityModel<QpuDto> qpuDto = new EntityModel<QpuDto>(QpuDto.createDTO(qpu));
+                    qpuDto.add(linkTo(methodOn(QpuController.class).getQPU(providerId, qpu.getDatabaseId()))
+                            .withSelfRel());
+                    qpuLinks.add(linkTo(methodOn(QpuController.class).getQPU(providerId, qpu.getDatabaseId()))
+                            .withRel(qpu.getDatabaseId().toString()));
+                    qpuEntities.add(qpuDto);
+                }
+        );
+
+        final var collectionModel = new CollectionModel<>(qpuEntities);
+        collectionModel.add(qpuLinks);
+        collectionModel.add(linkTo(methodOn(QpuController.class).getQPUs(providerId)).withSelfRel());
+        return ResponseEntity.ok(collectionModel);
+    }
+
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "404", description = "Not Found. QPU with given ID doesn't exist.")
+    }, description = "Retrieve a specific QPU and its basic properties.")
+    @GetMapping("/{qpuId}")
+    public ResponseEntity<EntityModel<ProviderDto>> getQPU(
+            @PathVariable UUID providerId, @PathVariable UUID qpuId) {
+        // TODO
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 }
