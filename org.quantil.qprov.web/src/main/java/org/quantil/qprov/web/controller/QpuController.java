@@ -32,7 +32,6 @@ import org.quantil.qprov.core.model.agents.QPU;
 import org.quantil.qprov.core.repositories.ProviderRepository;
 import org.quantil.qprov.core.repositories.QPURepository;
 import org.quantil.qprov.web.Constants;
-import org.quantil.qprov.web.dtos.ProviderDto;
 import org.quantil.qprov.web.dtos.QpuDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,12 +54,12 @@ import lombok.extern.slf4j.Slf4j;
 @io.swagger.v3.oas.annotations.tags.Tag(name = Constants.TAG_PROVIDER)
 @RestController
 @CrossOrigin(allowedHeaders = "*", origins = "*")
-@RequestMapping("/" + Constants.PATH_PROVIDERS + "/" + "/{providerId}/" + Constants.PATH_QPUS)
+@RequestMapping("/" + Constants.PATH_PROVIDERS + "/{providerId}/" + Constants.PATH_QPUS)
 @AllArgsConstructor
 @Slf4j
 public class QpuController {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProviderController.class);
+    private static final Logger logger = LoggerFactory.getLogger(QpuController.class);
 
     private final ProviderRepository providerRepository;
 
@@ -87,6 +86,7 @@ public class QpuController {
                     final EntityModel<QpuDto> qpuDto = new EntityModel<QpuDto>(QpuDto.createDTO(qpu));
                     qpuDto.add(linkTo(methodOn(QpuController.class).getQPU(providerId, qpu.getDatabaseId()))
                             .withSelfRel());
+                    qpuDto.add(linkTo(methodOn(QubitController.class).getQubits(providerId, qpu.getDatabaseId())).withRel(Constants.PATH_QUBITS));
                     qpuLinks.add(linkTo(methodOn(QpuController.class).getQPU(providerId, qpu.getDatabaseId()))
                             .withRel(qpu.getDatabaseId().toString()));
                     qpuEntities.add(qpuDto);
@@ -101,12 +101,33 @@ public class QpuController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400", description = "QPU belongs not to specified provider."),
             @ApiResponse(responseCode = "404", description = "Not Found. QPU with given ID doesn't exist.")
     }, description = "Retrieve a specific QPU and its basic properties.")
     @GetMapping("/{qpuId}")
-    public ResponseEntity<EntityModel<ProviderDto>> getQPU(
+    public ResponseEntity<EntityModel<QpuDto>> getQPU(
             @PathVariable UUID providerId, @PathVariable UUID qpuId) {
-        // TODO
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+
+        // check availability of provider
+        final Optional<Provider> provider = providerRepository.findById(providerId);
+        if (provider.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // check availability of qpu
+        final Optional<QPU> qpuOptional = qpuRepository.findById(qpuId);
+        if (qpuOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        final QPU qpu = qpuOptional.get();
+        if (!qpu.getProvider().getDatabaseId().equals(providerId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        final EntityModel<QpuDto> qpuDto = new EntityModel<QpuDto>(QpuDto.createDTO(qpu));
+        qpuDto.add(linkTo(methodOn(QpuController.class).getQPU(providerId, qpu.getDatabaseId())).withSelfRel());
+        qpuDto.add(linkTo(methodOn(QubitController.class).getQubits(providerId, qpu.getDatabaseId())).withRel(Constants.PATH_QUBITS));
+        return ResponseEntity.ok(qpuDto);
     }
 }

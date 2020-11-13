@@ -21,6 +21,7 @@ package org.quantil.qprov.collector.providers;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -163,10 +164,10 @@ public class IBMQProvider implements IProvider {
     }
 
     /**
-     * TODO
+     * Collect the data about the QPUs from IBMQ and add or update existing database entries
      *
-     * @param provider
-     * @return
+     * @param provider the provider object to connect the QPU objects to
+     * @return <code>true</code> if collection of QPU data is successful, <code>false</code> otherwise
      */
     private boolean collectQPUs(Provider provider) {
 
@@ -186,21 +187,28 @@ public class IBMQProvider implements IProvider {
 
                 try {
                     logger.debug("Getting detailed information for the QPU...");
+
+                    // skip simulators in further analysis as they do not provide calibration data
+                    if (Objects.isNull(device.getSimulator()) || device.getSimulator()) {
+                        logger.debug("Device is simulator. Skipping data retrieval!");
+                        continue;
+                    }
+
+                    // retrieve details about qubits, gates, calibration, and queue size
                     final DeviceProperties deviceProperties = backendInformationApi
                             .getBackendInformationGetDeviceProperties(IBMQ_DEFAULT_HUB, IBMQ_DEFAULT_GROUP, IBMQ_DEFAULT_PROJECT,
                                     device.getBackendName(), null, null);
 
+                    // update QPU object with last calibration and update time
+                    final Date lastCalibrated = new Date(deviceProperties.getLastUpdateDate().toInstant().toEpochMilli());
+                    qpu.setLastCalibrated(lastCalibrated);
+                    qpu.setLastUpdated(new Date(System.currentTimeMillis()));
+                    qpuRepository.save(qpu);
+
                     logger.debug(device.toString());
+                    deviceProperties.getQubits();
 
-                    // TODO
-                    /*if (deviceProperties.getBackendName() != null) {
-
-                        final ModelMapper modelMapper = new ModelMapper();
-
-                        final QPU qpu = modelMapper.map(device, QPU.class);
-                        // TODO: parse into new model
-                        qpus.add(qpu);
-                    }*/
+                    // TODO: retrieve data about gates, qubits, ...
                 } catch (ApiException e) {
                     logger.error("Exception while getting details about QPU with name '{}': {}", device.getBackendName(),
                             e.getLocalizedMessage());

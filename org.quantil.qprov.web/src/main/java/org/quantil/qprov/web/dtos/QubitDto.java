@@ -17,25 +17,19 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.web;
+package org.quantil.qprov.web.dtos;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * Constants for the QProv Web module
+ * Data transfer object for Qubits ({@link org.quantil.qprov.core.model.entities.Qubit}).
  */
-public final class Constants {
+@EqualsAndHashCode
+@Data
+@AllArgsConstructor
+public class QubitDto {
 
-    /**** Swagger Tags ****/
-    public static final String TAG_ROOT = "root";
-
-    public static final String TAG_PROVIDER = "provider";
-
-    /**** API paths ****/
-    public static final String PATH_PROVIDERS = "providers";
-
-    public static final String PATH_QPUS = "qpus";
-
-    public static final String PATH_QUBITS = "qubits";
-
-    private Constants() {
-    }
+    // TODO
 }
