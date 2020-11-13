@@ -17,20 +17,31 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.core.repositories;
+package org.quantil.qprov.web.dtos;
 
-import java.util.List;
 import java.util.UUID;
 
-import org.quantil.qprov.core.model.agents.QPU;
 import org.quantil.qprov.core.model.entities.Gate;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.stereotype.Repository;
 
-@RepositoryRestResource(exported = false)
-@Repository
-public interface GateRepository extends JpaRepository<Gate, UUID> {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-    List<Gate> findByQpu(QPU qpu);
+/**
+ * Data transfer object for Gates ({@link org.quantil.qprov.core.model.entities.Gate}).
+ */
+@EqualsAndHashCode
+@Data
+@AllArgsConstructor
+public class GateDto {
+
+    private UUID id;
+
+    private String name;
+
+    private boolean multiQubitGate;
+
+    public static GateDto createDTO(Gate gate) {
+        return new GateDto(gate.getDatabaseId(), gate.getName(), gate.getOperatingQubits().size() > 1);
+    }
 }

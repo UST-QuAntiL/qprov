@@ -217,6 +217,11 @@
             <artifactId>okhttp</artifactId>
             <version>4.9.0</version>
         </dependency>
+        <dependency>
+            <groupId>io.gsonfire</groupId>
+            <artifactId>gson-fire</artifactId>
+            <version>1.8.4</version>
+        </dependency>
 
         <!-- QProv -->
         <dependency>
