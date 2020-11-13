@@ -132,7 +132,11 @@ public class GateController {
     private EntityModel<GateDto> createGateDto(UUID providerId, UUID qpuId, UUID qubitId, Gate gate) {
         final EntityModel<GateDto> gateDto = new EntityModel<GateDto>(GateDto.createDTO(gate));
         gateDto.add(linkTo(methodOn(GateController.class).getGate(providerId, qpuId, qubitId, gate.getDatabaseId())).withSelfRel());
-        // TODO: add further links
+        for (Qubit qubit : gate.getOperatingQubits()) {
+            gateDto.add(linkTo(methodOn(QubitController.class).getQubit(providerId, qpuId, qubit.getDatabaseId()))
+                    .withRel(Constants.PATH_QUBITS_OPERATING + qubit.getDatabaseId()));
+        }
+        // TODO: add further links to characteristics
         return gateDto;
     }
 }

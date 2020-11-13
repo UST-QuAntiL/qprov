@@ -19,9 +19,12 @@
 
 package org.quantil.qprov.web.dtos;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.quantil.qprov.core.model.entities.Gate;
+import org.quantil.qprov.core.model.entities.Qubit;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -41,7 +44,10 @@ public class GateDto {
 
     private boolean multiQubitGate;
 
+    private List<UUID> operatingQubits;
+
     public static GateDto createDTO(Gate gate) {
-        return new GateDto(gate.getDatabaseId(), gate.getName(), gate.getOperatingQubits().size() > 1);
+        return new GateDto(gate.getDatabaseId(), gate.getName(), gate.getOperatingQubits().size() > 1,
+                gate.getOperatingQubits().stream().map(Qubit::getDatabaseId).collect(Collectors.toList()));
     }
 }

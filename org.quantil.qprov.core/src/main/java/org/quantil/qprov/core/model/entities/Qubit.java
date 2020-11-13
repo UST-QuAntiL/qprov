@@ -42,6 +42,7 @@ import org.quantil.qprov.core.model.agents.QPU;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -95,5 +96,21 @@ public class Qubit extends org.openprovenance.prov.xml.Entity implements ProvExt
         // TODO: sort QubitCharactertistics using calibration date and use latest version for the PROV graph
         // TODO: add gates for the qubits
         return null;
+    }
+
+    public void addSupportedGate(@NonNull Gate gate) {
+        if (supportedGates.contains(gate)) {
+            return;
+        }
+        supportedGates.add(gate);
+        gate.addOperatingQubit(this);
+    }
+
+    public void removeSupportedGate(@NonNull Gate gate) {
+        if (!supportedGates.contains(gate)) {
+            return;
+        }
+        supportedGates.remove(gate);
+        gate.removeOperatingQubit(this);
     }
 }

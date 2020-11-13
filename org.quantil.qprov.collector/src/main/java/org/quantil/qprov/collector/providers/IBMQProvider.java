@@ -26,16 +26,21 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.quantil.qprov.collector.IProvider;
 import org.quantil.qprov.core.model.agents.Provider;
 import org.quantil.qprov.core.model.agents.QPU;
+import org.quantil.qprov.core.model.entities.Gate;
 import org.quantil.qprov.core.model.entities.Qubit;
 import org.quantil.qprov.core.model.entities.QubitCharacteristics;
+import org.quantil.qprov.core.repositories.GateRepository;
 import org.quantil.qprov.core.repositories.ProviderRepository;
 import org.quantil.qprov.core.repositories.QPURepository;
 import org.quantil.qprov.core.repositories.QubitCharacteristicsRepository;
@@ -78,17 +83,21 @@ public class IBMQProvider implements IProvider {
 
     private final QubitCharacteristicsRepository qubitCharacteristicsRepository;
 
+    private final GateRepository gateRepository;
+
     private final String ibmqToken;
 
     private ApiClient defaultClient;
 
     public IBMQProvider(ProviderRepository providerRepository, QPURepository qpuRepository,
                         QubitRepository qubitRepository,
-                        QubitCharacteristicsRepository qubitCharacteristicsRepository, Environment env) {
+                        QubitCharacteristicsRepository qubitCharacteristicsRepository,
+                        GateRepository gateRepository, Environment env) {
         this.providerRepository = providerRepository;
         this.qpuRepository = qpuRepository;
         this.qubitRepository = qubitRepository;
         this.qubitCharacteristicsRepository = qubitCharacteristicsRepository;
+        this.gateRepository = gateRepository;
         this.ibmqToken = env.getProperty("QPROV_IBMQ_TOKEN");
         this.defaultClient = Configuration.getDefaultApiClient();
         this.defaultClient.setBasePath("https://api.quantum-computing.ibm.com/v2");
@@ -176,10 +185,11 @@ public class IBMQProvider implements IProvider {
         qpu.setVersion(device.getBackendVersion());
         qpu.setMaxShots(device.getMaxShots().intValue());
         qpu.setSimulator(Objects.nonNull(device.getSimulator()) && device.getSimulator());
+        qpu = qpuRepository.save(qpu);
 
         // add qubits
+        final Map<String, Qubit> qubits = new HashMap<>();
         if (Objects.nonNull(device.getCouplingMap())) {
-            final Map<String, Qubit> qubits = new HashMap<>();
             for (List<BigDecimal> coupling : device.getCouplingMap()) {
                 final List<Qubit> alreadyAdded = new ArrayList<>();
                 for (BigDecimal qubitId : coupling) {
@@ -191,6 +201,7 @@ public class IBMQProvider implements IProvider {
                         qubit = new Qubit();
                         qubit.setQpu(qpu);
                         qubit.setName(qubitName);
+                        qubit = qubitRepository.save(qubit);
 
                         qubits.put(qubitName, qubit);
                     }
@@ -211,11 +222,53 @@ public class IBMQProvider implements IProvider {
                 qubit.setQpu(qpu);
                 qubit.setName(String.valueOf(i));
                 qpu.getQubits().add(qubit);
+
+                qubits.put(qubit.getName(), qubit);
+            }
+        }
+
+        // add gates to the qubits on which they can be executed
+        if (Objects.nonNull(device.getSimulator()) && !device.getSimulator() && Objects.nonNull(device.getGates())) {
+            for (org.quantil.qprov.ibmq.client.model.Gate ibmGate : device.getGates()) {
+                addGateFromDevice(ibmGate, qpu, qubits);
             }
         }
 
         qpu = qpuRepository.save(qpu);
         return qpu;
+    }
+
+    /**
+     * Add the gate of the device to the corresponding qubits
+     *
+     * @param ibmGate the gate to add to the different qubits that can execute it
+     * @param qpu     the qpu to which the qubits belong
+     * @param qubits  a mapping from qubit names to the corresponding qubit objects
+     */
+    private void addGateFromDevice(org.quantil.qprov.ibmq.client.model.Gate ibmGate, QPU qpu, Map<String, Qubit> qubits) {
+
+        // remove duplicates in coupling map
+        final List<List<BigDecimal>> distinctList =
+                ibmGate.getCouplingMap().stream().map(listToSort -> listToSort.stream().sorted().collect(Collectors.toList())).distinct()
+                        .collect(Collectors.toList());
+
+        // each gate is instantiated for each coupling map, as the gate on different qubits has different characteristics
+        for (List<BigDecimal> coupling : distinctList) {
+            final Gate gate = new Gate();
+            gate.setName(ibmGate.getName());
+            gate.setQpu(qpu);
+            gateRepository.save(gate);
+
+            // add gate to each qubit in the coupling if it operates on multiple qubits
+            final Set<Qubit> operatingQubits = new HashSet<>();
+            for (BigDecimal qubitId : coupling) {
+                final Qubit qubit = qubits.get(qubitId.toString());
+                qubit.getSupportedGates().add(gate);
+                operatingQubits.add(qubit);
+            }
+            gate.setOperatingQubits(operatingQubits);
+            gateRepository.save(gate);
+        }
     }
 
     /**
@@ -352,7 +405,7 @@ public class IBMQProvider implements IProvider {
                     qpuRepository.save(qpu);
 
                     // add new qubit characteristics if a new calibration was done since the last retrieval
-                    qpu = updateQubitCharacteristicsOfQPU(qpu, deviceProperties, lastCalibrated);
+                    updateQubitCharacteristicsOfQPU(qpu, deviceProperties, lastCalibrated);
 
                     // TODO: retrieve data about gates
                 } catch (ApiException e) {

@@ -40,6 +40,7 @@ import org.quantil.qprov.core.model.agents.QPU;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -80,5 +81,21 @@ public class Gate extends org.openprovenance.prov.xml.Entity implements ProvExte
     public Set<Statement> toStandardCompliantProv(Gate extensionStatement) {
         //TODO
         return null;
+    }
+
+    public void addOperatingQubit(@NonNull Qubit qubit) {
+        if (operatingQubits.contains(qubit)) {
+            return;
+        }
+        operatingQubits.add(qubit);
+        qubit.addSupportedGate(this);
+    }
+
+    public void removeOperatingQubit(@NonNull Qubit qubit) {
+        if (!operatingQubits.contains(qubit)) {
+            return;
+        }
+        operatingQubits.remove(qubit);
+        qubit.removeSupportedGate(this);
     }
 }
