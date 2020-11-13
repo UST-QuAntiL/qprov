@@ -21,6 +21,9 @@ package org.quantil.qprov.web.dtos;
 
 import java.net.URL;
 
+import org.quantil.qprov.core.model.agents.Provider;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -29,9 +32,14 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode
 @Data
+@AllArgsConstructor
 public class ProviderDto {
 
     private String name;
 
     private URL offeringURL;
+
+    public static ProviderDto createDTO(Provider provider) {
+        return new ProviderDto(provider.getName(), provider.getOfferingURL());
+    }
 }

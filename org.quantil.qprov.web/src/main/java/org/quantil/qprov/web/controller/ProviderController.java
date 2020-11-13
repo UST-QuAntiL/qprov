@@ -19,8 +19,13 @@
 
 package org.quantil.qprov.web.controller;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.quantil.qprov.core.model.agents.Provider;
 import org.quantil.qprov.core.repositories.ProviderRepository;
@@ -28,9 +33,11 @@ import org.quantil.qprov.web.Constants;
 import org.quantil.qprov.web.dtos.ProviderDto;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -60,8 +67,34 @@ public class ProviderController {
         final List<EntityModel<ProviderDto>> providerEntities = new ArrayList<>();
         final var collectionModel = new CollectionModel<>(providerEntities);
 
-        final List<Provider> providers = providerRepository.findAll();
-        //resource.add(getLinks().linkTo(methodOn(AlgorithmController.class).getAlgorithm(getId(resource))).withSelfRel());
+        providerRepository.findAll().forEach((Provider provider) -> {
+                    final EntityModel<ProviderDto> providerDto = new EntityModel<ProviderDto>(ProviderDto.createDTO(provider));
+                    providerDto.add(linkTo(methodOn(ProviderController.class).getProvider(provider.getDatabaseId()))
+                            .withRel(provider.getDatabaseId().toString()));
+                    providerEntities.add(providerDto);
+                }
+        );
+
+        collectionModel.add(linkTo(methodOn(ProviderController.class).getProviders()).withSelfRel());
         return ResponseEntity.ok(collectionModel);
+    }
+
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "404", description = "Not Found. Provider with given ID doesn't exist.")
+    }, description = "Retrieve a specific provider and its basic properties.")
+    @GetMapping("/{providerId}")
+    public ResponseEntity<EntityModel<ProviderDto>> getProvider(
+            @PathVariable UUID providerId) {
+
+        final Optional<Provider> provider = providerRepository.findById(providerId);
+        if (provider.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        final EntityModel<ProviderDto> providerDto = new EntityModel<ProviderDto>(ProviderDto.createDTO(provider.get()));
+        providerDto.add(linkTo(methodOn(ProviderController.class).getProvider(providerId)).withSelfRel());
+        // TODO: add links to QPUs
+        return ResponseEntity.ok(providerDto);
     }
 }
