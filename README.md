@@ -24,7 +24,7 @@ Alternatively you can build and run the QProv Docker images by your own:
     `docker build -t collector -f Dockerfile-Collector .`
 2. Build the QProv system:
     `docker build -t qprov -f Dockerfile-Web`
-3. Run the Docker containers: `docker run -p 8080:8080 qprov` and `docker run -p 8081:8080 qprov`
+3. Run the Docker containers: `docker run -p 8080:8080 qprov` and `docker run -p 8081:8080 collector`
 
 Then, the QProv system can be accessed on <http://localhost:8080/qprov>. 
 
