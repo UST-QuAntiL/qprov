@@ -19,6 +19,11 @@
       "name": "qprov.ibmq.auto-collect-interval",
       "type": "java.lang.Integer",
       "description": "The interval in minutes in which the provenance data is retrieved if qprov.ibmq.auto-collect is set to true."
+    },
+    {
+      "name": "qprov.ibmq.auto-collect-interval-circuits",
+      "type": "java.lang.Integer",
+      "description": "The interval in minutes in which quantum circuits are executed to retrieve provenance data. Only needed if qprov.ibmq.auto-collect and qprov.ibmq.execute-calibration are set to true."
     }
   ]
 }

@@ -39,6 +39,7 @@ logging:
 qprov:
   ibmq:
     token: "${QPROV_IBMQ_TOKEN:token}"
+    execute-calibration: ${QPROV_IBMQ_EXECUTE_CIRCUITS:false}
     auto-collect: ${QPROV_IBMQ_AUTO_COLLECT:false}
     auto-collect-interval: ${QPROV_IBMQ_AUTO_COLLECT_INTERVAL:60}
-    execute-calibration: ${QPROV_IBMQ_EXECUTE_CIRCUITS:false}
+    auto-collect-interval-circuits: ${QPROV_IBMQ_AUTO_COLLECT_INTERVAL_CIRCUITS:180}

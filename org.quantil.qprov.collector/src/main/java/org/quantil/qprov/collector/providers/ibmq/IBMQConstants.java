@@ -19,27 +19,15 @@
 
 package org.quantil.qprov.collector.providers.ibmq;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+public abstract class IBMQConstants {
 
-import lombok.AllArgsConstructor;
+    public static final String PROVIDER_ID = "ibmq";
 
-@AllArgsConstructor
-public class IBMQRunnable implements Runnable {
+    public static final String PROVIDER_URL = "https://quantum-computing.ibm.com/";
 
-    private static final Logger logger = LoggerFactory.getLogger(IBMQProvider.class);
+    public static final String IBMQ_DEFAULT_HUB = "ibm-q";
 
-    private IBMQProvider ibmqProvider;
+    public static final String IBMQ_DEFAULT_GROUP = "open";
 
-    @Override
-    public void run() {
-        logger.debug("Starting periodic collection from API...");
-        boolean result = false;
-        try {
-            result = ibmqProvider.collectFromApi();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        logger.debug("Finished periodic collection from API with result: {}", result);
-    }
+    public static final String IBMQ_DEFAULT_PROJECT = "main";
 }

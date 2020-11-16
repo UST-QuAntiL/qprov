@@ -17,19 +17,29 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.collector;
+package org.quantil.qprov.collector.providers.ibmq;
 
-/**
- * Constants for the QProv collector classes.
- */
-public abstract class Constants {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    public static final int DEFAULT_COLLECTION_STARTUP_TIME = 1;
+import lombok.AllArgsConstructor;
 
-    public static final int DEFAULT_COLLECTION_STARTUP_TIME_CIRCUITS = 2;
+@AllArgsConstructor
+public class IBMQRunnableCircuits implements Runnable {
 
-    private Constants() {
+    private static final Logger logger = LoggerFactory.getLogger(IBMQRunnableCircuits.class);
+
+    private IBMQProvider ibmqProvider;
+
+    @Override
+    public void run() {
+        logger.debug("Starting periodic collection by executing quantum circuits...");
+        boolean result = false;
+        try {
+            result = ibmqProvider.collectThroughCircuits();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        logger.debug("Finished periodic collection by executing quantum circuits with result: {}", result);
     }
 }
-
-

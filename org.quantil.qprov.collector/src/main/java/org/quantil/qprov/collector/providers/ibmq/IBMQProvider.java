@@ -71,16 +71,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class IBMQProvider implements IProvider {
 
-    public static final String PROVIDER_ID = "ibmq";
-
-    public static final String PROVIDER_URL = "https://quantum-computing.ibm.com/";
-
-    public static final String IBMQ_DEFAULT_HUB = "ibm-q";
-
-    public static final String IBMQ_DEFAULT_GROUP = "open";
-
-    public static final String IBMQ_DEFAULT_PROJECT = "main";
-
     private static final Logger logger = LoggerFactory.getLogger(IBMQProvider.class);
 
     private final ProviderRepository providerRepository;
@@ -95,6 +85,8 @@ public class IBMQProvider implements IProvider {
 
     private final GateRepository gateRepository;
 
+    private final IBMQCircuitExecutor ibmqCircuitExecutor;
+
     private final Boolean executeCalibrationCircuits;
 
     private ApiClient defaultClient;
@@ -107,9 +99,11 @@ public class IBMQProvider implements IProvider {
                         QubitCharacteristicsRepository qubitCharacteristicsRepository,
                         GateCharacteristicsRepository gateCharacteristicsRepository,
                         GateRepository gateRepository,
+                        IBMQCircuitExecutor ibmqCircuitExecutor,
                         @Value("${qprov.ibmq.execute-calibration}") Boolean executeCalibrationCircuits,
                         @Value("${qprov.ibmq.auto-collect}") Boolean autoCollect,
-                        @Value("${qprov.ibmq.auto-collect-interval}") Integer autoCollectInterval) {
+                        @Value("${qprov.ibmq.auto-collect-interval}") Integer autoCollectInterval,
+                        @Value("${qprov.ibmq.auto-collect-interval-circuits}") Integer autoCollectIntervalCircuits) {
         this.providerRepository = providerRepository;
         this.qpuRepository = qpuRepository;
         this.qubitRepository = qubitRepository;
@@ -117,16 +111,25 @@ public class IBMQProvider implements IProvider {
         this.gateCharacteristicsRepository = gateCharacteristicsRepository;
         this.gateRepository = gateRepository;
         this.executeCalibrationCircuits = executeCalibrationCircuits;
+        this.ibmqCircuitExecutor = ibmqCircuitExecutor;
 
         this.defaultClient = Configuration.getDefaultApiClient();
         this.defaultClient.setBasePath("https://api.quantum-computing.ibm.com/v2");
 
-        // periodicaly collect data if activated in properties/environment variables
+        // periodically collect data if activated in properties/environment variables
         if (autoCollect) {
             logger.debug("Auto collection activated with interval: {} min", autoCollectInterval);
-            final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-            scheduler.scheduleAtFixedRate(new IBMQRunnable(this),
+            final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+            scheduler.scheduleAtFixedRate(new IBMQRunnableApi(this),
                     Constants.DEFAULT_COLLECTION_STARTUP_TIME, autoCollectInterval, TimeUnit.MINUTES);
+
+            if (executeCalibrationCircuits) {
+                logger.debug("Auto collection by circuit execution activated with interval: {} min", autoCollectInterval);
+
+                // circuit execution is delayed as it relies on the set of identified QPUs from the API collection
+                scheduler.scheduleAtFixedRate(new IBMQRunnableCircuits(this),
+                        Constants.DEFAULT_COLLECTION_STARTUP_TIME_CIRCUITS, autoCollectIntervalCircuits, TimeUnit.MINUTES);
+            }
         }
     }
 
@@ -168,7 +171,7 @@ public class IBMQProvider implements IProvider {
      * @return the retrieved or created IBMQ provider object
      */
     private Provider addProviderToDatabase() {
-        final Optional<Provider> providerOptional = providerRepository.findByName(PROVIDER_ID);
+        final Optional<Provider> providerOptional = providerRepository.findByName(IBMQConstants.PROVIDER_ID);
         if (providerOptional.isPresent()) {
             logger.debug("Provider already present, skipping creation.");
             return providerOptional.get();
@@ -176,9 +179,9 @@ public class IBMQProvider implements IProvider {
 
         // create a new Provider object representing the IBMQ provider that is handled by this collector
         final Provider provider = new Provider();
-        provider.setName(PROVIDER_ID);
+        provider.setName(IBMQConstants.PROVIDER_ID);
         try {
-            provider.setOfferingURL(new URL(PROVIDER_URL));
+            provider.setOfferingURL(new URL(IBMQConstants.PROVIDER_URL));
         } catch (MalformedURLException e) {
             logger.error("Unable to add provider URL due to MalformedURLException!");
         }
@@ -447,7 +450,8 @@ public class IBMQProvider implements IProvider {
             // get all available QPUs
             final GetBackendInformationApi backendInformationApi = new GetBackendInformationApi(this.defaultClient);
             final List<Device> devices = backendInformationApi
-                    .getBackendInformationGetProjectDevicesWithVersion(IBMQ_DEFAULT_HUB, IBMQ_DEFAULT_GROUP, IBMQ_DEFAULT_PROJECT);
+                    .getBackendInformationGetProjectDevicesWithVersion(IBMQConstants.IBMQ_DEFAULT_HUB, IBMQConstants.IBMQ_DEFAULT_GROUP,
+                            IBMQConstants.IBMQ_DEFAULT_PROJECT);
 
             // get details for each retrieved QPU
             boolean status = true;
@@ -468,8 +472,8 @@ public class IBMQProvider implements IProvider {
 
                     // retrieve details about qubits, gates, calibration, and queue size
                     final DeviceProperties deviceProperties = backendInformationApi
-                            .getBackendInformationGetDeviceProperties(IBMQ_DEFAULT_HUB, IBMQ_DEFAULT_GROUP, IBMQ_DEFAULT_PROJECT,
-                                    device.getBackendName(), null, null);
+                            .getBackendInformationGetDeviceProperties(IBMQConstants.IBMQ_DEFAULT_HUB, IBMQConstants.IBMQ_DEFAULT_GROUP,
+                                    IBMQConstants.IBMQ_DEFAULT_PROJECT, device.getBackendName(), null, null);
 
                     // update QPU object with last calibration and update time
                     final Date lastCalibrated = new Date(deviceProperties.getLastUpdateDate().toInstant().toEpochMilli());
@@ -497,7 +501,7 @@ public class IBMQProvider implements IProvider {
 
     @Override
     public String getProviderId() {
-        return PROVIDER_ID;
+        return IBMQConstants.PROVIDER_ID;
     }
 
     @Override
@@ -526,7 +530,7 @@ public class IBMQProvider implements IProvider {
             return false;
         }
 
-        // TODO
-        return false;
+        logger.debug("Triggering execution of circuits to determine calibration data for QPUs from IBMQ!");
+        return ibmqCircuitExecutor.collectDataByCircuitExecutions();
     }
 }

@@ -7,6 +7,10 @@ FROM openjdk:16-jdk-alpine
 LABEL maintainer = "Benjamin Weder <benjamin.weder@iaas.uni-stuttgart.de>"
 
 ENV SERVER_PORT 8080
+ENV QPROV_IBMQ_EXECUTE_CIRCUITS false
+ENV QPROV_IBMQ_AUTO_COLLECT false
+ENV QPROV_IBMQ_AUTO_COLLECT_INTERVAL 60
+ENV QPROV_IBMQ_AUTO_COLLECT_INTERVAL_CIRCUITS 180
 
 COPY --from=builder /tmp/qprov/org.quantil.qprov.collector/target/org.quantil.qprov.collector.jar /app/
 
