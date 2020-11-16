@@ -17,23 +17,17 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.core.repositories;
+package org.quantil.qprov.collector;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+/**
+ * Constants for the QProv collector classes.
+ */
+public abstract class Constants {
 
-import org.quantil.qprov.core.model.agents.QPU;
-import org.quantil.qprov.core.model.entities.Qubit;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.stereotype.Repository;
+    public static final int DEFAULT_COLLECTION_STARTUP_TIME = 1;
 
-@RepositoryRestResource(exported = false)
-@Repository
-public interface QubitRepository extends JpaRepository<Qubit, UUID> {
-
-    List<Qubit> findByQpu(QPU qpu);
-
-    Optional<Qubit> findByQpuAndName(QPU qpu, String name);
+    private Constants() {
+    }
 }
+
+

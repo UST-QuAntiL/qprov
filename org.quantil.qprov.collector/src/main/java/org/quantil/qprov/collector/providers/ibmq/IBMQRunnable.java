@@ -17,23 +17,29 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.core.repositories;
+package org.quantil.qprov.collector.providers.ibmq;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.quantil.qprov.core.model.agents.QPU;
-import org.quantil.qprov.core.model.entities.Qubit;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.stereotype.Repository;
+import lombok.AllArgsConstructor;
 
-@RepositoryRestResource(exported = false)
-@Repository
-public interface QubitRepository extends JpaRepository<Qubit, UUID> {
+@AllArgsConstructor
+public class IBMQRunnable implements Runnable {
 
-    List<Qubit> findByQpu(QPU qpu);
+    private static final Logger logger = LoggerFactory.getLogger(IBMQProvider.class);
 
-    Optional<Qubit> findByQpuAndName(QPU qpu, String name);
+    private IBMQProvider ibmqProvider;
+
+    @Override
+    public void run() {
+        logger.debug("Starting periodic collection from API...");
+        boolean result = false;
+        try {
+            result = ibmqProvider.collectFromApi();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        logger.debug("Finished periodic collection from API with result: {}", result);
+    }
 }

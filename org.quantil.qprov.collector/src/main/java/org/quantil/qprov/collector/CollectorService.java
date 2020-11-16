@@ -55,7 +55,7 @@ public class CollectorService {
 
         this.availableProviders.forEach((IProvider provider) -> {
             logger.debug("Collecting provenance data for provider: {}", provider.getProviderId());
-            final boolean success = provider.collect();
+            final boolean success = provider.collectFromApi();
             logger.debug("Finished retrieval of data with success: {}", success);
         });
 

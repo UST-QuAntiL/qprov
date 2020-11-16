@@ -5,9 +5,12 @@ spring:
   jackson: {serialization: {WRITE_DATES_AS_TIMESTAMPS: false}}
   jpa:
     generate-ddl: true
-    hibernate: {ddl-auto: update}
+    hibernate: {ddl-auto: create-drop}
     show-sql: false
-    properties: {hibernate: {dialect: org.hibernate.dialect.PostgreSQLDialect}}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        enable_lazy_load_no_trans: true
   datasource:
     url: "jdbc:postgresql://${QPROV_DB_HOST:127.0.0.1}:${QPROV_DB_PORT:5432}/${QPROV_DB_DATABASE:qprov}"
     driver-class-name: org.postgresql.Driver
@@ -31,3 +34,11 @@ logging:
     springdoc: "${LOGGING_LEVEL_SPRINGDOC:debug}"
     springframework: "${LOGGING_LEVEL_SPRINGFRAMEWORK:debug}"
     web: "${LOGGING_LEVEL_WEB:debug}"
+
+# config
+qprov:
+  ibmq:
+    token: "${QPROV_IBMQ_TOKEN:token}"
+    auto-collect: ${QPROV_IBMQ_AUTO_COLLECT:false}
+    auto-collect-interval: ${QPROV_IBMQ_AUTO_COLLECT_INTERVAL:60}
+    execute-calibration: ${QPROV_IBMQ_EXECUTE_CIRCUITS:false}

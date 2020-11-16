@@ -1,8 +1,24 @@
 {
   "properties": [
     {
-      "name": "provider.ibmq.apiToken",
+      "name": "qprov.ibmq.token",
       "type": "java.lang.String",
-      "description": "Description for provider.ibmq.apiToken."
+      "description": "Token to enable access to IBMQ."
+    },
+    {
+      "name": "qprov.ibmq.execute-calibration",
+      "type": "java.lang.Boolean",
+      "description": "True if QProv should execute calibration circuits on IBMQ to determine required data, false otherwise. When set to false some functionality may not be available in the QProv API."
+    },
+    {
+      "name": "qprov.ibmq.auto-collect",
+      "type": "java.lang.Boolean",
+      "description": "True if QProv should automatically retrieve provenance data regularly from IBMQ, false if the collection should only be done when invoking the collector API."
+    },
+    {
+      "name": "qprov.ibmq.auto-collect-interval",
+      "type": "java.lang.Integer",
+      "description": "The interval in minutes in which the provenance data is retrieved if qprov.ibmq.auto-collect is set to true."
     }
-  ] }
+  ]
+}

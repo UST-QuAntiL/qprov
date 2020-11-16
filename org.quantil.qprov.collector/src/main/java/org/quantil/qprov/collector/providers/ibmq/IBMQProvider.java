@@ -17,7 +17,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.collector.providers;
+package org.quantil.qprov.collector.providers.ibmq;
 
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
@@ -32,8 +32,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import javax.transaction.Transactional;
 
+import org.quantil.qprov.collector.Constants;
 import org.quantil.qprov.collector.IProvider;
 import org.quantil.qprov.core.model.agents.Provider;
 import org.quantil.qprov.core.model.agents.QPU;
@@ -61,7 +66,7 @@ import org.quantil.qprov.ibmq.client.model.DevicePropsGate;
 import org.quantil.qprov.ibmq.client.model.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -91,24 +96,39 @@ public class IBMQProvider implements IProvider {
 
     private final GateRepository gateRepository;
 
-    private final String ibmqToken;
+    private final Boolean executeCalibrationCircuits;
 
     private ApiClient defaultClient;
+
+    @Value("${qprov.ibmq.token}")
+    private String ibmqToken;
 
     public IBMQProvider(ProviderRepository providerRepository, QPURepository qpuRepository,
                         QubitRepository qubitRepository,
                         QubitCharacteristicsRepository qubitCharacteristicsRepository,
                         GateCharacteristicsRepository gateCharacteristicsRepository,
-                        GateRepository gateRepository, Environment env) {
+                        GateRepository gateRepository,
+                        @Value("${qprov.ibmq.execute-calibration}") Boolean executeCalibrationCircuits,
+                        @Value("${qprov.ibmq.auto-collect}") Boolean autoCollect,
+                        @Value("${qprov.ibmq.auto-collect-interval}") Integer autoCollectInterval) {
         this.providerRepository = providerRepository;
         this.qpuRepository = qpuRepository;
         this.qubitRepository = qubitRepository;
         this.qubitCharacteristicsRepository = qubitCharacteristicsRepository;
         this.gateCharacteristicsRepository = gateCharacteristicsRepository;
         this.gateRepository = gateRepository;
-        this.ibmqToken = env.getProperty("QPROV_IBMQ_TOKEN");
+        this.executeCalibrationCircuits = executeCalibrationCircuits;
+
         this.defaultClient = Configuration.getDefaultApiClient();
         this.defaultClient.setBasePath("https://api.quantum-computing.ibm.com/v2");
+
+        // periodicaly collect data if activated in properties/environment variables
+        if (autoCollect) {
+            logger.debug("Auto collection activated with interval: {} min", autoCollectInterval);
+            final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+            scheduler.scheduleAtFixedRate(new IBMQRunnable(this),
+                    Constants.DEFAULT_COLLECTION_STARTUP_TIME, autoCollectInterval, TimeUnit.MINUTES);
+        }
     }
 
     /**
@@ -238,7 +258,7 @@ public class IBMQProvider implements IProvider {
         // add gates to the qubits on which they can be executed
         if (Objects.nonNull(device.getSimulator()) && !device.getSimulator() && Objects.nonNull(device.getGates())) {
             for (org.quantil.qprov.ibmq.client.model.Gate ibmGate : device.getGates()) {
-                addGateFromDevice(ibmGate, qpu, qubits);
+                addGateFromDevice(ibmGate, qpu);
             }
         }
 
@@ -251,9 +271,9 @@ public class IBMQProvider implements IProvider {
      *
      * @param ibmGate the gate to add to the different qubits that can execute it
      * @param qpu     the qpu to which the qubits belong
-     * @param qubits  a mapping from qubit names to the corresponding qubit objects
      */
-    private void addGateFromDevice(org.quantil.qprov.ibmq.client.model.Gate ibmGate, QPU qpu, Map<String, Qubit> qubits) {
+    @Transactional
+    public void addGateFromDevice(org.quantil.qprov.ibmq.client.model.Gate ibmGate, QPU qpu) {
 
         // remove duplicates in coupling map
         final List<List<BigDecimal>> distinctList =
@@ -262,17 +282,19 @@ public class IBMQProvider implements IProvider {
 
         // each gate is instantiated for each coupling map, as the gate on different qubits has different characteristics
         for (List<BigDecimal> coupling : distinctList) {
-            final Gate gate = new Gate();
+            Gate gate = new Gate();
             gate.setName(ibmGate.getName());
             gate.setQpu(qpu);
-            gateRepository.save(gate);
+            gate = gateRepository.save(gate);
 
             // add gate to each qubit in the coupling if it operates on multiple qubits
             final Set<Qubit> operatingQubits = new HashSet<>();
             for (BigDecimal qubitId : coupling) {
-                final Qubit qubit = qubits.get(qubitId.toString());
-                qubit.getSupportedGates().add(gate);
-                operatingQubits.add(qubit);
+                final Qubit qubit = qubitRepository.findByQpuAndName(qpu, qubitId.toString()).orElse(null);
+                if (Objects.nonNull(qubit)) {
+                    qubit.getSupportedGates().add(gate);
+                    operatingQubits.add(qubit);
+                }
             }
             gate.setOperatingQubits(operatingQubits);
             gateRepository.save(gate);
@@ -319,7 +341,7 @@ public class IBMQProvider implements IProvider {
         }
 
         // Sort list of qubits after their name. This has to be done as the API only provides qubit properties in the order of the qubit
-        // names (intergers) and does not provide a reference from the properties to the qubit
+        // names (integers) and does not provide a reference from the properties to the qubit
         final List<Qubit> sortedQubits = new ArrayList<>(qpu.getQubits());
         sortedQubits.sort(Comparator.comparing(a -> Integer.valueOf(a.getName())));
 
@@ -479,7 +501,7 @@ public class IBMQProvider implements IProvider {
 
         try {
             // get all available QPUs
-            final GetBackendInformationApi backendInformationApi = new GetBackendInformationApi(defaultClient);
+            final GetBackendInformationApi backendInformationApi = new GetBackendInformationApi(this.defaultClient);
             final List<Device> devices = backendInformationApi
                     .getBackendInformationGetProjectDevicesWithVersion(IBMQ_DEFAULT_HUB, IBMQ_DEFAULT_GROUP, IBMQ_DEFAULT_PROJECT);
 
@@ -489,7 +511,7 @@ public class IBMQProvider implements IProvider {
 
                 // create QPU in database if not already existing
                 logger.debug("Found QPU with name '{}'. Adding to database!", device.getBackendName());
-                final QPU qpu = addQPUToDatabase(provider, device);
+                QPU qpu = addQPUToDatabase(provider, device);
 
                 try {
                     logger.debug("Getting detailed information for the QPU...");
@@ -509,7 +531,7 @@ public class IBMQProvider implements IProvider {
                     final Date lastCalibrated = new Date(deviceProperties.getLastUpdateDate().toInstant().toEpochMilli());
                     qpu.setLastCalibrated(lastCalibrated);
                     qpu.setLastUpdated(new Date(System.currentTimeMillis()));
-                    qpuRepository.save(qpu);
+                    qpu = qpuRepository.save(qpu);
 
                     // add new qubit and gate characteristics if a new calibration was done since the last retrieval
                     updateQubitCharacteristicsOfQPU(qpu, deviceProperties, lastCalibrated);
@@ -535,7 +557,7 @@ public class IBMQProvider implements IProvider {
     }
 
     @Override
-    public boolean collect() {
+    public boolean collectFromApi() {
         logger.debug("Collection by IBMQProvider started...");
 
         if (!authenticate()) {
@@ -550,5 +572,17 @@ public class IBMQProvider implements IProvider {
         final boolean qpuRetrievalSuccess = collectQPUs(ibmqProvider);
         logger.debug("Retrieval of QPUs returned success: {}", qpuRetrievalSuccess);
         return qpuRetrievalSuccess;
+    }
+
+    @Override
+    public boolean collectThroughCircuits() {
+
+        if (!executeCalibrationCircuits) {
+            logger.warn("Execution of calibration circuits deactivated in the properties. Please activate for this functionality!");
+            return false;
+        }
+
+        // TODO
+        return false;
     }
 }

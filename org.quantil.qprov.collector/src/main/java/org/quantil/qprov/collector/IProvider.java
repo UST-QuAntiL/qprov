@@ -29,9 +29,16 @@ public interface IProvider {
     String getProviderId();
 
     /**
-     * Fetch all data from provider
+     * Fetch all data from provider APIs
      *
      * @return boolean result of fetch attempt
      */
-    boolean collect();
+    boolean collectFromApi();
+
+    /**
+     * Execute calibration circuits to get required data that is not available via the API, such as the calibration matrix
+     *
+     * @return boolean result of collection
+     */
+    boolean collectThroughCircuits();
 }
