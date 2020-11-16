@@ -17,57 +17,38 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.core.model.entities;
+package org.quantil.qprov.web.dtos;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.jetbrains.annotations.NotNull;
+import org.quantil.qprov.core.model.entities.GateCharacteristics;
+import org.quantil.qprov.core.model.entities.QubitCharacteristics;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 
 /**
- * Characteristics of a gate at a certain calibration time
+ * Data transfer object for qubit characteristics ({@link QubitCharacteristics}).
  */
 @EqualsAndHashCode
 @Data
-@Entity
-public class GateCharacteristics implements Comparable<GateCharacteristics> {
+@AllArgsConstructor
+public class GateCharacteristicsDto {
 
-    @Id
-    @Getter
-    @Setter
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "databaseId", updatable = false, nullable = false)
-    private UUID databaseId;
+    private UUID id;
 
     private Date calibrationTime;
 
-    @Column(precision = 20, scale = 15)
     private BigDecimal gateTime;
 
-    @Column(precision = 20, scale = 15)
     private BigDecimal gateFidelity;
 
-    @ManyToOne
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
-    private Gate gate;
-
-    @Override
-    public int compareTo(@NotNull GateCharacteristics o) {
-        return getCalibrationTime().compareTo(o.getCalibrationTime());
+    public static GateCharacteristicsDto createDTO(GateCharacteristics gateCharacteristics) {
+        return new GateCharacteristicsDto(gateCharacteristics.getDatabaseId(), gateCharacteristics.getCalibrationTime(),
+                gateCharacteristics.getGateTime(),
+                gateCharacteristics.getGateFidelity());
     }
 }

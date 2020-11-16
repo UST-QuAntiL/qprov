@@ -19,25 +19,27 @@
 
 package org.quantil.qprov.web.controller;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
+import javax.ws.rs.QueryParam;
 
+import org.quantil.qprov.core.model.agents.Provider;
 import org.quantil.qprov.core.model.agents.QPU;
 import org.quantil.qprov.core.model.entities.Gate;
+import org.quantil.qprov.core.model.entities.GateCharacteristics;
 import org.quantil.qprov.core.model.entities.Qubit;
+import org.quantil.qprov.core.repositories.GateCharacteristicsRepository;
 import org.quantil.qprov.core.repositories.GateRepository;
+import org.quantil.qprov.core.repositories.ProviderRepository;
 import org.quantil.qprov.core.repositories.QPURepository;
 import org.quantil.qprov.core.repositories.QubitRepository;
 import org.quantil.qprov.web.Constants;
-import org.quantil.qprov.web.dtos.GateDto;
+import org.quantil.qprov.web.dtos.GateCharacteristicsDto;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -55,10 +57,12 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @CrossOrigin(allowedHeaders = "*", origins = "*")
 @RequestMapping("/" + Constants.PATH_PROVIDERS + "/{providerId}/" + Constants.PATH_QPUS + "/{qpuId}/" + Constants.PATH_QUBITS + "/{qubitId}/" +
-        Constants.PATH_GATES)
+        Constants.PATH_GATES + "/{gateId}/" + Constants.PATH_CHARACTERISTICS)
 @AllArgsConstructor
 @Slf4j
-public class GateController {
+public class GateCharacteristicsController {
+
+    private final ProviderRepository providerRepository;
 
     private final QPURepository qpuRepository;
 
@@ -66,13 +70,25 @@ public class GateController {
 
     private final GateRepository gateRepository;
 
+    private final GateCharacteristicsRepository gateCharacteristicsRepository;
+
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "404", description = "Qubit or QPU not available.")
-    }, description = "Retrieve all Gates that can be executed on the Qubit.")
+            @ApiResponse(responseCode = "404", description = "No characteristics for this Gate available.")
+    }, description = "Retrieve the calibration characteristics from the given gate. " +
+            "By using the latest parameter only the latest data is retrieved, otherwise all available data.")
     @GetMapping
-    public ResponseEntity<CollectionModel<EntityModel<GateDto>>> getGates(@PathVariable UUID providerId, @PathVariable UUID qpuId,
-                                                                          @PathVariable UUID qubitId) {
+    public ResponseEntity<CollectionModel<EntityModel<GateCharacteristicsDto>>> getGateCharacterisitcs(@PathVariable UUID providerId,
+                                                                                                       @PathVariable UUID qpuId,
+                                                                                                       @PathVariable UUID qubitId,
+                                                                                                       @PathVariable UUID gateId,
+                                                                                                       @QueryParam("latest") boolean latest) {
+
+        // check availability of provider
+        final Optional<Provider> provider = providerRepository.findById(providerId);
+        if (provider.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
 
         // check availability of qpu
         final Optional<QPU> qpuOptional = qpuRepository.findById(qpuId);
@@ -80,65 +96,37 @@ public class GateController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        // check availability of Qubit
+        // check availability of qubit
         final Optional<Qubit> qubitOptional = qubitRepository.findById(qubitId);
         if (qubitOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        final List<EntityModel<GateDto>> qubitEntities = new ArrayList<>();
-        final List<Link> qubitLinks = new ArrayList<>();
-
-        gateRepository.findByQpu(qpuOptional.get()).stream().filter(gate -> gate.getOperatingQubits().contains(qubitOptional.get())).forEach(gate -> {
-                    qubitEntities.add(createGateDto(providerId, qpuId, qubitId, gate));
-                }
-        );
-
-        final var collectionModel = new CollectionModel<>(qubitEntities);
-        collectionModel.add(qubitLinks);
-        collectionModel.add(linkTo(methodOn(GateController.class).getGates(providerId, qpuId, qubitId)).withSelfRel());
-        return ResponseEntity.ok(collectionModel);
-    }
-
-    @Operation(responses = {
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "404", description = "Not Found. Gate with given ID doesn't exist.")
-    }, description = "Retrieve a specific Qubit and its basic properties.")
-    @GetMapping("/{gateId}")
-    public ResponseEntity<EntityModel<GateDto>> getGate(
-            @PathVariable UUID providerId, @PathVariable UUID qpuId, @PathVariable UUID qubitId, @PathVariable UUID gateId) {
-
-        // check availability of qpu
-        final Optional<QPU> qpuOptional = qpuRepository.findById(qpuId);
-        if (qpuOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        // check availability of Qubit
-        final Optional<Qubit> qubitOptional = qubitRepository.findById(qubitId);
-        if (qubitOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        // check availability of Gate
+        // check availability of gate
         final Optional<Gate> gateOptional = gateRepository.findById(gateId);
         if (gateOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        return ResponseEntity.ok(createGateDto(providerId, qpuId, qubitId, gateOptional.get()));
-    }
-
-    private EntityModel<GateDto> createGateDto(UUID providerId, UUID qpuId, UUID qubitId, Gate gate) {
-        final EntityModel<GateDto> gateDto = new EntityModel<GateDto>(GateDto.createDTO(gate));
-        gateDto.add(linkTo(methodOn(GateController.class).getGate(providerId, qpuId, qubitId, gate.getDatabaseId())).withSelfRel());
-        for (Qubit qubit : gate.getOperatingQubits()) {
-            gateDto.add(linkTo(methodOn(QubitController.class).getQubit(providerId, qpuId, qubit.getDatabaseId()))
-                    .withRel(Constants.PATH_QUBITS_OPERATING + qubit.getDatabaseId()));
+        final Stream<GateCharacteristics> gateCharacteristicsStream;
+        if (latest) {
+            // retrieve characteristics with latest calibration time stamp
+            gateCharacteristicsStream = Stream.ofNullable(
+                    gateCharacteristicsRepository.findByGateOrderByCalibrationTimeDesc(gateOptional.get()).stream().findFirst().orElse(null));
+        } else {
+            // retrieve all characteristics
+            gateCharacteristicsStream = gateCharacteristicsRepository.findByGateOrderByCalibrationTimeDesc(gateOptional.get()).stream();
         }
-        gateDto.add(
-                linkTo(methodOn(GateCharacteristicsController.class).getGateCharacterisitcs(providerId, qpuId, qubitId, gate.getDatabaseId(), false))
-                        .withRel(Constants.PATH_CHARACTERISTICS));
-        return gateDto;
+
+        final List<EntityModel<GateCharacteristicsDto>> entities = new ArrayList<>();
+        gateCharacteristicsStream.forEach(gateCharacteristic -> {
+            entities.add(new EntityModel<GateCharacteristicsDto>(GateCharacteristicsDto.createDTO(gateCharacteristic)));
+        });
+
+        if (entities.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(new CollectionModel<>(entities));
     }
 }

@@ -55,10 +55,13 @@ public class QubitCharacteristics implements Comparable<QubitCharacteristics> {
 
     private Date calibrationTime;
 
+    @Column(precision = 20, scale = 15)
     private BigDecimal t1Time;
 
+    @Column(precision = 20, scale = 15)
     private BigDecimal t2Time;
 
+    @Column(precision = 20, scale = 15)
     private BigDecimal readoutError;
 
     @ManyToOne

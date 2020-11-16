@@ -19,9 +19,13 @@
 
 package org.quantil.qprov.core.repositories;
 
+import java.util.List;
 import java.util.UUID;
 
+import org.quantil.qprov.core.model.entities.Gate;
 import org.quantil.qprov.core.model.entities.GateCharacteristics;
+import org.quantil.qprov.core.model.entities.Qubit;
+import org.quantil.qprov.core.model.entities.QubitCharacteristics;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.stereotype.Repository;
@@ -29,4 +33,6 @@ import org.springframework.stereotype.Repository;
 @RepositoryRestResource(exported = false)
 @Repository
 public interface GateCharacteristicsRepository extends JpaRepository<GateCharacteristics, UUID> {
+
+    List<GateCharacteristics> findByGateOrderByCalibrationTimeDesc(Gate gate);
 }

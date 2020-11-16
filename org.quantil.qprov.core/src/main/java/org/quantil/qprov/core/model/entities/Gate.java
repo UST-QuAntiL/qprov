@@ -75,6 +75,7 @@ public class Gate extends org.openprovenance.prov.xml.Entity implements ProvExte
     @ManyToMany(mappedBy = "supportedGates",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Set<Qubit> operatingQubits = new HashSet<>();
 
     @Override

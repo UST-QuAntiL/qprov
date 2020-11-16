@@ -38,8 +38,10 @@ import org.quantil.qprov.collector.IProvider;
 import org.quantil.qprov.core.model.agents.Provider;
 import org.quantil.qprov.core.model.agents.QPU;
 import org.quantil.qprov.core.model.entities.Gate;
+import org.quantil.qprov.core.model.entities.GateCharacteristics;
 import org.quantil.qprov.core.model.entities.Qubit;
 import org.quantil.qprov.core.model.entities.QubitCharacteristics;
+import org.quantil.qprov.core.repositories.GateCharacteristicsRepository;
 import org.quantil.qprov.core.repositories.GateRepository;
 import org.quantil.qprov.core.repositories.ProviderRepository;
 import org.quantil.qprov.core.repositories.QPURepository;
@@ -55,6 +57,8 @@ import org.quantil.qprov.ibmq.client.model.AccessToken;
 import org.quantil.qprov.ibmq.client.model.ApiToken;
 import org.quantil.qprov.ibmq.client.model.Device;
 import org.quantil.qprov.ibmq.client.model.DeviceProperties;
+import org.quantil.qprov.ibmq.client.model.DevicePropsGate;
+import org.quantil.qprov.ibmq.client.model.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -83,6 +87,8 @@ public class IBMQProvider implements IProvider {
 
     private final QubitCharacteristicsRepository qubitCharacteristicsRepository;
 
+    private final GateCharacteristicsRepository gateCharacteristicsRepository;
+
     private final GateRepository gateRepository;
 
     private final String ibmqToken;
@@ -92,11 +98,13 @@ public class IBMQProvider implements IProvider {
     public IBMQProvider(ProviderRepository providerRepository, QPURepository qpuRepository,
                         QubitRepository qubitRepository,
                         QubitCharacteristicsRepository qubitCharacteristicsRepository,
+                        GateCharacteristicsRepository gateCharacteristicsRepository,
                         GateRepository gateRepository, Environment env) {
         this.providerRepository = providerRepository;
         this.qpuRepository = qpuRepository;
         this.qubitRepository = qubitRepository;
         this.qubitCharacteristicsRepository = qubitCharacteristicsRepository;
+        this.gateCharacteristicsRepository = gateCharacteristicsRepository;
         this.gateRepository = gateRepository;
         this.ibmqToken = env.getProperty("QPROV_IBMQ_TOKEN");
         this.defaultClient = Configuration.getDefaultApiClient();
@@ -301,14 +309,13 @@ public class IBMQProvider implements IProvider {
      * @param qpu              the QPU to update the qubit characteristics for
      * @param deviceProperties the device properties retrieved from the IBM API
      * @param calibrationTime  the time of the calibration the given device properties were retrieved from
-     * @return the updated QPU object
      */
-    private QPU updateQubitCharacteristicsOfQPU(QPU qpu, DeviceProperties deviceProperties, Date calibrationTime) {
+    private void updateQubitCharacteristicsOfQPU(QPU qpu, DeviceProperties deviceProperties, Date calibrationTime) {
 
         if (deviceProperties.getQubits().size() != qpu.getQubits().size()) {
             logger.error("Number of qubits in the device properties ({}) does not equal number of qubits from the QPU ({})!",
                     deviceProperties.getQubits().size(), qpu.getQubits().size());
-            return qpu;
+            return;
         }
 
         // Sort list of qubits after their name. This has to be done as the API only provides qubit properties in the order of the qubit
@@ -358,8 +365,108 @@ public class IBMQProvider implements IProvider {
             currentQubit.getQubitCharacteristics().add(qubitCharacteristics);
             qubitRepository.save(currentQubit);
         }
+    }
 
-        return qpu;
+    /**
+     * Update the gate characteristics of the given QPU with the latest calibration data and add to the database
+     *
+     * @param qpu              the QPU to update the gate characteristics for
+     * @param deviceProperties the device properties retrieved from the IBM API
+     * @param calibrationTime  the time of the calibration the given device properties were retrieved from
+     */
+    private void updateGateCharacteristicsOfQPU(QPU qpu, DeviceProperties deviceProperties, Date calibrationTime) {
+
+        final List<Gate> gates =
+                qpu.getQubits().stream().flatMap(qubit -> qubit.getSupportedGates().stream()).distinct().collect(Collectors.toList());
+        logger.debug("Updating characteristics for {} gates of QPU: {}", gates.size(), qpu.getName());
+
+        for (Gate gate : gates) {
+
+            // skip update if latest characteristics have the same time stamp then current calibration data
+            final GateCharacteristics latestCharacteristics =
+                    gateCharacteristicsRepository.findByGateOrderByCalibrationTimeDesc(gate).stream().findFirst().orElse(null);
+            if (Objects.nonNull(latestCharacteristics) && !calibrationTime.after(latestCharacteristics.getCalibrationTime())) {
+                logger.debug("Stored gate characteristics are up-to-date. No update needed!");
+                continue;
+            }
+
+            // get the DevicePropsGate that belongs to the gate that should be updated with the characteristics
+            final Optional<DevicePropsGate> matchingGateOptional =
+                    deviceProperties.getGates().stream()
+                            .filter(ibmGate -> ibmGate.getGate().equals(gate.getName()))
+                            .filter(ibmGate -> operatesOnSameQubits(ibmGate, gate))
+                            .findFirst();
+
+            if (matchingGateOptional.isEmpty()) {
+                logger.warn("No properties found for gate {} on QPU: {}", gate.getName(), qpu.getName());
+                continue;
+            }
+            final DevicePropsGate matchingGate = matchingGateOptional.get();
+
+            if (Objects.isNull(matchingGate.getParameters())) {
+                logger.warn("Parameters for matching gate properties are null!");
+                continue;
+            }
+
+            // create new characteristics object with the current characteristics
+            final GateCharacteristics gateCharacteristics = new GateCharacteristics();
+            gateCharacteristics.setGate(gate);
+            gateCharacteristics.setCalibrationTime(calibrationTime);
+
+            // retrieve gate time and error rate
+            for (Parameter characteristicsOfGate : matchingGate.getParameters()) {
+
+                switch (characteristicsOfGate.getName()) {
+                    case "gate_error":
+                        gateCharacteristics.setGateFidelity(characteristicsOfGate.getValue());
+                        break;
+                    case "gate_length":
+                        gateCharacteristics.setGateTime(characteristicsOfGate.getValue());
+                        break;
+                    default:
+                }
+            }
+
+            // update gate object with new characteristics object
+            gate.getGateCharacteristics().add(gateCharacteristics);
+            gateRepository.save(gate);
+        }
+    }
+
+    /**
+     * Check whether the given gate from the QProv data model operates on the same set of qubits than the gate for which the characteristics were
+     * retrieved from IBM
+     *
+     * @param ibmGateProperties the properties of the gate retrieved from IBM
+     * @param gate              the gate from the QPov data model
+     * @return <code>true</code> if the two gates operate on the same set of qubits, <code>false</code> otherwise
+     */
+    private boolean operatesOnSameQubits(DevicePropsGate ibmGateProperties, Gate gate) {
+
+        if (Objects.isNull(ibmGateProperties.getQubits())) {
+            logger.warn("Qubits in IBM gate properties are null for gate with name: {}!", gate.getName());
+            return false;
+        }
+
+        if (ibmGateProperties.getQubits().size() != gate.getOperatingQubits().size()) {
+            logger.debug("Gates operate on different qubits!");
+            return false;
+        }
+
+        // check if the stored gate and the gate for which the information was retrieved operate on the same qubit
+        for (Qubit operatingQubit : gate.getOperatingQubits()) {
+            boolean foundMatchingQubit = false;
+            for (BigDecimal ibmOperatingQubit : ibmGateProperties.getQubits()) {
+                if (ibmOperatingQubit.toString().equals(operatingQubit.getName())) {
+                    foundMatchingQubit = true;
+                }
+            }
+            if (!foundMatchingQubit) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -404,10 +511,9 @@ public class IBMQProvider implements IProvider {
                     qpu.setLastUpdated(new Date(System.currentTimeMillis()));
                     qpuRepository.save(qpu);
 
-                    // add new qubit characteristics if a new calibration was done since the last retrieval
+                    // add new qubit and gate characteristics if a new calibration was done since the last retrieval
                     updateQubitCharacteristicsOfQPU(qpu, deviceProperties, lastCalibrated);
-
-                    // TODO: retrieve data about gates
+                    updateGateCharacteristicsOfQPU(qpu, deviceProperties, lastCalibrated);
                 } catch (ApiException e) {
                     logger.error("Exception while getting details about QPU with name '{}': {}", device.getBackendName(),
                             e.getLocalizedMessage());
