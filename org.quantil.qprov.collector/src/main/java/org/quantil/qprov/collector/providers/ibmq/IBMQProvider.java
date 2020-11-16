@@ -23,7 +23,6 @@ import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -314,17 +313,17 @@ public class IBMQProvider implements IProvider {
             return;
         }
 
-        // Sort list of qubits after their name. This has to be done as the API only provides qubit properties in the order of the qubit
-        // names (integers) and does not provide a reference from the properties to the qubit
-        final List<Qubit> sortedQubits = new ArrayList<>(qpu.getQubits());
-        sortedQubits.sort(Comparator.comparing(a -> Integer.valueOf(a.getName())));
-
         // iterate through all properties and update corresponding Qubit
         for (int i = 0; i < deviceProperties.getQubits().size(); i++) {
 
             // get properties and Qubit which belong together (based on the order)
             final List<Object> propertiesOfQubitList = deviceProperties.getQubits().get(i);
-            final Qubit currentQubit = sortedQubits.get(i);
+            final Qubit currentQubit = qubitRepository.findByQpuAndName(qpu, String.valueOf(i)).orElse(null);
+
+            if (Objects.isNull(currentQubit)) {
+                logger.warn("Unable to retrieve related qubit with name {} for QPU {}", i, qpu.getName());
+                continue;
+            }
 
             // skip update if latest characteristics have the same time stamp then current calibration data
             final QubitCharacteristics latestCharacteristics =
