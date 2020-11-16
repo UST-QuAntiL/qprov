@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -365,11 +366,17 @@ public class IBMQProvider implements IProvider {
     /**
      * Update the gate characteristics of the given QPU with the latest calibration data and add to the database
      *
-     * @param qpu              the QPU to update the gate characteristics for
+     * @param qpuId            the Id of the QPU to update the gate characteristics for
      * @param deviceProperties the device properties retrieved from the IBM API
      * @param calibrationTime  the time of the calibration the given device properties were retrieved from
      */
-    private void updateGateCharacteristicsOfQPU(QPU qpu, DeviceProperties deviceProperties, Date calibrationTime) {
+    private void updateGateCharacteristicsOfQPU(UUID qpuId, DeviceProperties deviceProperties, Date calibrationTime) {
+
+        final QPU qpu = qpuRepository.findById(qpuId).orElse(null);
+        if (Objects.isNull(qpu)) {
+            logger.error("Unable to retrieve QPU with Id: {}", qpuId);
+            return;
+        }
 
         final List<Gate> gates =
                 qpu.getQubits().stream().flatMap(qubit -> qubit.getSupportedGates().stream()).distinct().collect(Collectors.toList());
@@ -448,7 +455,7 @@ public class IBMQProvider implements IProvider {
 
                 // create QPU in database if not already existing
                 logger.debug("Found QPU with name '{}'. Adding to database!", device.getBackendName());
-                QPU qpu = addQPUToDatabase(provider, device);
+                final QPU qpu = addQPUToDatabase(provider, device);
 
                 try {
                     logger.debug("Getting detailed information for the QPU...");
@@ -468,11 +475,11 @@ public class IBMQProvider implements IProvider {
                     final Date lastCalibrated = new Date(deviceProperties.getLastUpdateDate().toInstant().toEpochMilli());
                     qpu.setLastCalibrated(lastCalibrated);
                     qpu.setLastUpdated(new Date(System.currentTimeMillis()));
-                    qpu = qpuRepository.save(qpu);
+                    qpuRepository.save(qpu);
 
                     // add new qubit and gate characteristics if a new calibration was done since the last retrieval
                     updateQubitCharacteristicsOfQPU(qpu, deviceProperties, lastCalibrated);
-                    updateGateCharacteristicsOfQPU(qpu, deviceProperties, lastCalibrated);
+                    updateGateCharacteristicsOfQPU(qpu.getDatabaseId(), deviceProperties, lastCalibrated);
                 } catch (ApiException e) {
                     logger.error("Exception while getting details about QPU with name '{}': {}", device.getBackendName(),
                             e.getLocalizedMessage());

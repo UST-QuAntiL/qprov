@@ -33,6 +33,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface QPURepository extends JpaRepository<QPU, UUID> {
 
+    Optional<QPU> findById(UUID id);
+
     Optional<QPU> findByName(String name);
 
     List<QPU> findByProvider(Provider provider);
