@@ -30,6 +30,7 @@ import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
+import org.quantil.qprov.core.Constants;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -55,10 +56,10 @@ public class GateCharacteristics implements Comparable<GateCharacteristics> {
 
     private Date calibrationTime;
 
-    @Column(precision = 20, scale = 15)
+    @Column(precision = Constants.BIG_DECIMAL_PRECISION, scale = Constants.BIG_DECIMAL_SCALE)
     private BigDecimal gateTime;
 
-    @Column(precision = 20, scale = 15)
+    @Column(precision = Constants.BIG_DECIMAL_PRECISION, scale = Constants.BIG_DECIMAL_SCALE)
     private BigDecimal gateFidelity;
 
     @ManyToOne

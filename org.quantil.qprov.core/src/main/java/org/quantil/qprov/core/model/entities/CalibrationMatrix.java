@@ -19,18 +19,18 @@
 
 package org.quantil.qprov.core.model.entities;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
+import java.util.Vector;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.jetbrains.annotations.NotNull;
-import org.quantil.qprov.core.Constants;
+import org.quantil.qprov.core.model.agents.QPU;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -38,13 +38,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- * Characteristics of a qubit at a certain calibration time
- */
-@EqualsAndHashCode
 @Data
 @Entity
-public class QubitCharacteristics implements Comparable<QubitCharacteristics> {
+public class CalibrationMatrix {
 
     @Id
     @Getter
@@ -56,22 +52,11 @@ public class QubitCharacteristics implements Comparable<QubitCharacteristics> {
 
     private Date calibrationTime;
 
-    @Column(precision = Constants.BIG_DECIMAL_PRECISION, scale = Constants.BIG_DECIMAL_SCALE)
-    private BigDecimal t1Time;
-
-    @Column(precision = Constants.BIG_DECIMAL_PRECISION, scale = Constants.BIG_DECIMAL_SCALE)
-    private BigDecimal t2Time;
-
-    @Column(precision = Constants.BIG_DECIMAL_PRECISION, scale = Constants.BIG_DECIMAL_SCALE)
-    private BigDecimal readoutError;
-
     @ManyToOne
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    private Qubit qubit;
+    private QPU qpu;
 
-    @Override
-    public int compareTo(@NotNull QubitCharacteristics o) {
-        return getCalibrationTime().compareTo(o.getCalibrationTime());
-    }
+    @Lob
+    private Vector<Vector<Double>> calibrationMatrix;
 }

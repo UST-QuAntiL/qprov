@@ -24,6 +24,11 @@ package org.quantil.qprov.core;
  */
 public final class Constants {
 
+    /**** General constants ****/
+    public static final int BIG_DECIMAL_PRECISION = 20;
+
+    public static final int BIG_DECIMAL_SCALE = 15;
+
     /**** Namespaces and prefixes ****/
     public static final String DEFAULT_NAMESPACE = "http://quantil.org/qprov";
 

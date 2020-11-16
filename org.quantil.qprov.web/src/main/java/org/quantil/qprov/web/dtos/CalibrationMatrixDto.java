@@ -17,37 +17,34 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.web;
+package org.quantil.qprov.web.dtos;
+
+import java.util.Date;
+import java.util.UUID;
+import java.util.Vector;
+
+import org.quantil.qprov.core.model.entities.CalibrationMatrix;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * Constants for the QProv Web module
+ * Data transfer object for Calibration Matrices ({@link org.quantil.qprov.core.model.entities.CalibrationMatrix}).
  */
-public final class Constants {
+@EqualsAndHashCode
+@Data
+@AllArgsConstructor
+public class CalibrationMatrixDto {
 
-    /**** Swagger Tags ****/
-    public static final String TAG_ROOT = "root";
+    private UUID id;
 
-    public static final String TAG_PROVIDER = "provider";
+    private Date calibrationTime;
 
-    /**** API paths ****/
-    public static final String PATH_PROVIDERS = "providers";
+    private Vector<Vector<Double>> calibrationMatrix;
 
-    public static final String PATH_QPUS = "qpus";
-
-    public static final String PATH_QUBITS = "qubits";
-
-    public static final String PATH_GATES = "gates";
-
-    public static final String PATH_QUBITS_CONNECTED = "connected-qubit-";
-
-    public static final String PATH_QUBITS_OPERATING = "operating-qubit-";
-
-    public static final String PATH_AGGREGATED_DATA = "aggregated-data";
-
-    public static final String PATH_CALIBRATION_MATRIX = "calibration-matrix";
-
-    public static final String PATH_CHARACTERISTICS = "characteristics";
-
-    private Constants() {
+    public static CalibrationMatrixDto createDTO(CalibrationMatrix calibrationMatrix) {
+        return new CalibrationMatrixDto(calibrationMatrix.getDatabaseId(), calibrationMatrix.getCalibrationTime(),
+                calibrationMatrix.getCalibrationMatrix());
     }
 }

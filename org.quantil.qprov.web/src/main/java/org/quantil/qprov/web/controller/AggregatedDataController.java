@@ -22,11 +22,26 @@ package org.quantil.qprov.web.controller;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
+import javax.ws.rs.QueryParam;
 
+import org.quantil.qprov.core.model.agents.Provider;
+import org.quantil.qprov.core.model.agents.QPU;
+import org.quantil.qprov.core.model.entities.CalibrationMatrix;
+import org.quantil.qprov.core.repositories.CalibrationMatrixRepository;
+import org.quantil.qprov.core.repositories.ProviderRepository;
+import org.quantil.qprov.core.repositories.QPURepository;
 import org.quantil.qprov.web.Constants;
+import org.quantil.qprov.web.dtos.CalibrationMatrixDto;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,17 +62,77 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AggregatedDataController {
 
+    private final ProviderRepository providerRepository;
+
+    private final QPURepository qpuRepository;
+
+    private final CalibrationMatrixRepository calibrationMatrixRepository;
+
     @Operation(responses = {@ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "404", description = "Provider or QPU not found.")})
     @GetMapping
     public HttpEntity<RepresentationModel<?>> getLinksToAggregatedData(@PathVariable UUID providerId, @PathVariable UUID qpuId) {
 
+        // check availability of provider
+        final Optional<Provider> provider = providerRepository.findById(providerId);
+        if (provider.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // check availability of qpu
+        final Optional<QPU> qpuOptional = qpuRepository.findById(qpuId);
+        if (qpuOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
         final RepresentationModel<?> responseEntity = new RepresentationModel<>();
 
-        // add self-link and links to sub-controllers
+        // add self-link and links to routes returning aggregated data
         responseEntity.add(linkTo(methodOn(AggregatedDataController.class).getLinksToAggregatedData(providerId, qpuId)).withSelfRel());
-        // TODO: add link to calibration matrix
+        responseEntity.add(linkTo(methodOn(AggregatedDataController.class).getCalibrationMatrix(providerId, qpuId, false))
+                .withRel(Constants.PATH_CALIBRATION_MATRIX));
 
         return ResponseEntity.ok(responseEntity);
+    }
+
+    @Operation(responses = {@ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "404", description = "Provider or QPU not found or no calibration matrix available for this QPU.")})
+    @GetMapping("/" + Constants.PATH_CALIBRATION_MATRIX)
+    public ResponseEntity<CollectionModel<EntityModel<CalibrationMatrixDto>>> getCalibrationMatrix(@PathVariable UUID providerId,
+                                                                                                   @PathVariable UUID qpuId,
+                                                                                                   @QueryParam("latest") boolean latest) {
+
+        // check availability of provider
+        final Optional<Provider> provider = providerRepository.findById(providerId);
+        if (provider.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // check availability of qpu
+        final Optional<QPU> qpuOptional = qpuRepository.findById(qpuId);
+        if (qpuOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        final Stream<CalibrationMatrix> calibrationMatrixStream;
+        if (latest) {
+            // retrieve characteristics with latest calibration time stamp
+            calibrationMatrixStream = Stream.ofNullable(
+                    calibrationMatrixRepository.findByQpuOrderByCalibrationTimeDesc(qpuOptional.get()).stream().findFirst().orElse(null));
+        } else {
+            // retrieve all characteristics
+            calibrationMatrixStream = calibrationMatrixRepository.findByQpuOrderByCalibrationTimeDesc(qpuOptional.get()).stream();
+        }
+
+        final List<EntityModel<CalibrationMatrixDto>> entities = new ArrayList<>();
+        calibrationMatrixStream.forEach(calibrationMatrix -> {
+            entities.add(new EntityModel<CalibrationMatrixDto>(CalibrationMatrixDto.createDTO(calibrationMatrix)));
+        });
+
+        if (entities.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(new CollectionModel<>(entities));
     }
 }

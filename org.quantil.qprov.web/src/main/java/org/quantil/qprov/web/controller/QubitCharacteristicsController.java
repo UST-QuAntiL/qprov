@@ -71,7 +71,8 @@ public class QubitCharacteristicsController {
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "404", description = "No characteristics for this Qubit available.")
-    }, description = "Retrieve the calibration characteristics from the given qubit. By using the latest parameter only the latest data is retrieved, otherwise all available data.")
+    }, description = "Retrieve the calibration characteristics from the given qubit. " +
+            "By using the latest parameter only the latest data is retrieved, otherwise all available data.")
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<QubitCharacteristicsDto>>> getQubitCharacterisitcs(@PathVariable UUID providerId,
                                                                                                          @PathVariable UUID qpuId,

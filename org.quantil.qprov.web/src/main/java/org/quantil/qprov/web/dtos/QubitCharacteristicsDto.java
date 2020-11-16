@@ -48,7 +48,7 @@ public class QubitCharacteristicsDto {
     private BigDecimal readoutError;
 
     public static QubitCharacteristicsDto createDTO(QubitCharacteristics qubitCharacteristics) {
-        return new QubitCharacteristicsDto(qubitCharacteristics.getDatabaseId(), qubitCharacteristics.getCalibrationTime(), qubitCharacteristics.getT1Time(),
-                qubitCharacteristics.getT2Time(), qubitCharacteristics.getReadoutError());
+        return new QubitCharacteristicsDto(qubitCharacteristics.getDatabaseId(), qubitCharacteristics.getCalibrationTime(),
+                qubitCharacteristics.getT1Time(), qubitCharacteristics.getT2Time(), qubitCharacteristics.getReadoutError());
     }
 }

@@ -38,6 +38,7 @@ import org.openprovenance.prov.model.Statement;
 import org.quantil.qprov.core.Constants;
 import org.quantil.qprov.core.Utils;
 import org.quantil.qprov.core.model.ProvExtension;
+import org.quantil.qprov.core.model.entities.CalibrationMatrix;
 import org.quantil.qprov.core.model.entities.Gate;
 import org.quantil.qprov.core.model.entities.Qubit;
 
@@ -89,6 +90,14 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Set<Qubit> qubits = new HashSet<>();
+
+    @OneToMany(mappedBy = "qpu",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private Set<CalibrationMatrix> calibrationMatrices = new HashSet<>();
 
     @ManyToOne
     @EqualsAndHashCode.Exclude
