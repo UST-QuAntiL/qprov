@@ -36,7 +36,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.transaction.Transactional;
 
 import org.quantil.qprov.collector.Constants;
 import org.quantil.qprov.collector.IProvider;
@@ -272,7 +271,6 @@ public class IBMQProvider implements IProvider {
      * @param ibmGate the gate to add to the different qubits that can execute it
      * @param qpu     the qpu to which the qubits belong
      */
-    @Transactional
     public void addGateFromDevice(org.quantil.qprov.ibmq.client.model.Gate ibmGate, QPU qpu) {
 
         // remove duplicates in coupling map
@@ -302,30 +300,6 @@ public class IBMQProvider implements IProvider {
     }
 
     /**
-     * Parse the objects returned by IBM to a Java Map
-     *
-     * @param propertiesList the propertiesList as provided by the IBM API
-     * @return the Map containing the data from the provided properties list
-     */
-    private Map<String, String> transformIbmPropertiesToMap(Object propertiesList) {
-        final String[] propertiesArray = propertiesList.toString()
-                .replaceAll("\\s+", "")
-                .replaceAll("\\{", "")
-                .replaceAll("}", "")
-                .split(",");
-
-        final Map<String, String> map = new HashMap<>();
-        for (String property : propertiesArray) {
-            final String[] propertyParts = property.split("=");
-            if (propertyParts.length != 2) {
-                continue;
-            }
-            map.put(propertyParts[0], propertyParts[1]);
-        }
-        return map;
-    }
-
-    /**
      * Update the qubit characteristics of the given QPU with the latest calibration data and add to the database
      *
      * @param qpu              the QPU to update the qubit characteristics for
@@ -345,7 +319,7 @@ public class IBMQProvider implements IProvider {
         final List<Qubit> sortedQubits = new ArrayList<>(qpu.getQubits());
         sortedQubits.sort(Comparator.comparing(a -> Integer.valueOf(a.getName())));
 
-        // iterate through all properties and update corresonding Qubit
+        // iterate through all properties and update corresponding Qubit
         for (int i = 0; i < deviceProperties.getQubits().size(); i++) {
 
             // get properties and Qubit which belong together (based on the order)
@@ -367,7 +341,7 @@ public class IBMQProvider implements IProvider {
 
             // retrieve T1, T2, and readout error
             for (Object propertiesOfQubit : propertiesOfQubitList) {
-                final Map<String, String> propertiesMap = transformIbmPropertiesToMap(propertiesOfQubit);
+                final Map<String, String> propertiesMap = IBMQUtility.transformIbmPropertiesToMap(propertiesOfQubit);
 
                 switch (propertiesMap.get("name")) {
                     case "T1":
@@ -416,7 +390,7 @@ public class IBMQProvider implements IProvider {
             final Optional<DevicePropsGate> matchingGateOptional =
                     deviceProperties.getGates().stream()
                             .filter(ibmGate -> ibmGate.getGate().equals(gate.getName()))
-                            .filter(ibmGate -> operatesOnSameQubits(ibmGate, gate))
+                            .filter(ibmGate -> IBMQUtility.operatesOnSameQubits(ibmGate, gate))
                             .findFirst();
 
             if (matchingGateOptional.isEmpty()) {
@@ -453,42 +427,6 @@ public class IBMQProvider implements IProvider {
             gate.getGateCharacteristics().add(gateCharacteristics);
             gateRepository.save(gate);
         }
-    }
-
-    /**
-     * Check whether the given gate from the QProv data model operates on the same set of qubits than the gate for which the characteristics were
-     * retrieved from IBM
-     *
-     * @param ibmGateProperties the properties of the gate retrieved from IBM
-     * @param gate              the gate from the QPov data model
-     * @return <code>true</code> if the two gates operate on the same set of qubits, <code>false</code> otherwise
-     */
-    private boolean operatesOnSameQubits(DevicePropsGate ibmGateProperties, Gate gate) {
-
-        if (Objects.isNull(ibmGateProperties.getQubits())) {
-            logger.warn("Qubits in IBM gate properties are null for gate with name: {}!", gate.getName());
-            return false;
-        }
-
-        if (ibmGateProperties.getQubits().size() != gate.getOperatingQubits().size()) {
-            logger.debug("Gates operate on different qubits!");
-            return false;
-        }
-
-        // check if the stored gate and the gate for which the information was retrieved operate on the same qubit
-        for (Qubit operatingQubit : gate.getOperatingQubits()) {
-            boolean foundMatchingQubit = false;
-            for (BigDecimal ibmOperatingQubit : ibmGateProperties.getQubits()) {
-                if (ibmOperatingQubit.toString().equals(operatingQubit.getName())) {
-                    foundMatchingQubit = true;
-                }
-            }
-            if (!foundMatchingQubit) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     /**
