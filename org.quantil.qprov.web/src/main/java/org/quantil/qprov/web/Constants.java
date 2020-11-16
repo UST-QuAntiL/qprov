@@ -42,6 +42,8 @@ public final class Constants {
 
     public static final String PATH_QUBITS_OPERATING = "operating-qubit-";
 
+    public static final String PATH_AGGREGATED_DATA = "aggregated-data";
+
     public static final String PATH_CHARACTERISTICS = "characteristics";
 
     private Constants() {

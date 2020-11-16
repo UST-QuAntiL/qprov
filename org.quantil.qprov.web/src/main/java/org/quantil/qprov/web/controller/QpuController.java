@@ -132,7 +132,8 @@ public class QpuController {
             // calibration data about simulators is not available, thus do not add a link to the qubits
             qpuDto.add(linkTo(methodOn(QubitController.class).getQubits(providerId, qpu.getDatabaseId())).withRel(Constants.PATH_QUBITS));
         }
-        // TODO: add link to composite data
+        qpuDto.add(linkTo(methodOn(AggregatedDataController.class).getLinksToAggregatedData(providerId, qpu.getDatabaseId()))
+                .withRel(Constants.PATH_AGGREGATED_DATA));
         return qpuDto;
     }
 }
