@@ -531,6 +531,6 @@ public class IBMQProvider implements IProvider {
         }
 
         logger.debug("Triggering execution of circuits to determine calibration data for QPUs from IBMQ!");
-        return ibmqCircuitExecutor.collectDataByCircuitExecutions();
+        return ibmqCircuitExecutor.collectDataByCircuitExecutions(ibmqToken);
     }
 }
