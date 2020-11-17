@@ -61,4 +61,20 @@ public class CollectorService {
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
+
+    @Operation(responses = {
+            @ApiResponse(responseCode = "202"),
+            @ApiResponse(responseCode = "500", description = "Server error during provenance data collection"),
+    }, description = "Retrieve the provenance data from all available quantum hardware providers by executing calibration circuits.")
+    @PostMapping("/collectCircuit")
+    public HttpEntity<RepresentationModel<?>> collectProvenanceDataByCircuitExecution() {
+
+        this.availableProviders.forEach((IProvider provider) -> {
+            logger.debug("Calculating provenance data for provider by executing calibration circuits: {}", provider.getProviderId());
+            final boolean success = provider.collectThroughCircuits();
+            logger.debug("Finished retrieval of data with success: {}", success);
+        });
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
 }

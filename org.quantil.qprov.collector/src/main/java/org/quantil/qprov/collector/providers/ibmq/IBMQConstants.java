@@ -30,4 +30,6 @@ public abstract class IBMQConstants {
     public static final String IBMQ_DEFAULT_GROUP = "open";
 
     public static final String IBMQ_DEFAULT_PROJECT = "main";
+
+    public static final String QISKIT_SERVICE_RESULT_VARIABLE = "matrix";
 }

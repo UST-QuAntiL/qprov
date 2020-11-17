@@ -43,3 +43,7 @@ qprov:
     auto-collect: ${QPROV_IBMQ_AUTO_COLLECT:false}
     auto-collect-interval: ${QPROV_IBMQ_AUTO_COLLECT_INTERVAL:60}
     auto-collect-interval-circuits: ${QPROV_IBMQ_AUTO_COLLECT_INTERVAL_CIRCUITS:180}
+    qiskit-service:
+      hostname: "${QISKIT_SERVICE_HOSTNAME:127.0.0.1}"
+      port: ${QISKIT_SERVICE_PORT:5000}
+      version: "v1.0"

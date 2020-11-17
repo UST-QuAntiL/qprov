@@ -24,6 +24,16 @@
       "name": "qprov.ibmq.auto-collect-interval-circuits",
       "type": "java.lang.Integer",
       "description": "The interval in minutes in which quantum circuits are executed to retrieve provenance data. Only needed if qprov.ibmq.auto-collect and qprov.ibmq.execute-calibration are set to true."
+    },
+    {
+      "name": "qprov.ibmq.qiskit-service.hostname",
+      "type": "java.lang.String",
+      "description": "The hostname to access the Qiskit service if qprov.ibmq.execute-calibration is set to true."
+    },
+    {
+      "name": "qprov.ibmq.qiskit-service.port",
+      "type": "java.lang.Integer",
+      "description": "The port to access the Qiskit service if qprov.ibmq.execute-calibration is set to true."
     }
   ]
 }

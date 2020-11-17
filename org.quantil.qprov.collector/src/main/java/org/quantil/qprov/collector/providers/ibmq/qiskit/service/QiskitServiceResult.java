@@ -17,21 +17,23 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.collector;
+package org.quantil.qprov.collector.providers.ibmq.qiskit.service;
 
-/**
- * Constants for the QProv collector classes.
- */
-public abstract class Constants {
+import java.util.HashMap;
+import java.util.Map;
 
-    public static final int DEFAULT_COLLECTION_STARTUP_TIME = 1;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    public static final int DEFAULT_COLLECTION_STARTUP_TIME_CIRCUITS = 2;
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class QiskitServiceResult {
 
-    public static final int CALIBRATION_MATRIX_CALCULATION_POLLING_INTERVAL = 180000;
+    private String id;
 
-    private Constants() {
-    }
+    private boolean complete;
+
+    private Map<String, Object> result = new HashMap<>();
 }
-
-

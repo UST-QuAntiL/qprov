@@ -19,15 +19,25 @@
 
 package org.quantil.qprov.collector.providers.ibmq;
 
+import java.net.URI;
+import java.util.Date;
 import java.util.Objects;
+import java.util.Vector;
 
+import org.quantil.qprov.collector.Constants;
+import org.quantil.qprov.collector.providers.ibmq.qiskit.service.QiskitServiceRequest;
+import org.quantil.qprov.collector.providers.ibmq.qiskit.service.QiskitServiceResult;
 import org.quantil.qprov.core.model.agents.Provider;
 import org.quantil.qprov.core.model.agents.QPU;
+import org.quantil.qprov.core.model.entities.CalibrationMatrix;
 import org.quantil.qprov.core.repositories.ProviderRepository;
 import org.quantil.qprov.core.repositories.QPURepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 @Component
 public class IBMQCircuitExecutor {
@@ -38,9 +48,17 @@ public class IBMQCircuitExecutor {
 
     private final QPURepository qpuRepository;
 
-    public IBMQCircuitExecutor(ProviderRepository providerRepository, QPURepository qpuRepository) {
+    private URI createCalibrationMatrixApiEndpoint;
+
+    public IBMQCircuitExecutor(ProviderRepository providerRepository, QPURepository qpuRepository,
+                               @Value("${qprov.ibmq.qiskit-service.hostname}") String hostname,
+                               @Value("${qprov.ibmq.qiskit-service.port}") int port,
+                               @Value("${qprov.ibmq.qiskit-service.version}") String version) {
         this.providerRepository = providerRepository;
         this.qpuRepository = qpuRepository;
+
+        createCalibrationMatrixApiEndpoint =
+                URI.create(String.format("http://%s:%d/qiskit-service/api/%s/calculate-calibration-matrix", hostname, port, version));
     }
 
     /**
@@ -61,6 +79,11 @@ public class IBMQCircuitExecutor {
         for (QPU qpu : qpuRepository.findByProvider(provider)) {
             logger.debug("Determining data on QPU: {}", qpu.getName());
 
+            if (qpu.isSimulator()) {
+                logger.debug("Skipping simulator {} for calibration matrix calculation!", qpu.getName());
+                continue;
+            }
+
             // We currently collect the calibration matrices by running circuits. The collection of other kind of data can be added here
             success &= collectCalibrationMatrix(qpu, ibmqToken);
         }
@@ -76,7 +99,56 @@ public class IBMQCircuitExecutor {
      * @return <code>true</code> if the calculation was successful, otherwise <code>false</code>
      */
     private boolean collectCalibrationMatrix(QPU qpu, String ibmqToken) {
-        // TODO
-        return false;
+
+        // Prepare the request to the Qiskit service
+        final RestTemplate restTemplate = new RestTemplate();
+        final QiskitServiceRequest request = new QiskitServiceRequest(qpu.getName(), ibmqToken);
+
+        try {
+            // make the execution request
+            final URI resultLocation = restTemplate.postForLocation(createCalibrationMatrixApiEndpoint, request);
+
+            boolean retrievedResult = false;
+            QiskitServiceResult result = restTemplate.getForObject(resultLocation, QiskitServiceResult.class);
+            while (!retrievedResult) {
+                try {
+                    // poll for result of calibration matrix calculation
+                    result = restTemplate.getForObject(resultLocation, QiskitServiceResult.class);
+
+                    // wait for next poll
+                    Thread.sleep(Constants.CALIBRATION_MATRIX_CALCULATION_POLLING_INTERVAL);
+                } catch (InterruptedException e) {
+                    // pass
+                } catch (RestClientException e) {
+                    logger.error("Unable to retrieve result from URL: {}", resultLocation);
+                    retrievedResult = true;
+                }
+            }
+
+            if (Objects.isNull(result) || !result.isComplete()) {
+                logger.debug("Retrieval of calibration matrix not successful!");
+                return false;
+            }
+
+            // get the calibration matrix from the result
+            final Object qiskitResult = result.getResult().get(IBMQConstants.QISKIT_SERVICE_RESULT_VARIABLE);
+
+            // TODO: cast result to internal data model and store it
+            logger.debug(qiskitResult.toString());
+            final Vector<Vector<Double>> parsedCalibrationMatrix = new Vector<Vector<Double>>();
+
+            // add new calibration matrix to the database and update corresponding QPU
+            final CalibrationMatrix calibrationMatrix = new CalibrationMatrix();
+            calibrationMatrix.setQpu(qpu);
+            calibrationMatrix.setCalibrationTime(new Date(System.currentTimeMillis()));
+            calibrationMatrix.setCalibrationMatrix(parsedCalibrationMatrix);
+            qpu.getCalibrationMatrices().add(calibrationMatrix);
+            qpuRepository.save(qpu);
+
+            return true;
+        } catch (RestClientException e) {
+            logger.error("Unable to access Qiskit service at URL: {}", createCalibrationMatrixApiEndpoint);
+            return false;
+        }
     }
 }

@@ -11,6 +11,8 @@ ENV QPROV_IBMQ_EXECUTE_CIRCUITS false
 ENV QPROV_IBMQ_AUTO_COLLECT false
 ENV QPROV_IBMQ_AUTO_COLLECT_INTERVAL 60
 ENV QPROV_IBMQ_AUTO_COLLECT_INTERVAL_CIRCUITS 180
+ENV QISKIT_SERVICE_HOSTNAME qiskit-service
+ENV QISKIT_SERVICE_PORT 5000
 
 COPY --from=builder /tmp/qprov/org.quantil.qprov.collector/target/org.quantil.qprov.collector.jar /app/
 
