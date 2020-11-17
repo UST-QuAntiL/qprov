@@ -3,11 +3,11 @@
 [![Build Status](https://api.travis-ci.com/UST-QuAntiL/qprov.svg?branch=master)](https://travis-ci.com/github/UST-QuAntiL/qprov)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-A provenance system for quantum computing, which allows collecting and analyzing important provenance data types about quantum computations.
+A provenance system for quantum computing, which allows collecting and analyzing important provenance attributes about quantum computations.
 The underlying provenance data model of the QProv system can be found [here](docs/data-model).
 Therefore, it can be used to support different use cases, such as [selecting suitable quantum hardware](https://github.com/UST-QuAntiL/nisq-analyzer) for the execution of a quantum circuit, providing a basis for transpilers and optimizers, or finding the origins of errors in quantum computations.
 
-Please refer to the [documentation](docs) for details of the possible usage of the system, as well as details to set up the system for development.
+Please refer to the [documentation](docs) for details about the possible usage of the system, as well as details about its configuration and how to set up the system for development.
 
 ## Build
 
