@@ -54,7 +54,7 @@ public class RootController {
         // add self-link and links to sub-controllers
         responseEntity.add(linkTo(methodOn(RootController.class).root()).withSelfRel());
         responseEntity.add(linkTo(methodOn(ProviderController.class).getProviders()).withRel(Constants.PATH_PROVIDERS));
-        // TODO: add link to provenance graph controller
+        responseEntity.add(linkTo(methodOn(ProvController.class).getProvenanceDocuments()).withRel(Constants.PATH_PROV));
 
         return ResponseEntity.ok(responseEntity);
     }

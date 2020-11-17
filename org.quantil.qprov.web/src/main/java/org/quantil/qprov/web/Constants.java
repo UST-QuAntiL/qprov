@@ -29,7 +29,13 @@ public final class Constants {
 
     public static final String TAG_PROVIDER = "provider";
 
+    public static final String TAG_PROV = "provenance-document";
+
     /**** API paths ****/
+    public static final String PATH_PROV = "provenance-documents";
+
+    public static final String PATH_PROV_DOCUMENT = "provenance-document-";
+
     public static final String PATH_PROVIDERS = "providers";
 
     public static final String PATH_QPUS = "qpus";
