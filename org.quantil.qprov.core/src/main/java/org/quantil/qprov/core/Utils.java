@@ -21,16 +21,22 @@ package org.quantil.qprov.core;
 
 import java.util.Objects;
 
+import org.modelmapper.ModelMapper;
 import org.openprovenance.prov.interop.InteropFramework;
 import org.openprovenance.prov.model.Namespace;
 import org.openprovenance.prov.model.ProvFactory;
 import org.openprovenance.prov.model.QualifiedName;
+import org.openprovenance.prov.model.StatementOrBundle;
 import org.openprovenance.prov.model.Value;
 import org.openprovenance.prov.sql.Document;
 import org.openprovenance.prov.xml.Other;
 import org.openprovenance.prov.xml.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class Utils {
+
+    private static final Logger logger = LoggerFactory.getLogger(Utils.class);
 
     private static final ProvFactory pFactory = InteropFramework.newXMLProvFactory();
 
@@ -104,9 +110,32 @@ public final class Utils {
      * @return the created PROV document object from the XML package
      */
     public static org.openprovenance.prov.xml.Document createProvXmlDocument(Document sqlDocument) {
+        logger.debug("Mapping SQL document with Id {} to XML document", sqlDocument.getPk());
+        final ModelMapper modelMapper = new ModelMapper();
+
         final org.openprovenance.prov.xml.Document document = new org.openprovenance.prov.xml.Document();
         document.setNamespace(sqlDocument.getNamespace());
-        document.getStatementOrBundle().addAll(sqlDocument.getStatementOrBundle());
+
+        logger.debug("Document contains {} statements", sqlDocument.getStatementOrBundle());
+        for (StatementOrBundle statementOrBundle : sqlDocument.getStatementOrBundle()) {
+            switch (statementOrBundle.getKind()) {
+                case PROV_ACTIVITY:
+                    final org.openprovenance.prov.xml.Activity activity =
+                            modelMapper.map(statementOrBundle, org.openprovenance.prov.xml.Activity.class);
+                    document.getStatementOrBundle().add(activity);
+                    break;
+                case PROV_AGENT:
+                    final org.openprovenance.prov.xml.Agent agent = modelMapper.map(statementOrBundle, org.openprovenance.prov.xml.Agent.class);
+                    document.getStatementOrBundle().add(agent);
+                    break;
+                case PROV_ENTITY:
+                    final org.openprovenance.prov.xml.Entity entity = modelMapper.map(statementOrBundle, org.openprovenance.prov.xml.Entity.class);
+                    document.getStatementOrBundle().add(entity);
+                    break;
+                default:
+                    document.getStatementOrBundle().add(statementOrBundle);
+            }
+        }
         return document;
     }
 }

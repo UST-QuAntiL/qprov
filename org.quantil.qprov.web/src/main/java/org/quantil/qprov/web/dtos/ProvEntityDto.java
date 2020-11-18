@@ -21,13 +21,13 @@ package org.quantil.qprov.web.dtos;
 
 import java.util.List;
 
+import org.openprovenance.prov.model.Entity;
 import org.openprovenance.prov.model.LangString;
 import org.openprovenance.prov.model.Location;
 import org.openprovenance.prov.model.Other;
 import org.openprovenance.prov.model.QualifiedName;
 import org.openprovenance.prov.model.Type;
 import org.openprovenance.prov.model.Value;
-import org.openprovenance.prov.sql.Entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
