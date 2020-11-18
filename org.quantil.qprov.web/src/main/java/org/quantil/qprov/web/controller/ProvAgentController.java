@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.openprovenance.prov.sql.Agent;
 import org.openprovenance.prov.sql.Document;
 import org.openprovenance.prov.sql.ObjectFactory;
@@ -47,6 +48,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -73,6 +75,8 @@ public class ProvAgentController {
     private final QualifiedNameRepository qualifiedNameRepository;
 
     private final ObjectFactory factory = new ObjectFactory();
+
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
@@ -160,6 +164,30 @@ public class ProvAgentController {
         provDocument.getStatementOrBundle().add(agent);
         provDocumentRepository.save(provDocument);
         return new ResponseEntity<>(new EntityModel<>(ProvAgentDto.createDTO(agent)), HttpStatus.CREATED);
+    }
+
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "404", description = "Not Found. PROV document or agent with given ID doesn't exist.")
+    }, description = "Update the agent in a specific PROV document.")
+    @PutMapping("/{provAgentId}")
+    public ResponseEntity<EntityModel<ProvAgentDto>> setProvAgent(@PathVariable Long provDocumentId,
+                                                                  @PathVariable Long provAgentId,
+                                                                  @RequestBody ProvAgentDto provAgentDto) {
+
+        // check availability of PROV document and agent
+        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<Agent> provAgentOptional = provAgentRepository.findById(provAgentId);
+        if (provDocumentOptional.isEmpty() || provAgentOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // update agent with passed data
+        Agent newAgent = modelMapper.map(provAgentDto, Agent.class);
+        newAgent.setPk(provAgentId);
+        newAgent = provAgentRepository.save(newAgent);
+
+        return ResponseEntity.ok(createEntityModel(provDocumentId, newAgent));
     }
 
     private EntityModel<ProvAgentDto> createEntityModel(Long provDocumentId, Agent agent) {

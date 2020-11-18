@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.openprovenance.prov.sql.Document;
 import org.openprovenance.prov.sql.Entity;
 import org.openprovenance.prov.sql.ObjectFactory;
@@ -47,6 +48,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -73,6 +75,8 @@ public class ProvEntityController {
     private final QualifiedNameRepository qualifiedNameRepository;
 
     private final ObjectFactory factory = new ObjectFactory();
+
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
@@ -160,6 +164,30 @@ public class ProvEntityController {
         provDocument.getStatementOrBundle().add(entity);
         provDocumentRepository.save(provDocument);
         return new ResponseEntity<>(new EntityModel<>(ProvEntityDto.createDTO(entity)), HttpStatus.CREATED);
+    }
+
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "404", description = "Not Found. PROV document or entity with given ID doesn't exist.")
+    }, description = "Update the entity in a specific PROV document.")
+    @PutMapping("/{provEntityId}")
+    public ResponseEntity<EntityModel<ProvEntityDto>> setProvEntity(@PathVariable Long provDocumentId,
+                                                                    @PathVariable Long provEntityId,
+                                                                    @RequestBody ProvEntityDto provEntityDto) {
+
+        // check availability of PROV document and entity
+        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<Entity> provEntityOptional = provEntityRepository.findById(provEntityId);
+        if (provDocumentOptional.isEmpty() || provEntityOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // update entity with passed data
+        Entity newEntity = modelMapper.map(provEntityDto, Entity.class);
+        newEntity.setPk(provEntityId);
+        newEntity = provEntityRepository.save(newEntity);
+
+        return ResponseEntity.ok(createEntityModel(provDocumentId, newEntity));
     }
 
     private EntityModel<ProvEntityDto> createEntityModel(Long provDocumentId, Entity entity) {

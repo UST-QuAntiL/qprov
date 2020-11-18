@@ -19,6 +19,7 @@
 
 package org.quantil.qprov.web.dtos;
 
+import java.util.Date;
 import java.util.List;
 
 import org.openprovenance.prov.model.Attribute;
@@ -52,8 +53,12 @@ public class ProvActivityDto {
 
     private List<Other> others;
 
+    private Date startTime;
+
+    private Date endTime;
+
     public static ProvActivityDto createDTO(Activity activity) {
         return new ProvActivityDto(activity.getId(), activity.getLabel(), activity.getLocation(), activity.getType(), activity.getAllAttributes(),
-                activity.getOther());
+                activity.getOther(), activity.getStartTimeItem(), activity.getEndTimeItem());
     }
 }

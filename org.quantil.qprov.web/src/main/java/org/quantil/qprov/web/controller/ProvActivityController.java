@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.openprovenance.prov.sql.Activity;
 import org.openprovenance.prov.sql.Document;
 import org.openprovenance.prov.sql.ObjectFactory;
@@ -47,6 +48,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -73,6 +75,8 @@ public class ProvActivityController {
     private final QualifiedNameRepository qualifiedNameRepository;
 
     private final ObjectFactory factory = new ObjectFactory();
+
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
@@ -160,6 +164,30 @@ public class ProvActivityController {
         provDocument.getStatementOrBundle().add(activity);
         provDocumentRepository.save(provDocument);
         return new ResponseEntity<>(new EntityModel<>(ProvActivityDto.createDTO(activity)), HttpStatus.CREATED);
+    }
+
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "404", description = "Not Found. PROV document or agent with given ID doesn't exist.")
+    }, description = "Update the activity in a specific PROV document.")
+    @PutMapping("/{provActivityId}")
+    public ResponseEntity<EntityModel<ProvActivityDto>> setProvActivity(@PathVariable Long provDocumentId,
+                                                                      @PathVariable Long provActivityId,
+                                                                      @RequestBody ProvActivityDto provActivityDto) {
+
+        // check availability of PROV document and activity
+        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<Activity> provActivityOptional = provActivityRepository.findById(provActivityId);
+        if (provDocumentOptional.isEmpty() || provActivityOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // update activity with passed data
+        Activity newActivity = modelMapper.map(provActivityDto, Activity.class);
+        newActivity.setPk(provActivityId);
+        newActivity = provActivityRepository.save(newActivity);
+
+        return ResponseEntity.ok(createEntityModel(provDocumentId, newActivity));
     }
 
     private EntityModel<ProvActivityDto> createEntityModel(Long provDocumentId, Activity activity) {
