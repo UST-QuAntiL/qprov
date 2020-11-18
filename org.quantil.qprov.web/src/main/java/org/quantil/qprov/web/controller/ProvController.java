@@ -25,6 +25,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,6 +36,7 @@ import org.quantil.qprov.core.Utils;
 import org.quantil.qprov.core.repositories.prov.ProvDocumentRepository;
 import org.quantil.qprov.web.Constants;
 import org.quantil.qprov.web.dtos.ProvDocumentDto;
+import org.quantil.qprov.web.dtos.ProvNamespaceDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.CollectionModel;
@@ -49,6 +51,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -185,9 +189,61 @@ public class ProvController {
         }
     }
 
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "404", description = "Not Found. PROV document with given ID doesn't exist.")
+    }, description = "Retrieve the namespace of a specific PROV document.")
+    @GetMapping("/{provDocumentId}/" + Constants.PATH_PROV_NAMESPACE)
+    public ResponseEntity<EntityModel<ProvNamespaceDto>> getProvNamespace(@PathVariable Long provDocumentId) {
+
+        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        if (provDocumentOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        final EntityModel<ProvNamespaceDto> provDocumentDto =
+                new EntityModel<ProvNamespaceDto>(ProvNamespaceDto.createDTO(provDocumentOptional.get().getNamespace()));
+        provDocumentDto.add(linkTo(methodOn(ProvController.class).getProvNamespace(provDocumentId)).withSelfRel());
+        return ResponseEntity.ok(provDocumentDto);
+    }
+
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "404", description = "Not Found. PROV document with given ID doesn't exist.")
+    }, description = "Update the namespace of a specific PROV document.")
+    @PutMapping("/{provDocumentId}/" + Constants.PATH_PROV_NAMESPACE)
+    public ResponseEntity<EntityModel<ProvNamespaceDto>> setProvNamespace(@PathVariable Long provDocumentId,
+                                                                          @RequestBody ProvNamespaceDto provNamespaceDto) {
+
+        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        if (provDocumentOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        final Document provDocument = provDocumentOptional.get();
+
+        // update the namespaces and prefixes
+        final org.openprovenance.prov.model.Namespace namespace = provDocument.getNamespace();
+        final Map<String, String> namespaceMap = namespace.getNamespaces();
+        namespaceMap.clear();
+        namespaceMap.putAll(provNamespaceDto.getNamespaces());
+
+        final Map<String, String> prefixMap = namespace.getPrefixes();
+        prefixMap.clear();
+        prefixMap.putAll(provNamespaceDto.getPrefixes());
+
+        provDocumentRepository.save(provDocument);
+
+        final EntityModel<ProvNamespaceDto> provDocumentDto =
+                new EntityModel<ProvNamespaceDto>(ProvNamespaceDto.createDTO(provDocumentOptional.get().getNamespace()));
+        provDocumentDto.add(linkTo(methodOn(ProvController.class).getProvNamespace(provDocumentId)).withSelfRel());
+        return ResponseEntity.ok(provDocumentDto);
+    }
+
     private EntityModel<ProvDocumentDto> createEntityModel(Document provDocument) {
         final EntityModel<ProvDocumentDto> provDocumentDto = new EntityModel<ProvDocumentDto>(ProvDocumentDto.createDTO(provDocument));
         provDocumentDto.add(linkTo(methodOn(ProvController.class).getProvDocument(provDocument.getPk())).withSelfRel());
+        provDocumentDto.add(linkTo(methodOn(ProvController.class).getProvNamespace(provDocument.getPk()))
+                .withRel(Constants.PATH_PROV_NAMESPACE));
         provDocumentDto.add(linkTo(methodOn(ProvEntityController.class).getProvEntities(provDocument.getPk()))
                 .withRel(Constants.PATH_PROV_ENTITIES));
         provDocumentDto.add(linkTo(methodOn(ProvActivityController.class).getProvActivities(provDocument.getPk()))
