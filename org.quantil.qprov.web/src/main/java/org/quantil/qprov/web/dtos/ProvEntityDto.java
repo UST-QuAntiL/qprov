@@ -17,32 +17,42 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.core.model;
+package org.quantil.qprov.web.dtos;
 
-import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import java.util.List;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.openprovenance.prov.xml.Document;
+import org.openprovenance.prov.model.LangString;
+import org.openprovenance.prov.model.Location;
+import org.openprovenance.prov.model.Other;
+import org.openprovenance.prov.model.QualifiedName;
+import org.openprovenance.prov.model.Type;
+import org.openprovenance.prov.model.Value;
+import org.openprovenance.prov.sql.Entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @Data
-@Entity
-public class ProvDocument extends Document {
+@AllArgsConstructor
+@NoArgsConstructor
+public class ProvEntityDto {
 
-    @Id
-    @Getter
-    @Setter
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "databaseId", updatable = false, nullable = false)
-    private UUID databaseId;
+    private QualifiedName id;
+
+    private List<LangString> label;
+
+    private List<Location> location;
+
+    private List<Type> type;
+
+    private Value value;
+
+    private List<Other> others;
+
+    public static ProvEntityDto createDTO(Entity entity) {
+        return new ProvEntityDto(entity.getId(), entity.getLabel(), entity.getLocation(), entity.getType(), entity.getValue(), entity.getOther());
+    }
 }

@@ -34,11 +34,15 @@ public final class Constants {
     /**** API paths ****/
     public static final String PATH_PROV = "provenance-documents";
 
+    public static final String PATH_PROV_ENTITIES = "entities";
+
+    public static final String PATH_PROV_AGENTS = "agents";
+
+    public static final String PATH_PROV_ACTIVITIES = "activities";
+
     public static final String PATH_PROV_XML = "xml-document";
 
     public static final String PATH_PROV_JPEG = "jpeg";
-
-    public static final String PATH_PROV_DOCUMENT = "provenance-document-";
 
     public static final String PATH_PROVIDERS = "providers";
 

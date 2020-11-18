@@ -26,6 +26,7 @@ import org.openprovenance.prov.model.Namespace;
 import org.openprovenance.prov.model.ProvFactory;
 import org.openprovenance.prov.model.QualifiedName;
 import org.openprovenance.prov.model.Value;
+import org.openprovenance.prov.sql.Document;
 import org.openprovenance.prov.xml.Other;
 import org.openprovenance.prov.xml.Type;
 
@@ -94,5 +95,18 @@ public final class Utils {
      */
     public static Value createStringValueElement(String value) {
         return pFactory.newValue(value, pFactory.getName().XSD_STRING);
+    }
+
+    /**
+     * Parse a given PROV document from the SQL package to a document from the XML package
+     *
+     * @param sqlDocument the PROV document object from the SQL package
+     * @return the created PROV document object from the XML package
+     */
+    public static org.openprovenance.prov.xml.Document createProvXmlDocument(Document sqlDocument) {
+        final org.openprovenance.prov.xml.Document document = new org.openprovenance.prov.xml.Document();
+        document.setNamespace(sqlDocument.getNamespace());
+        document.getStatementOrBundle().addAll(sqlDocument.getStatementOrBundle());
+        return document;
     }
 }

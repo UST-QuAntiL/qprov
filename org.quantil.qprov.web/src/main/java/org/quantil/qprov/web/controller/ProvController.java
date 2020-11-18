@@ -23,30 +23,32 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 
 import org.openprovenance.prov.interop.InteropFramework;
-import org.quantil.qprov.core.model.ProvDocument;
-import org.quantil.qprov.core.repositories.ProvDocumentRepository;
+import org.openprovenance.prov.sql.Document;
+import org.openprovenance.prov.sql.Namespace;
+import org.quantil.qprov.core.Utils;
+import org.quantil.qprov.core.repositories.prov.ProvDocumentRepository;
 import org.quantil.qprov.web.Constants;
 import org.quantil.qprov.web.dtos.ProvDocumentDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -74,19 +76,22 @@ public class ProvController {
             @ApiResponse(responseCode = "200")
     }, description = "Retrieve all stored PROV documents.")
     @GetMapping
-    public HttpEntity<RepresentationModel<?>> getProvenanceDocuments() {
+    public ResponseEntity<CollectionModel<EntityModel<ProvDocumentDto>>> getProvenanceDocuments() {
 
-        final RepresentationModel<?> responseEntity = new RepresentationModel<>();
-        responseEntity.add(linkTo(methodOn(ProvController.class).getProvenanceDocuments()).withSelfRel());
+        final List<EntityModel<ProvDocumentDto>> provDocumentEntities = new ArrayList<>();
+        final List<Link> provDocumentLinks = new ArrayList<>();
 
-        for (ProvDocument provDocument : provDocumentRepository.findAll()) {
-            logger.debug("Found Prov document with Id: {}", provDocument.getDatabaseId());
-            responseEntity
-                    .add(linkTo(methodOn(ProvController.class).getProvDocument(provDocument.getDatabaseId())).withRel(Constants.PATH_PROV_DOCUMENT +
-                            provDocument.getDatabaseId()));
+        for (Document provDocument : provDocumentRepository.findAll()) {
+            logger.debug("Found Prov document with Id: {}", provDocument.getPk());
+            provDocumentLinks.add(linkTo(methodOn(ProvController.class).getProvDocument(provDocument.getPk()))
+                    .withRel(provDocument.getPk().toString()));
+            provDocumentEntities.add(createEntityModel(provDocument));
         }
 
-        return ResponseEntity.ok(responseEntity);
+        final var collectionModel = new CollectionModel<>(provDocumentEntities);
+        collectionModel.add(provDocumentLinks);
+        collectionModel.add(linkTo(methodOn(ProvController.class).getProvenanceDocuments()).withSelfRel());
+        return ResponseEntity.ok(collectionModel);
     }
 
     @Operation(responses = {@ApiResponse(responseCode = "201"),
@@ -95,10 +100,13 @@ public class ProvController {
     public ResponseEntity<EntityModel<ProvDocumentDto>> createProvDocument() {
 
         // create new PROV document and retrieve Id from database
-        ProvDocument provDocument = new ProvDocument();
+        Document provDocument = new Document();
+        final Namespace ns = new Namespace();
+        ns.addKnownNamespaces();
+        provDocument.setNamespace(ns);
         provDocument = provDocumentRepository.save(provDocument);
 
-        return ResponseEntity.ok(createEntityModel(provDocument));
+        return new ResponseEntity<>(createEntityModel(provDocument), HttpStatus.CREATED);
     }
 
     @Operation(responses = {
@@ -106,9 +114,9 @@ public class ProvController {
             @ApiResponse(responseCode = "404", description = "Not Found. PROV document with given ID doesn't exist.")
     }, description = "Retrieve a specific PROV document.")
     @GetMapping("/{provDocumentId}")
-    public ResponseEntity<EntityModel<ProvDocumentDto>> getProvDocument(@PathVariable UUID provDocumentId) {
+    public ResponseEntity<EntityModel<ProvDocumentDto>> getProvDocument(@PathVariable Long provDocumentId) {
 
-        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -122,8 +130,8 @@ public class ProvController {
             @ApiResponse(responseCode = "404", description = "Not Found. PROV document with given ID doesn't exist.")
     }, description = "Delete a PROV document.")
     @DeleteMapping("/{provDocumentId}")
-    public ResponseEntity<Void> deleteProvDocument(@PathVariable UUID provDocumentId) {
-        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+    public ResponseEntity<Void> deleteProvDocument(@PathVariable Long provDocumentId) {
+        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -134,41 +142,20 @@ public class ProvController {
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "400"),
-            @ApiResponse(responseCode = "404", description = "Not Found. PROV document with given ID doesn't exist.")
-    }, description = "Update the properties of a PROV document.")
-    @PutMapping("/{provDocumentId}")
-    public ResponseEntity<EntityModel<ProvDocumentDto>> updateProvDocument(@PathVariable UUID provDocumentId,
-                                                                           @Validated @RequestBody ProvDocumentDto inputProvDocumentDto) {
-
-        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
-        if (provDocumentOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        // update the PROV document with the given Dto
-        inputProvDocumentDto.setDatabaseId(provDocumentId);
-        final ProvDocument updatedProvDocument = provDocumentRepository.save(ProvDocumentDto.createPROV(inputProvDocumentDto));
-
-        return ResponseEntity.ok(createEntityModel(updatedProvDocument));
-    }
-
-    @Operation(responses = {
-            @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "404", description = "Not Found. PROV document with given ID doesn't exist.")
     }, description = "Retrieve a specific PROV document and return it as serialized XML document.")
     @GetMapping("/{provDocumentId}/" + Constants.PATH_PROV_XML)
-    public HttpEntity<RepresentationModel<?>> getProvDocumentXml(@PathVariable UUID provDocumentId, HttpServletResponse response) {
+    public HttpEntity<RepresentationModel<?>> getProvDocumentXml(@PathVariable Long provDocumentId, HttpServletResponse response) {
 
         logger.debug("Serializing PROV document with Id {} to XML!", provDocumentId);
-        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         final InteropFramework intF = new InteropFramework();
         try {
-            intF.writeDocument(response.getOutputStream(), InteropFramework.ProvFormat.XML, provDocumentOptional.get());
+            intF.writeDocument(response.getOutputStream(), InteropFramework.ProvFormat.XML, Utils.createProvXmlDocument(provDocumentOptional.get()));
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -180,10 +167,10 @@ public class ProvController {
             @ApiResponse(responseCode = "404", description = "Not Found. PROV document with given ID doesn't exist.")
     }, description = "Retrieve a specific PROV document and return it as JPEG image.")
     @GetMapping("/{provDocumentId}/" + Constants.PATH_PROV_JPEG)
-    public HttpEntity<RepresentationModel<?>> getProvDocumentJPEG(@PathVariable UUID provDocumentId, HttpServletResponse response) {
+    public HttpEntity<RepresentationModel<?>> getProvDocumentJPEG(@PathVariable Long provDocumentId, HttpServletResponse response) {
 
         logger.debug("Serializing PROV document with Id {} to JPEG!", provDocumentId);
-        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             response.setStatus(HttpStatus.NOT_FOUND.value());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -191,20 +178,26 @@ public class ProvController {
 
         final InteropFramework intF = new InteropFramework();
         try {
-            intF.writeDocument(response.getOutputStream(), InteropFramework.ProvFormat.JPEG, provDocumentOptional.get());
+            intF.writeDocument(response.getOutputStream(), InteropFramework.ProvFormat.JPEG, Utils.createProvXmlDocument(provDocumentOptional.get()));
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    private EntityModel<ProvDocumentDto> createEntityModel(ProvDocument provDocument) {
+    private EntityModel<ProvDocumentDto> createEntityModel(Document provDocument) {
         final EntityModel<ProvDocumentDto> provDocumentDto = new EntityModel<ProvDocumentDto>(ProvDocumentDto.createDTO(provDocument));
-        provDocumentDto.add(linkTo(methodOn(ProvController.class).getProvDocument(provDocument.getDatabaseId())).withSelfRel());
+        provDocumentDto.add(linkTo(methodOn(ProvController.class).getProvDocument(provDocument.getPk())).withSelfRel());
+        provDocumentDto.add(linkTo(methodOn(ProvEntityController.class).getProvEntities(provDocument.getPk()))
+                .withRel(Constants.PATH_PROV_ENTITIES));
+        provDocumentDto.add(linkTo(methodOn(ProvActivityController.class).getProvActivities(provDocument.getPk()))
+                .withRel(Constants.PATH_PROV_ACTIVITIES));
+        provDocumentDto.add(linkTo(methodOn(ProvAgentController.class).getProvAgents(provDocument.getPk()))
+                .withRel(Constants.PATH_PROV_AGENTS));
         provDocumentDto
-                .add(linkTo(methodOn(ProvController.class).getProvDocumentXml(provDocument.getDatabaseId(), null))
+                .add(linkTo(methodOn(ProvController.class).getProvDocumentXml(provDocument.getPk(), null))
                         .withRel(Constants.PATH_PROV_XML));
-        provDocumentDto.add(linkTo(methodOn(ProvController.class).getProvDocumentJPEG(provDocument.getDatabaseId(), null))
+        provDocumentDto.add(linkTo(methodOn(ProvController.class).getProvDocumentJPEG(provDocument.getPk(), null))
                 .withRel(Constants.PATH_PROV_JPEG));
         return provDocumentDto;
     }

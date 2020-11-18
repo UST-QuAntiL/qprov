@@ -17,16 +17,14 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.core.repositories;
+package org.quantil.qprov.core.repositories.prov;
 
-import java.util.UUID;
-
-import org.quantil.qprov.core.model.ProvDocument;
+import org.openprovenance.prov.sql.Entity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.stereotype.Repository;
 
 @RepositoryRestResource(exported = false)
 @Repository
-public interface ProvDocumentRepository extends JpaRepository<ProvDocument, UUID> {
+public interface ProvEntityRepository extends JpaRepository<Entity, Long> {
 }

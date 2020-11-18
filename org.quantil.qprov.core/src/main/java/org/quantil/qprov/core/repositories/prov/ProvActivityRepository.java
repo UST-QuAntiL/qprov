@@ -17,36 +17,14 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.web.dtos;
+package org.quantil.qprov.core.repositories.prov;
 
-import java.util.List;
+import org.openprovenance.prov.sql.Activity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.stereotype.Repository;
 
-import org.openprovenance.prov.model.Namespace;
-import org.openprovenance.prov.model.StatementOrBundle;
-import org.openprovenance.prov.sql.Document;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-
-/**
- * Data transfer object for PROV Documents ({@link org.openprovenance.prov.sql.Document}).
- */
-@EqualsAndHashCode
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class ProvDocumentDto {
-
-    private Long databaseId;
-
-    private Namespace namespace;
-
-    private List<StatementOrBundle> statementOrBundle;
-
-    public static ProvDocumentDto createDTO(Document provDocument) {
-        return new ProvDocumentDto(provDocument.getPk(), provDocument.getNamespace(),
-                provDocument.getStatementOrBundle());
-    }
+@RepositoryRestResource(exported = false)
+@Repository
+public interface ProvActivityRepository extends JpaRepository<Activity, Long> {
 }

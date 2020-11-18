@@ -21,32 +21,39 @@ package org.quantil.qprov.web.dtos;
 
 import java.util.List;
 
-import org.openprovenance.prov.model.Namespace;
-import org.openprovenance.prov.model.StatementOrBundle;
-import org.openprovenance.prov.sql.Document;
+import org.openprovenance.prov.model.Attribute;
+import org.openprovenance.prov.model.LangString;
+import org.openprovenance.prov.model.Location;
+import org.openprovenance.prov.model.Other;
+import org.openprovenance.prov.model.QualifiedName;
+import org.openprovenance.prov.model.Type;
+import org.openprovenance.prov.sql.Activity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-/**
- * Data transfer object for PROV Documents ({@link org.openprovenance.prov.sql.Document}).
- */
 @EqualsAndHashCode
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProvDocumentDto {
+public class ProvActivityDto {
 
-    private Long databaseId;
+    private QualifiedName id;
 
-    private Namespace namespace;
+    private List<LangString> label;
 
-    private List<StatementOrBundle> statementOrBundle;
+    private List<Location> location;
 
-    public static ProvDocumentDto createDTO(Document provDocument) {
-        return new ProvDocumentDto(provDocument.getPk(), provDocument.getNamespace(),
-                provDocument.getStatementOrBundle());
+    private List<Type> type;
+
+    private List<Attribute> attributes;
+
+    private List<Other> others;
+
+    public static ProvActivityDto createDTO(Activity activity) {
+        return new ProvActivityDto(activity.getId(), activity.getLabel(), activity.getLocation(), activity.getType(), activity.getAllAttributes(),
+                activity.getOther());
     }
 }
