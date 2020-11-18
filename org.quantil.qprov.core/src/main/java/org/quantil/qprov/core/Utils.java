@@ -116,7 +116,7 @@ public final class Utils {
         final org.openprovenance.prov.xml.Document document = new org.openprovenance.prov.xml.Document();
         document.setNamespace(sqlDocument.getNamespace());
 
-        logger.debug("Document contains {} statements", sqlDocument.getStatementOrBundle());
+        logger.debug("Document contains {} statements", sqlDocument.getStatementOrBundle().size());
         for (StatementOrBundle statementOrBundle : sqlDocument.getStatementOrBundle()) {
             switch (statementOrBundle.getKind()) {
                 case PROV_ACTIVITY:

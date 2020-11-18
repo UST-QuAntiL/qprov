@@ -28,8 +28,11 @@ import java.util.Optional;
 
 import org.openprovenance.prov.sql.Agent;
 import org.openprovenance.prov.sql.Document;
+import org.openprovenance.prov.sql.ObjectFactory;
+import org.openprovenance.prov.sql.QualifiedName;
 import org.quantil.qprov.core.repositories.prov.ProvAgentRepository;
 import org.quantil.qprov.core.repositories.prov.ProvDocumentRepository;
+import org.quantil.qprov.core.repositories.prov.QualifiedNameRepository;
 import org.quantil.qprov.web.Constants;
 import org.quantil.qprov.web.dtos.ProvAgentDto;
 import org.slf4j.Logger;
@@ -43,6 +46,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -64,6 +69,10 @@ public class ProvAgentController {
     private final ProvDocumentRepository provDocumentRepository;
 
     private final ProvAgentRepository provAgentRepository;
+
+    private final QualifiedNameRepository qualifiedNameRepository;
+
+    private final ObjectFactory factory = new ObjectFactory();
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
@@ -126,6 +135,31 @@ public class ProvAgentController {
 
         provAgentRepository.delete(provAgentOptional.get());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Operation(responses = {@ApiResponse(responseCode = "201"),
+            @ApiResponse(responseCode = "404", description = "Not Found. PROV document with given ID doesn't exist.")
+    }, description = "Create a new PROV agent in the specified PROV document.")
+    @PostMapping
+    public ResponseEntity<EntityModel<ProvAgentDto>> addProvAgentToDocument(@PathVariable Long provDocumentId,
+                                                                            @RequestBody QualifiedName qualifiedName) {
+
+        logger.debug("Adding new PROV agent to document with Id: {}", provDocumentId);
+
+        // check availability of PROV document
+        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        if (provDocumentOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        final Document provDocument = provDocumentOptional.get();
+
+        final Agent agent = factory.createAgent();
+        qualifiedNameRepository.save(qualifiedName);
+        agent.setId(qualifiedName);
+
+        provDocument.getStatementOrBundle().add(agent);
+        provDocumentRepository.save(provDocument);
+        return new ResponseEntity<>(new EntityModel<>(ProvAgentDto.createDTO(agent)), HttpStatus.CREATED);
     }
 
     private EntityModel<ProvAgentDto> createEntityModel(Long provDocumentId, Agent agent) {

@@ -24,13 +24,15 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.openprovenance.prov.sql.Document;
 import org.openprovenance.prov.sql.Entity;
+import org.openprovenance.prov.sql.ObjectFactory;
+import org.openprovenance.prov.sql.QualifiedName;
 import org.quantil.qprov.core.repositories.prov.ProvDocumentRepository;
 import org.quantil.qprov.core.repositories.prov.ProvEntityRepository;
+import org.quantil.qprov.core.repositories.prov.QualifiedNameRepository;
 import org.quantil.qprov.web.Constants;
 import org.quantil.qprov.web.dtos.ProvEntityDto;
 import org.slf4j.Logger;
@@ -67,6 +69,10 @@ public class ProvEntityController {
     private final ProvDocumentRepository provDocumentRepository;
 
     private final ProvEntityRepository provEntityRepository;
+
+    private final QualifiedNameRepository qualifiedNameRepository;
+
+    private final ObjectFactory factory = new ObjectFactory();
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
@@ -129,6 +135,31 @@ public class ProvEntityController {
 
         provEntityRepository.delete(provEntityOptional.get());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Operation(responses = {@ApiResponse(responseCode = "201"),
+            @ApiResponse(responseCode = "404", description = "Not Found. PROV document with given ID doesn't exist.")
+    }, description = "Create a new PROV entity in the specified PROV document.")
+    @PostMapping
+    public ResponseEntity<EntityModel<ProvEntityDto>> addProvEntityToDocument(@PathVariable Long provDocumentId,
+                                                                              @RequestBody QualifiedName qualifiedName) {
+
+        logger.debug("Adding new PROV entity to document with Id: {}", provDocumentId);
+
+        // check availability of PROV document
+        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        if (provDocumentOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        final Document provDocument = provDocumentOptional.get();
+
+        final Entity entity = factory.createEntity();
+        qualifiedNameRepository.save(qualifiedName);
+        entity.setId(qualifiedName);
+
+        provDocument.getStatementOrBundle().add(entity);
+        provDocumentRepository.save(provDocument);
+        return new ResponseEntity<>(new EntityModel<>(ProvEntityDto.createDTO(entity)), HttpStatus.CREATED);
     }
 
     private EntityModel<ProvEntityDto> createEntityModel(Long provDocumentId, Entity entity) {
