@@ -114,6 +114,7 @@ public class IBMQCircuitExecutor {
                 try {
                     // poll for result of calibration matrix calculation
                     result = restTemplate.getForObject(resultLocation, QiskitServiceResult.class);
+                    retrievedResult = result.isComplete();
 
                     // wait for next poll
                     Thread.sleep(Constants.CALIBRATION_MATRIX_CALCULATION_POLLING_INTERVAL);
@@ -133,9 +134,16 @@ public class IBMQCircuitExecutor {
             // get the calibration matrix from the result
             final Object qiskitResult = result.getResult().get(IBMQConstants.QISKIT_SERVICE_RESULT_VARIABLE);
 
-            // TODO: cast result to internal data model and store it
-            logger.debug(qiskitResult.toString());
             final Vector<Vector<Double>> parsedCalibrationMatrix = new Vector<Vector<Double>>();
+            final String[] rows = qiskitResult.toString().split("],\\[");
+            for (String row : rows) {
+                final String cleanedRow = row.replaceAll("\\[", "").replaceAll("]", "");
+                final Vector<Double> rowVector = new Vector<Double>();
+                for (String entry : cleanedRow.split(",")) {
+                    rowVector.add(Double.parseDouble(entry));
+                }
+                parsedCalibrationMatrix.add(rowVector);
+            }
 
             // add new calibration matrix to the database and update corresponding QPU
             final CalibrationMatrix calibrationMatrix = new CalibrationMatrix();

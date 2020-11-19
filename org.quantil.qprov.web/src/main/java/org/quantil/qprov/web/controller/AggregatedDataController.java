@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
+import javax.transaction.Transactional;
 import javax.ws.rs.QueryParam;
 
 import org.quantil.qprov.core.model.agents.Provider;
@@ -37,6 +38,8 @@ import org.quantil.qprov.core.repositories.ProviderRepository;
 import org.quantil.qprov.core.repositories.QPURepository;
 import org.quantil.qprov.web.Constants;
 import org.quantil.qprov.web.dtos.CalibrationMatrixDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.RepresentationModel;
@@ -61,6 +64,8 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @Slf4j
 public class AggregatedDataController {
+
+    private final Logger logger = LoggerFactory.getLogger(AggregatedDataController.class);
 
     private final ProviderRepository providerRepository;
 
@@ -98,6 +103,7 @@ public class AggregatedDataController {
     @Operation(responses = {@ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "404", description = "Provider or QPU not found or no calibration matrix available for this QPU.")})
     @GetMapping("/" + Constants.PATH_CALIBRATION_MATRIX)
+    @Transactional
     public ResponseEntity<CollectionModel<EntityModel<CalibrationMatrixDto>>> getCalibrationMatrix(@PathVariable UUID providerId,
                                                                                                    @PathVariable UUID qpuId,
                                                                                                    @QueryParam("latest") boolean latest) {
@@ -113,21 +119,24 @@ public class AggregatedDataController {
         if (qpuOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+        final QPU qpu = qpuOptional.get();
+        logger.debug("Retrieving calibration matrix for QPU with name: {}", qpu.getName());
 
         final Stream<CalibrationMatrix> calibrationMatrixStream;
         if (latest) {
             // retrieve characteristics with latest calibration time stamp
             calibrationMatrixStream = Stream.ofNullable(
-                    calibrationMatrixRepository.findByQpuOrderByCalibrationTimeDesc(qpuOptional.get()).stream().findFirst().orElse(null));
+                    calibrationMatrixRepository.findByQpuOrderByCalibrationTimeDesc(qpu).stream().findFirst().orElse(null));
         } else {
             // retrieve all characteristics
-            calibrationMatrixStream = calibrationMatrixRepository.findByQpuOrderByCalibrationTimeDesc(qpuOptional.get()).stream();
+            calibrationMatrixStream = calibrationMatrixRepository.findByQpuOrderByCalibrationTimeDesc(qpu).stream();
         }
 
         final List<EntityModel<CalibrationMatrixDto>> entities = new ArrayList<>();
         calibrationMatrixStream.forEach(calibrationMatrix -> {
             entities.add(new EntityModel<CalibrationMatrixDto>(CalibrationMatrixDto.createDTO(calibrationMatrix)));
         });
+        logger.debug("Retrieved {} calibration matrix records for QPU with name: {}", entities.size(), qpu.getName());
 
         if (entities.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
