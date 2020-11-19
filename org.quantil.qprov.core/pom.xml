@@ -56,32 +56,32 @@
         <dependency>
             <groupId>org.openprovenance.prov</groupId>
             <artifactId>prov-model</artifactId>
-            <version>0.7.0</version>
+            <version>${prov.toolbox.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openprovenance.prov</groupId>
             <artifactId>prov-sql</artifactId>
-            <version>0.7.0</version>
+            <version>${prov.toolbox.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openprovenance.prov</groupId>
             <artifactId>prov-interop</artifactId>
-            <version>0.7.0</version>
+            <version>${prov.toolbox.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openprovenance.prov</groupId>
             <artifactId>prov-xml</artifactId>
-            <version>0.7.0</version>
+            <version>${prov.toolbox.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openprovenance.prov</groupId>
             <artifactId>prov-n</artifactId>
-            <version>0.7.0</version>
+            <version>${prov.toolbox.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openprovenance.prov</groupId>
             <artifactId>prov-dot</artifactId>
-            <version>0.7.0</version>
+            <version>${prov.toolbox.version}</version>
         </dependency>
 
         <dependency>

@@ -124,7 +124,7 @@ public class IBMQProvider implements IProvider {
                     Constants.DEFAULT_COLLECTION_STARTUP_TIME, autoCollectInterval, TimeUnit.MINUTES);
 
             if (executeCalibrationCircuits) {
-                logger.debug("Auto collection by circuit execution activated with interval: {} min", autoCollectInterval);
+                logger.debug("Auto collection by circuit execution activated with interval: {} min", autoCollectIntervalCircuits);
 
                 // circuit execution is delayed as it relies on the set of identified QPUs from the API collection
                 scheduler.scheduleAtFixedRate(new IBMQRunnableCircuits(this),
