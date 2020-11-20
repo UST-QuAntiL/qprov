@@ -189,8 +189,7 @@ public class ProvTemplateController {
                                                                                  @RequestParam("format") Formats.ProvFormat format) {
 
         try {
-            logger.debug(format.name());
-            final org.openprovenance.prov.model.Document template = intF.readDocument(file.getInputStream(), format, "test");
+            final org.openprovenance.prov.model.Document template = intF.readDocument(file.getInputStream(), format, "");
             final Document templateSql = provInteroperabilityUtils.createProvSQLDocument(template);
             ProvTemplate mappedTemplate = Utils.createProvTemplate(templateSql);
             mappedTemplate = provTemplateRepository.save(mappedTemplate);

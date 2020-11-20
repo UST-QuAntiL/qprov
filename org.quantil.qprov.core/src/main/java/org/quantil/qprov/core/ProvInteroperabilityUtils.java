@@ -23,14 +23,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.openprovenance.prov.model.LangString;
+import org.openprovenance.prov.model.Statement;
 import org.openprovenance.prov.model.StatementOrBundle;
 import org.openprovenance.prov.sql.Activity;
 import org.openprovenance.prov.sql.Agent;
 import org.openprovenance.prov.sql.Bundle;
 import org.openprovenance.prov.sql.Document;
 import org.openprovenance.prov.sql.Entity;
+import org.openprovenance.prov.sql.InternationalizedString;
+import org.openprovenance.prov.sql.Location;
 import org.openprovenance.prov.sql.Namespace;
+import org.openprovenance.prov.sql.Other;
 import org.openprovenance.prov.sql.QualifiedName;
 import org.openprovenance.prov.sql.Type;
 import org.openprovenance.prov.sql.Value;
@@ -105,7 +111,7 @@ public class ProvInteroperabilityUtils {
         for (StatementOrBundle modelStatementOrBundle : modelStatementOrBundles) {
             switch (modelStatementOrBundle.getKind()) {
                 case PROV_ENTITY:
-                    statementOrBundles.add(createProvSQLEntities((org.openprovenance.prov.model.Entity) modelStatementOrBundle));
+                    statementOrBundles.add(createProvSQLEntity((org.openprovenance.prov.model.Entity) modelStatementOrBundle));
                     break;
                 case PROV_ACTIVITY:
                     statementOrBundles.add(createProvSQLActivity((org.openprovenance.prov.model.Activity) modelStatementOrBundle));
@@ -128,7 +134,7 @@ public class ProvInteroperabilityUtils {
         for (StatementOrBundle modelStatementOrBundle : modelStatementOrBundles) {
             switch (modelStatementOrBundle.getKind()) {
                 case PROV_ENTITY:
-                    statementOrBundles.add(createProvXMLEntities((org.openprovenance.prov.model.Entity) modelStatementOrBundle));
+                    statementOrBundles.add(createProvXMLEntity((org.openprovenance.prov.model.Entity) modelStatementOrBundle));
                     break;
                 case PROV_ACTIVITY:
                     statementOrBundles.add(createProvXMLActivity((org.openprovenance.prov.model.Activity) modelStatementOrBundle));
@@ -186,7 +192,46 @@ public class ProvInteroperabilityUtils {
         return type;
     }
 
-    private Entity createProvSQLEntities(org.openprovenance.prov.model.Entity modelEntity) {
+    private Other createProvSQLOther(org.openprovenance.prov.model.Other modelOther) {
+        final Other other = new Other();
+        other.setElementName(createProvSQLQualifiedName(modelOther.getElementName()));
+        other.setType(createProvSQLQualifiedName(modelOther.getType()));
+        if (modelOther.getValue() instanceof org.openprovenance.prov.model.QualifiedName) {
+            final org.openprovenance.prov.model.QualifiedName qualifiedName = (org.openprovenance.prov.model.QualifiedName) modelOther.getValue();
+            other.setValue(createProvSQLQualifiedName(qualifiedName));
+        } else {
+            other.setValue(modelOther.getValue().toString());
+        }
+        return other;
+    }
+
+    private Location createProvSQLLocation(org.openprovenance.prov.model.Location modelLocation) {
+        final Location location = new Location();
+        location.setType(createProvSQLQualifiedName(modelLocation.getType()));
+        if (modelLocation.getValue() instanceof org.openprovenance.prov.model.QualifiedName) {
+            final org.openprovenance.prov.model.QualifiedName qualifiedName = (org.openprovenance.prov.model.QualifiedName) modelLocation.getValue();
+            location.setValue(createProvSQLQualifiedName(qualifiedName));
+        } else {
+            location.setValue(modelLocation.getValue().toString());
+        }
+        return location;
+    }
+
+    private LangString createProvSQLLabel(org.openprovenance.prov.model.LangString modelLabel) {
+        final LangString langString = new InternationalizedString();
+        langString.setLang(modelLabel.getLang());
+        langString.setValue(modelLabel.getValue());
+        return langString;
+    }
+
+    private LangString createProvXMLLabel(org.openprovenance.prov.model.LangString modelLabel) {
+        final LangString langString = new org.openprovenance.prov.xml.InternationalizedString();
+        langString.setLang(modelLabel.getLang());
+        langString.setValue(modelLabel.getValue());
+        return langString;
+    }
+
+    private Entity createProvSQLEntity(org.openprovenance.prov.model.Entity modelEntity) {
         final Entity entity = new Entity();
         entity.setId(createProvSQLQualifiedName(modelEntity.getId()));
         if (Objects.nonNull(modelEntity.getValue())) {
@@ -198,69 +243,157 @@ public class ProvInteroperabilityUtils {
             types.add(createProvSQLType(modelType));
         }
         entity.setType(types);
-        logger.debug("Number of types: {}", types.size());
 
-        //entity.set
+        final List<org.openprovenance.prov.model.Other> others = new ArrayList<>();
+        for (org.openprovenance.prov.model.Other modelOther : modelEntity.getOther()) {
+            others.add(createProvSQLOther(modelOther));
+        }
+        entity.setOther(others);
 
-        // TODO
+        final List<org.openprovenance.prov.model.Location> locations = new ArrayList<>();
+        for (org.openprovenance.prov.model.Location modelLocation : modelEntity.getLocation()) {
+            locations.add(createProvSQLLocation(modelLocation));
+        }
+        entity.setLocation(locations);
+
+        final List<org.openprovenance.prov.model.LangString> labels = new ArrayList<>();
+        for (org.openprovenance.prov.model.LangString modelLabel : modelEntity.getLabel()) {
+            labels.add(createProvSQLLabel(modelLabel));
+        }
+        entity.setLabel(labels);
+
         return entity;
     }
 
-    private org.openprovenance.prov.xml.Entity createProvXMLEntities(org.openprovenance.prov.model.Entity modelEntity) {
+    private org.openprovenance.prov.xml.Entity createProvXMLEntity(org.openprovenance.prov.model.Entity modelEntity) {
         final org.openprovenance.prov.xml.Entity entity = new org.openprovenance.prov.xml.Entity();
         entity.setId(modelEntity.getId());
-        if (Objects.nonNull(modelEntity.getValue())) {
-            entity.setValue(modelEntity.getValue());
+        entity.setValue(modelEntity.getValue());
+        entity.getType().addAll(modelEntity.getType());
+        entity.getOther().addAll(modelEntity.getOther());
+        entity.getLocation().addAll(modelEntity.getLocation());
+        for (org.openprovenance.prov.model.LangString modelLabel : modelEntity.getLabel()) {
+            entity.getLabel().add(createProvXMLLabel(modelLabel));
         }
 
-        for (org.openprovenance.prov.model.Type modelType : modelEntity.getType()) {
-            entity.getType().add(createProvSQLType(modelType));
-        }
-        logger.debug("Number of types: {}", entity.getType().size());
-
-        // TODO
         return entity;
     }
 
     private Activity createProvSQLActivity(org.openprovenance.prov.model.Activity modelActivity) {
         final Activity activity = new Activity();
         activity.setId(createProvSQLQualifiedName(modelActivity.getId()));
-        // TODO
+
+        final List<org.openprovenance.prov.model.Type> types = new ArrayList<>();
+        for (org.openprovenance.prov.model.Type modelType : modelActivity.getType()) {
+            types.add(createProvSQLType(modelType));
+        }
+        activity.setType(types);
+
+        final List<org.openprovenance.prov.model.Other> others = new ArrayList<>();
+        for (org.openprovenance.prov.model.Other modelOther : modelActivity.getOther()) {
+            others.add(createProvSQLOther(modelOther));
+        }
+        activity.setOther(others);
+
+        final List<org.openprovenance.prov.model.Location> locations = new ArrayList<>();
+        for (org.openprovenance.prov.model.Location modelLocation : modelActivity.getLocation()) {
+            locations.add(createProvSQLLocation(modelLocation));
+        }
+        activity.setLocation(locations);
+
+        final List<org.openprovenance.prov.model.LangString> labels = new ArrayList<>();
+        for (org.openprovenance.prov.model.LangString modelLabel : modelActivity.getLabel()) {
+            labels.add(createProvSQLLabel(modelLabel));
+        }
+        activity.setLabel(labels);
+
+        activity.setStartTime(modelActivity.getStartTime());
+        activity.setEndTime(modelActivity.getEndTime());
+
         return activity;
     }
 
     private org.openprovenance.prov.xml.Activity createProvXMLActivity(org.openprovenance.prov.model.Activity modelActivity) {
         final org.openprovenance.prov.xml.Activity activity = new org.openprovenance.prov.xml.Activity();
         activity.setId(createProvSQLQualifiedName(modelActivity.getId()));
-        // TODO
+        activity.getType().addAll(modelActivity.getType());
+        activity.getOther().addAll(modelActivity.getOther());
+        activity.getLocation().addAll(modelActivity.getLocation());
+        for (org.openprovenance.prov.model.LangString modelLabel : modelActivity.getLabel()) {
+            activity.getLabel().add(createProvXMLLabel(modelLabel));
+        }
+
+        activity.setStartTime(modelActivity.getStartTime());
+        activity.setEndTime(modelActivity.getEndTime());
+
         return activity;
     }
 
     private Agent createProvSQLAgent(org.openprovenance.prov.model.Agent modelAgent) {
         final Agent agent = new Agent();
         agent.setId(createProvSQLQualifiedName(modelAgent.getId()));
-        // TODO
+
+        final List<org.openprovenance.prov.model.Type> types = new ArrayList<>();
+        for (org.openprovenance.prov.model.Type modelType : modelAgent.getType()) {
+            types.add(createProvSQLType(modelType));
+        }
+        agent.setType(types);
+
+        final List<org.openprovenance.prov.model.Other> others = new ArrayList<>();
+        for (org.openprovenance.prov.model.Other modelOther : modelAgent.getOther()) {
+            others.add(createProvSQLOther(modelOther));
+        }
+        agent.setOther(others);
+
+        final List<org.openprovenance.prov.model.Location> locations = new ArrayList<>();
+        for (org.openprovenance.prov.model.Location modelLocation : modelAgent.getLocation()) {
+            locations.add(createProvSQLLocation(modelLocation));
+        }
+        agent.setLocation(locations);
+
+        final List<org.openprovenance.prov.model.LangString> labels = new ArrayList<>();
+        for (org.openprovenance.prov.model.LangString modelLabel : modelAgent.getLabel()) {
+            labels.add(createProvSQLLabel(modelLabel));
+        }
+        agent.setLabel(labels);
+
         return agent;
     }
 
     private org.openprovenance.prov.xml.Agent createProvXMLAgent(org.openprovenance.prov.model.Agent modelAgent) {
         final org.openprovenance.prov.xml.Agent agent = new org.openprovenance.prov.xml.Agent();
         agent.setId(createProvSQLQualifiedName(modelAgent.getId()));
-        // TODO
+        agent.getType().addAll(modelAgent.getType());
+        agent.getOther().addAll(modelAgent.getOther());
+        agent.getLocation().addAll(modelAgent.getLocation());
+        for (org.openprovenance.prov.model.LangString modelLabel : modelAgent.getLabel()) {
+            agent.getLabel().add(createProvXMLLabel(modelLabel));
+        }
         return agent;
     }
 
     private Bundle createProvSQLBundle(org.openprovenance.prov.model.Bundle modelBundle) {
         final Bundle bundle = new Bundle();
         bundle.setId(createProvSQLQualifiedName(modelBundle.getId()));
-        // TODO
+
+        logger.debug("Parsing bundle with {} statements!", modelBundle.getStatement().size());
+        final List<StatementOrBundle> transformedStatementOrBundles = createProvSQLStatements(
+                modelBundle.getStatement().stream().map(statement -> (StatementOrBundle) statement).collect(Collectors.toList()));
+        bundle.setStatement(transformedStatementOrBundles.stream()
+                .map(statementOrBundle -> (Statement) statementOrBundle).collect(Collectors.toList()));
+        logger.debug("Bundle with {} statements after parsing!", bundle.getStatement().size());
         return bundle;
     }
 
     private org.openprovenance.prov.xml.Bundle createProvXMLBundle(org.openprovenance.prov.model.Bundle modelBundle) {
         final org.openprovenance.prov.xml.Bundle bundle = new org.openprovenance.prov.xml.Bundle();
-        bundle.setId(createProvSQLQualifiedName(modelBundle.getId()));
-        // TODO
+        bundle.setId(modelBundle.getId());
+
+        logger.debug("Parsing bundle with {} statements!", modelBundle.getStatement().size());
+        final List<StatementOrBundle> transformedStatementOrBundles = createProvXMLStatements(
+                modelBundle.getStatement().stream().map(statement -> (StatementOrBundle) statement).collect(Collectors.toList()));
+        bundle.getStatement().addAll(transformedStatementOrBundles.stream()
+                .map(statementOrBundle -> (Statement) statementOrBundle).collect(Collectors.toList()));
         return bundle;
     }
 }
