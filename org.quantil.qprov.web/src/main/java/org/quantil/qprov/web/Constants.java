@@ -31,8 +31,12 @@ public final class Constants {
 
     public static final String TAG_PROV = "provenance-document";
 
+    public static final String TAG_PROV_TEMPLATE = "provenance-template";
+
     /**** API paths ****/
     public static final String PATH_PROV = "provenance-documents";
+
+    public static final String PATH_PROV_TEMPLATE = "provenance-templates";
 
     public static final String PATH_PROV_ENTITIES = "entities";
 

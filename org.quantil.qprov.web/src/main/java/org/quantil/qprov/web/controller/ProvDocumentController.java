@@ -29,10 +29,11 @@ import java.util.Map;
 import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 
+import org.openprovenance.prov.interop.Formats;
 import org.openprovenance.prov.interop.InteropFramework;
 import org.openprovenance.prov.sql.Document;
 import org.openprovenance.prov.sql.Namespace;
-import org.quantil.qprov.core.Utils;
+import org.quantil.qprov.core.ProvInteroperabilityUtils;
 import org.quantil.qprov.core.repositories.prov.ProvDocumentRepository;
 import org.quantil.qprov.web.Constants;
 import org.quantil.qprov.web.dtos.ProvDocumentDto;
@@ -70,11 +71,13 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/" + Constants.PATH_PROV)
 @AllArgsConstructor
 @Slf4j
-public class ProvController {
+public class ProvDocumentController {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProvController.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProvDocumentController.class);
 
     private final ProvDocumentRepository provDocumentRepository;
+
+    private final ProvInteroperabilityUtils provInteroperabilityUtils;
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200")
@@ -87,14 +90,14 @@ public class ProvController {
 
         for (Document provDocument : provDocumentRepository.findAll()) {
             logger.debug("Found Prov document with Id: {}", provDocument.getPk());
-            provDocumentLinks.add(linkTo(methodOn(ProvController.class).getProvDocument(provDocument.getPk()))
+            provDocumentLinks.add(linkTo(methodOn(ProvDocumentController.class).getProvDocument(provDocument.getPk()))
                     .withRel(provDocument.getPk().toString()));
             provDocumentEntities.add(createEntityModel(provDocument));
         }
 
         final var collectionModel = new CollectionModel<>(provDocumentEntities);
         collectionModel.add(provDocumentLinks);
-        collectionModel.add(linkTo(methodOn(ProvController.class).getProvenanceDocuments()).withSelfRel());
+        collectionModel.add(linkTo(methodOn(ProvDocumentController.class).getProvenanceDocuments()).withSelfRel());
         return ResponseEntity.ok(collectionModel);
     }
 
@@ -159,7 +162,8 @@ public class ProvController {
 
         final InteropFramework intF = new InteropFramework();
         try {
-            intF.writeDocument(response.getOutputStream(), InteropFramework.ProvFormat.XML, Utils.createProvXmlDocument(provDocumentOptional.get()));
+            intF.writeDocument(response.getOutputStream(), Formats.ProvFormat.XML,
+                    provInteroperabilityUtils.createProvXMLDocument(provDocumentOptional.get()));
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -182,7 +186,8 @@ public class ProvController {
 
         final InteropFramework intF = new InteropFramework();
         try {
-            intF.writeDocument(response.getOutputStream(), InteropFramework.ProvFormat.JPEG, Utils.createProvXmlDocument(provDocumentOptional.get()));
+            intF.writeDocument(response.getOutputStream(), Formats.ProvFormat.JPEG,
+                    provInteroperabilityUtils.createProvXMLDocument(provDocumentOptional.get()));
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -203,7 +208,7 @@ public class ProvController {
 
         final EntityModel<ProvNamespaceDto> provDocumentDto =
                 new EntityModel<ProvNamespaceDto>(ProvNamespaceDto.createDTO(provDocumentOptional.get().getNamespace()));
-        provDocumentDto.add(linkTo(methodOn(ProvController.class).getProvNamespace(provDocumentId)).withSelfRel());
+        provDocumentDto.add(linkTo(methodOn(ProvDocumentController.class).getProvNamespace(provDocumentId)).withSelfRel());
         return ResponseEntity.ok(provDocumentDto);
     }
 
@@ -235,14 +240,14 @@ public class ProvController {
 
         final EntityModel<ProvNamespaceDto> provDocumentDto =
                 new EntityModel<ProvNamespaceDto>(ProvNamespaceDto.createDTO(provDocumentOptional.get().getNamespace()));
-        provDocumentDto.add(linkTo(methodOn(ProvController.class).getProvNamespace(provDocumentId)).withSelfRel());
+        provDocumentDto.add(linkTo(methodOn(ProvDocumentController.class).getProvNamespace(provDocumentId)).withSelfRel());
         return ResponseEntity.ok(provDocumentDto);
     }
 
     private EntityModel<ProvDocumentDto> createEntityModel(Document provDocument) {
         final EntityModel<ProvDocumentDto> provDocumentDto = new EntityModel<ProvDocumentDto>(ProvDocumentDto.createDTO(provDocument));
-        provDocumentDto.add(linkTo(methodOn(ProvController.class).getProvDocument(provDocument.getPk())).withSelfRel());
-        provDocumentDto.add(linkTo(methodOn(ProvController.class).getProvNamespace(provDocument.getPk()))
+        provDocumentDto.add(linkTo(methodOn(ProvDocumentController.class).getProvDocument(provDocument.getPk())).withSelfRel());
+        provDocumentDto.add(linkTo(methodOn(ProvDocumentController.class).getProvNamespace(provDocument.getPk()))
                 .withRel(Constants.PATH_PROV_NAMESPACE));
         provDocumentDto.add(linkTo(methodOn(ProvEntityController.class).getProvEntities(provDocument.getPk()))
                 .withRel(Constants.PATH_PROV_ENTITIES));
@@ -251,9 +256,9 @@ public class ProvController {
         provDocumentDto.add(linkTo(methodOn(ProvAgentController.class).getProvAgents(provDocument.getPk()))
                 .withRel(Constants.PATH_PROV_AGENTS));
         provDocumentDto
-                .add(linkTo(methodOn(ProvController.class).getProvDocumentXml(provDocument.getPk(), null))
+                .add(linkTo(methodOn(ProvDocumentController.class).getProvDocumentXml(provDocument.getPk(), null))
                         .withRel(Constants.PATH_PROV_XML));
-        provDocumentDto.add(linkTo(methodOn(ProvController.class).getProvDocumentJPEG(provDocument.getPk(), null))
+        provDocumentDto.add(linkTo(methodOn(ProvDocumentController.class).getProvDocumentJPEG(provDocument.getPk(), null))
                 .withRel(Constants.PATH_PROV_JPEG));
         return provDocumentDto;
     }

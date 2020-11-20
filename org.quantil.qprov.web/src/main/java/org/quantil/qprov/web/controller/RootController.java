@@ -54,7 +54,8 @@ public class RootController {
         // add self-link and links to sub-controllers
         responseEntity.add(linkTo(methodOn(RootController.class).root()).withSelfRel());
         responseEntity.add(linkTo(methodOn(ProviderController.class).getProviders()).withRel(Constants.PATH_PROVIDERS));
-        responseEntity.add(linkTo(methodOn(ProvController.class).getProvenanceDocuments()).withRel(Constants.PATH_PROV));
+        responseEntity.add(linkTo(methodOn(ProvTemplateController.class).getProvenanceTemplates()).withRel(Constants.PATH_PROV_TEMPLATE));
+        responseEntity.add(linkTo(methodOn(ProvDocumentController.class).getProvenanceDocuments()).withRel(Constants.PATH_PROV));
 
         return ResponseEntity.ok(responseEntity);
     }

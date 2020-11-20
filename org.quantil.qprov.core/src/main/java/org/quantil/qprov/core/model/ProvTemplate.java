@@ -17,18 +17,15 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.core.repositories.prov;
+package org.quantil.qprov.core.model;
 
-import java.util.Optional;
+import javax.persistence.Entity;
 
-import org.openprovenance.prov.sql.QualifiedName;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.stereotype.Repository;
+import org.openprovenance.prov.sql.Document;
 
-@RepositoryRestResource(exported = false)
-@Repository
-public interface QualifiedNameRepository extends JpaRepository<QualifiedName, Long> {
+import lombok.Data;
 
-    Optional<QualifiedName> findByUri(String uri);
+@Data
+@Entity
+public class ProvTemplate extends Document {
 }

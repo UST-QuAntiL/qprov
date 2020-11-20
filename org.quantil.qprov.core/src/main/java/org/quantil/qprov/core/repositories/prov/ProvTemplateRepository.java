@@ -19,16 +19,12 @@
 
 package org.quantil.qprov.core.repositories.prov;
 
-import java.util.Optional;
-
-import org.openprovenance.prov.sql.QualifiedName;
+import org.quantil.qprov.core.model.ProvTemplate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.stereotype.Repository;
 
 @RepositoryRestResource(exported = false)
 @Repository
-public interface QualifiedNameRepository extends JpaRepository<QualifiedName, Long> {
-
-    Optional<QualifiedName> findByUri(String uri);
+public interface ProvTemplateRepository extends JpaRepository<ProvTemplate, Long> {
 }
