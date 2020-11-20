@@ -16,12 +16,6 @@
     </properties>
 
     <dependencies>
-        <!-- supporting yaml properties file -->
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -101,12 +95,6 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>16.0.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openapitools</groupId>
-            <artifactId>openapi-generator</artifactId>
-            <version>5.0.0-beta2</version>
         </dependency>
 
         <dependency>
