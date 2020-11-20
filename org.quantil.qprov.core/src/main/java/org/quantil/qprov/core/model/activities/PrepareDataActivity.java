@@ -32,7 +32,7 @@ import javax.persistence.Id;
 import org.hibernate.annotations.GenericGenerator;
 import org.openprovenance.prov.model.Statement;
 import org.quantil.qprov.core.Constants;
-import org.quantil.qprov.core.Utils;
+import org.quantil.qprov.core.utils.Utils;
 import org.quantil.qprov.core.model.ProvExtension;
 
 import lombok.Data;

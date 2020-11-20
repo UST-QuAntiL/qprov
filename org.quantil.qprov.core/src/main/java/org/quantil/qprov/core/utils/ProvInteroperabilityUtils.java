@@ -17,7 +17,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.core;
+package org.quantil.qprov.core.utils;
 
 import java.util.ArrayList;
 import java.util.List;
