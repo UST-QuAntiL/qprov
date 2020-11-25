@@ -46,7 +46,7 @@ The built products can also be executed directly using the embedded Tomcat serve
 
 The QProv systems provides a Swagger UI, as well as an HAL browser, which can be accessed on the following URLs:
 
-* Swagger UI: <http://localhost:8080/qprov/swagger-ui.html>
+* Swagger UI: <http://localhost:8080/qprov/swagger-ui>
 * HAL browser: <http://localhost:8080/qprov/explorer>
   
 Furthermore, the OpenAPI specification can be found here:
