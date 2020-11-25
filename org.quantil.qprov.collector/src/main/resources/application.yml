@@ -5,7 +5,7 @@ spring:
   jackson: {serialization: {WRITE_DATES_AS_TIMESTAMPS: false}}
   jpa:
     generate-ddl: true
-    hibernate: {ddl-auto: validate}
+    hibernate: {use-new-id-generator-mappings: false, ddl-auto: update}
     show-sql: false
     properties:
       hibernate:
@@ -34,6 +34,7 @@ logging:
     springdoc: "${LOGGING_LEVEL_SPRINGDOC:debug}"
     springframework: "${LOGGING_LEVEL_SPRINGFRAMEWORK:debug}"
     web: "${LOGGING_LEVEL_WEB:debug}"
+    org.hibernate.orm.deprecation: "${LOGGING_LEVEL_HIBERNATE_ORM:error}"
 
 # config
 qprov:
