@@ -12,10 +12,11 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         enable_lazy_load_no_trans: true
   datasource:
-    url: "jdbc:postgresql://${QPROV_DB_HOST:127.0.0.1}:${QPROV_DB_PORT:5432}/${QPROV_DB_DATABASE:qprov}"
+
+    url: "jdbc:postgresql://${POSTGRES_HOSTNAME:127.0.0.1}:${POSTGRES_PORT:5432}/${POSTGRES_DB:qprov}"
     driver-class-name: org.postgresql.Driver
-    username: "${QPROV_DB_USERNAME:qprov}"
-    password: "${QPROV_DB_PASSWORD:qprov}"
+    username: "${POSTGRES_USER:qprov}"
+    password: "${POSTGRES_PASSWORD:qprov}"
     initialization-mode: always
     continue-on-error: true
     sql-script-encoding: UTF-8
