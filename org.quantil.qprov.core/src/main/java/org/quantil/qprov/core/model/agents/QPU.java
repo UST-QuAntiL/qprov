@@ -131,13 +131,13 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
      * @return the maximum gate time of all gates on all qubits, or <code>null</code> if no calibration data is available
      */
     public BigDecimal getMaximumGateTime() {
-        BigDecimal maxGateTime = null;
+        BigDecimal maxGateTime = BigDecimal.valueOf(0);
         for (Gate gate : gateSet) {
             final Optional<GateCharacteristics> latestCharacteristicsOptional =
                     gate.getGateCharacteristics().stream().min(Comparator.comparing(GateCharacteristics::getCalibrationTime));
             if (latestCharacteristicsOptional.isPresent()) {
                 final GateCharacteristics latestCharacteristics = latestCharacteristicsOptional.get();
-                if (Objects.isNull(maxGateTime) || latestCharacteristics.getGateTime().compareTo(maxGateTime) > 0) {
+                if (latestCharacteristics.getGateTime().compareTo(maxGateTime) > 0) {
                     maxGateTime = latestCharacteristics.getGateTime();
                 }
             }
