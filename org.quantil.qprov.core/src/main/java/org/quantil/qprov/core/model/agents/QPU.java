@@ -19,8 +19,12 @@
 
 package org.quantil.qprov.core.model.agents;
 
+import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -39,7 +43,9 @@ import org.quantil.qprov.core.Constants;
 import org.quantil.qprov.core.model.ProvExtension;
 import org.quantil.qprov.core.model.entities.CalibrationMatrix;
 import org.quantil.qprov.core.model.entities.Gate;
+import org.quantil.qprov.core.model.entities.GateCharacteristics;
 import org.quantil.qprov.core.model.entities.Qubit;
+import org.quantil.qprov.core.model.entities.QubitCharacteristics;
 import org.quantil.qprov.core.utils.Utils;
 
 import lombok.Data;
@@ -103,6 +109,46 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Provider provider;
+
+    /**
+     * Return the minimum T1 time from all qubits of the last calibration or null if no calibration data is available
+     *
+     * @return the minimum T1 time of all qubits, or <code>null</code> if no calibration data is available
+     */
+    public BigDecimal getMinT1Time() {
+        BigDecimal minT1Time = null;
+        for (Qubit qubit : qubits) {
+            final Optional<QubitCharacteristics> latestCharacteristicsOptional =
+                    qubit.getQubitCharacteristics().stream().min(Comparator.comparing(QubitCharacteristics::getCalibrationTime));
+            if (latestCharacteristicsOptional.isPresent()) {
+                final QubitCharacteristics latestCharacteristics = latestCharacteristicsOptional.get();
+                if (Objects.isNull(minT1Time) || latestCharacteristics.getT1Time().compareTo(minT1Time) < 0) {
+                    minT1Time = latestCharacteristics.getT1Time();
+                }
+            }
+        }
+        return minT1Time;
+    }
+
+    /**
+     * Return the maximum gate time from all gates of the last calibration or null if no calibration data is available
+     *
+     * @return the maximum gate time of all gates on all qubits, or <code>null</code> if no calibration data is available
+     */
+    public BigDecimal getMaximumGateTime() {
+        BigDecimal maxGateTime = null;
+        for (Gate gate : gateSet) {
+            final Optional<GateCharacteristics> latestCharacteristicsOptional =
+                    gate.getGateCharacteristics().stream().min(Comparator.comparing(GateCharacteristics::getCalibrationTime));
+            if (latestCharacteristicsOptional.isPresent()) {
+                final GateCharacteristics latestCharacteristics = latestCharacteristicsOptional.get();
+                if (Objects.isNull(maxGateTime) || latestCharacteristics.getGateTime().compareTo(maxGateTime) > 0) {
+                    maxGateTime = latestCharacteristics.getGateTime();
+                }
+            }
+        }
+        return maxGateTime;
+    }
 
     @Override
     public Set<Statement> toStandardCompliantProv(QPU extensionStatement) {

@@ -19,6 +19,7 @@
 
 package org.quantil.qprov.web.dtos;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
@@ -54,8 +55,12 @@ public class QpuDto {
 
     private boolean isSimulator;
 
+    private BigDecimal minT1Time;
+
+    private BigDecimal maxGateTime;
+
     public static QpuDto createDTO(QPU qpu) {
         return new QpuDto(qpu.getDatabaseId(), qpu.getName(), qpu.getVersion(), qpu.getLastUpdated(), qpu.getLastCalibrated(), qpu.getMaxShots(),
-                qpu.getQueueSize(), qpu.getQubits().size(), qpu.isSimulator());
+                qpu.getQueueSize(), qpu.getQubits().size(), qpu.isSimulator(), qpu.getMinT1Time(), qpu.getMaximumGateTime());
     }
 }
