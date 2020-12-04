@@ -111,23 +111,18 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
     private Provider provider;
 
     /**
-     * Return the minimum T1 time from all qubits of the last calibration or null if no calibration data is available
+     * Return the average T1 time from all qubits of the last calibration or null if no calibration data is available
      *
-     * @return the minimum T1 time of all qubits, or <code>null</code> if no calibration data is available
+     * @return the average T1 time of all qubits, or 0 if no calibration data is available
      */
-    public BigDecimal getMinT1Time() {
-        BigDecimal minT1Time = null;
-        for (Qubit qubit : qubits) {
-            final Optional<QubitCharacteristics> latestCharacteristicsOptional =
-                    qubit.getQubitCharacteristics().stream().min(Comparator.comparing(QubitCharacteristics::getCalibrationTime));
-            if (latestCharacteristicsOptional.isPresent()) {
-                final QubitCharacteristics latestCharacteristics = latestCharacteristicsOptional.get();
-                if (Objects.isNull(minT1Time) || latestCharacteristics.getT1Time().compareTo(minT1Time) < 0) {
-                    minT1Time = latestCharacteristics.getT1Time();
-                }
-            }
-        }
-        return minT1Time;
+    public BigDecimal getAvgT1Time() {
+        return BigDecimal.valueOf(qubits.stream().map(qubit -> qubit.getQubitCharacteristics().stream()
+                .min(Comparator.comparing(QubitCharacteristics::getCalibrationTime)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .mapToDouble(qubitCharacteristics -> qubitCharacteristics.getT1Time().doubleValue())
+                .average()
+                .orElse(0));
     }
 
     /**
