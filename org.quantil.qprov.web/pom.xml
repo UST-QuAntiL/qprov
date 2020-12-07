@@ -10,11 +10,6 @@
 
     <artifactId>org.quantil.qprov.web</artifactId>
 
-    <properties>
-        <jackson.version>2.11.3</jackson.version>
-        <springdoc.version>1.4.8</springdoc.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

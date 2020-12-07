@@ -11,16 +11,11 @@
     <artifactId>org.quantil.qprov.collector</artifactId>
 
     <properties>
-        <default.package>org.quantil.qprov.collector</default.package>
         <jackson-databind-nullable-version>0.2.0</jackson-databind-nullable-version>
         <jackson.version>2.11.1</jackson.version>
-        <jersey.version>2.27</jersey.version>
         <junit.version>4.13.1</junit.version>
-        <modelmapper.version>2.3.0</modelmapper.version>
         <openapi-generator.version>4.3.1</openapi-generator.version>
         <slf4j-api.version>1.7.30</slf4j-api.version>
-        <springfox.version>2.9.2</springfox.version>
-        <start-class>org.quantil.qprov.collector.QProvCollector</start-class>
         <swagger-annotations.version>2.1.5</swagger-annotations.version>
     </properties>
 
