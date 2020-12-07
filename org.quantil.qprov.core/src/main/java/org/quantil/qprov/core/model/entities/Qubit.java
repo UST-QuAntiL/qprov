@@ -19,9 +19,12 @@
 
 package org.quantil.qprov.core.model.entities;
 
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,8 +39,10 @@ import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.openprovenance.prov.model.Statement;
+import org.quantil.qprov.core.Constants;
 import org.quantil.qprov.core.model.ProvExtension;
 import org.quantil.qprov.core.model.agents.QPU;
+import org.quantil.qprov.core.utils.Utils;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -93,9 +98,49 @@ public class Qubit extends org.openprovenance.prov.xml.Entity implements ProvExt
 
     @Override
     public Set<Statement> toStandardCompliantProv(Qubit qubit) {
-        // TODO: sort QubitCharactertistics using calibration date and use latest version for the PROV graph
-        // TODO: add gates for the qubits
-        return null;
+        final org.openprovenance.prov.xml.Entity entity = new org.openprovenance.prov.xml.Entity();
+
+        // add Qubit specific attributes
+        entity.setId(Utils.generateQualifiedName(databaseId.toString(), null));
+        entity.getType().add(Utils.createTypeElement(Constants.QPROV_TYPE_QUBIT));
+        entity.getOther().add(Utils.createOtherElement(Constants.QPROV_TYPE_QUBIT_NAME, name,
+                Constants.QPROV_TYPE_QUBIT_NAME + Constants.QPROV_TYPE_SUFFIX));
+
+        // add set of names from connected qubits
+        entity.getOther().add(Utils.createOtherElement(Constants.QPROV_TYPE_QUBIT_CONNECTED_QUBITS,
+                connectedQubits.stream().map(Qubit::getName).collect(Collectors.joining(",")),
+                Constants.QPROV_TYPE_QUBIT_CONNECTED_QUBITS + Constants.QPROV_TYPE_SUFFIX));
+
+        // add latest calibration data
+        String calibrationTime = Constants.QPROV_CHARACTERISTICS_NO_DATA;
+        String t1 = Constants.QPROV_CHARACTERISTICS_NO_DATA;
+        String t2 = Constants.QPROV_CHARACTERISTICS_NO_DATA;
+        String readoutError = Constants.QPROV_CHARACTERISTICS_NO_DATA;
+        final Optional<QubitCharacteristics> currentCharacteristicsOptional = qubit.getQubitCharacteristics().stream()
+                .min(Comparator.comparing(QubitCharacteristics::getCalibrationTime));
+        if (currentCharacteristicsOptional.isPresent()) {
+            // update with latest calibration data
+            final QubitCharacteristics currentCharacteristics = currentCharacteristicsOptional.get();
+            calibrationTime = currentCharacteristics.getCalibrationTime().toString();
+            t1 = currentCharacteristics.getT1Time().toString();
+            t2 = currentCharacteristics.getT2Time().toString();
+            readoutError = currentCharacteristics.getReadoutError().toString();
+        }
+        entity.getOther().add(Utils.createOtherElement(Constants.QPROV_TYPE_QUBIT_CALIBRATION_TIME,
+                calibrationTime, Constants.QPROV_TYPE_QUBIT_CALIBRATION_TIME + Constants.QPROV_TYPE_SUFFIX));
+        entity.getOther().add(Utils.createOtherElement(Constants.QPROV_TYPE_QUBIT_T1,
+                t1, Constants.QPROV_TYPE_QUBIT_T1 + Constants.QPROV_TYPE_SUFFIX));
+        entity.getOther().add(Utils.createOtherElement(Constants.QPROV_TYPE_QUBIT_T2,
+                t2, Constants.QPROV_TYPE_QUBIT_T2 + Constants.QPROV_TYPE_SUFFIX));
+        entity.getOther().add(Utils.createOtherElement(Constants.QPROV_TYPE_QUBIT_READOUT_ERROR,
+                readoutError, Constants.QPROV_TYPE_QUBIT_READOUT_ERROR + Constants.QPROV_TYPE_SUFFIX));
+
+        // add data about gates on the qubit
+        final Set<Statement> statements =
+                supportedGates.stream().flatMap(gate -> gate.toStandardCompliantProv(gate).stream()).collect(Collectors.toSet());
+        statements.add(entity);
+
+        return statements;
     }
 
     public void addSupportedGate(@NonNull Gate gate) {

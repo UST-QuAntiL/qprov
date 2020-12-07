@@ -57,6 +57,8 @@ public final class Constants {
 
     public static final String QPROV_TYPE_QPU = "qpu";
 
+    public static final String QPROV_TYPE_QUBIT = "qubit";
+
     /**** QProv type attributes ****/
     public static final String QPROV_TYPE_SUFFIX = "Type";
 
@@ -113,6 +115,22 @@ public final class Constants {
     public static final String QPROV_TYPE_QPU_VERSION = "qpuVersion";
 
     public static final String QPROV_TYPE_QPU_SIMULATOR = "isSimulator";
+
+    public static final String QPROV_TYPE_QUBIT_NAME = "qubitName";
+
+    public static final String QPROV_TYPE_QUBIT_CONNECTED_QUBITS = "connectedQubits";
+
+    public static final String QPROV_TYPE_QUBIT_T1 = "t1";
+
+    public static final String QPROV_TYPE_QUBIT_T2 = "t1";
+
+    public static final String QPROV_TYPE_QUBIT_READOUT_ERROR = "readoutError";
+
+    public static final String QPROV_TYPE_QUBIT_CALIBRATION_TIME = "calibrationTime";
+
+    /**** Default values ****/
+
+    public static final String QPROV_CHARACTERISTICS_NO_DATA = "no data";
 
     private Constants() {
     }
