@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 
@@ -55,7 +56,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -78,6 +81,8 @@ public class ProvDocumentController {
     private final ProvDocumentRepository provDocumentRepository;
 
     private final ProvInteroperabilityUtils provInteroperabilityUtils;
+
+    private final InteropFramework intF = new InteropFramework();
 
     @Operation(responses = {
             @ApiResponse(responseCode = "200")
@@ -104,15 +109,28 @@ public class ProvDocumentController {
     @Operation(responses = {@ApiResponse(responseCode = "201"),
     }, description = "Create a new PROV document and return the link which can then be used to retrieve, update, and delete it.")
     @PostMapping
-    public ResponseEntity<EntityModel<ProvDocumentDto>> createProvDocument() {
+    public ResponseEntity<EntityModel<ProvDocumentDto>> createProvDocument(
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "format", required = false) Formats.ProvFormat format) {
 
-        // create new PROV document and retrieve Id from database
         Document provDocument = new Document();
-        final Namespace ns = new Namespace();
-        ns.addKnownNamespaces();
-        provDocument.setNamespace(ns);
-        provDocument = provDocumentRepository.save(provDocument);
+        if (Objects.nonNull(file) && Objects.nonNull(format)) {
+            // create document that is passed as input
+            try {
+                final org.openprovenance.prov.model.Document inputDocument = intF.readDocument(file.getInputStream(), format, "");
+                provDocument = provInteroperabilityUtils.createProvSQLDocument(inputDocument);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        } else {
+            // prepare namespace of empty PROV document
+            final Namespace ns = new Namespace();
+            ns.addKnownNamespaces();
+            provDocument.setNamespace(ns);
+        }
 
+        provDocument = provDocumentRepository.save(provDocument);
         return new ResponseEntity<>(createEntityModel(provDocument), HttpStatus.CREATED);
     }
 
