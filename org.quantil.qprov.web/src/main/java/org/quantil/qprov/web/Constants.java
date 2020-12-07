@@ -50,6 +50,8 @@ public final class Constants {
 
     public static final String PATH_PROV_NAMESPACE = "namespace";
 
+    public static final String PATH_PROV_PARAMETERS = "parameters";
+
     public static final String PATH_PROVIDERS = "providers";
 
     public static final String PATH_QPUS = "qpus";

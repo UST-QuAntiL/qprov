@@ -200,6 +200,22 @@ public class ProvTemplateController {
         }
     }
 
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "404", description = "Not Found. PROV template with given ID doesn't exist.")
+    }, description = "Retrieve the parameters that are required to instantiate a PROV document from a PROV template.")
+    @GetMapping("/{provTemplateId}/" + Constants.PATH_PROV_PARAMETERS)
+    public HttpEntity<RepresentationModel<?>> getProvTemplateParameters(@PathVariable Long provTemplateId) {
+
+        logger.debug("Getting parameters for PROV template with Id {}!", provTemplateId);
+        final Optional<ProvTemplate> provTemplateOptional = provTemplateRepository.findById(provTemplateId);
+        if (provTemplateOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
     private EntityModel<ProvDocumentDto> createEntityModel(Document provDocument) {
         final EntityModel<ProvDocumentDto> provDocumentDto = new EntityModel<ProvDocumentDto>(ProvDocumentDto.createDTO(provDocument));
         provDocumentDto.add(linkTo(methodOn(ProvTemplateController.class).getProvTemplate(provDocument.getPk())).withSelfRel());
