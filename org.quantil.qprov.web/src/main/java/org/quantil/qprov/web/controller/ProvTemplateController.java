@@ -152,7 +152,6 @@ public class ProvTemplateController {
         logger.debug("Serializing PROV template with Id {} to JPEG!", provTemplateId);
         final Optional<ProvTemplate> provTemplateOptional = provTemplateRepository.findById(provTemplateId);
         if (provTemplateOptional.isEmpty()) {
-            response.setStatus(HttpStatus.NOT_FOUND.value());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
