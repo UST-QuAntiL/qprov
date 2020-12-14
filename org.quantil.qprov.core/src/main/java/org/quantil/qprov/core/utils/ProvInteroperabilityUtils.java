@@ -39,10 +39,12 @@ import org.openprovenance.prov.sql.Namespace;
 import org.openprovenance.prov.sql.Other;
 import org.openprovenance.prov.sql.QualifiedName;
 import org.openprovenance.prov.sql.Type;
+import org.openprovenance.prov.sql.Used;
 import org.openprovenance.prov.sql.Value;
 import org.openprovenance.prov.sql.WasAssociatedWith;
 import org.openprovenance.prov.sql.WasAttributedTo;
 import org.openprovenance.prov.sql.WasGeneratedBy;
+import org.openprovenance.prov.sql.WasInfluencedBy;
 import org.quantil.qprov.core.repositories.prov.QualifiedNameRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,6 +136,12 @@ public class ProvInteroperabilityUtils {
                 case PROV_GENERATION:
                     statementOrBundles.add(createProvSQLGeneration((org.openprovenance.prov.model.WasGeneratedBy) modelStatementOrBundle));
                     break;
+                case PROV_USAGE:
+                    statementOrBundles.add(createProvSQLUsed((org.openprovenance.prov.model.Used) modelStatementOrBundle));
+                    break;
+                case PROV_INFLUENCE:
+                    statementOrBundles.add(createProvSQLWasInfluencedBy((org.openprovenance.prov.model.WasInfluencedBy) modelStatementOrBundle));
+                    break;
                 default:
                     logger.warn("PROV document contains elements that can currently not be parsed. Ignoring them.");
             }
@@ -165,6 +173,12 @@ public class ProvInteroperabilityUtils {
                     break;
                 case PROV_GENERATION:
                     statementOrBundles.add(createProvXMLGeneration((org.openprovenance.prov.model.WasGeneratedBy) modelStatementOrBundle));
+                    break;
+                case PROV_USAGE:
+                    statementOrBundles.add(createProvXMLUsed((org.openprovenance.prov.model.Used) modelStatementOrBundle));
+                    break;
+                case PROV_INFLUENCE:
+                    statementOrBundles.add(createProvXMLWasInfluencedBy((org.openprovenance.prov.model.WasInfluencedBy) modelStatementOrBundle));
                     break;
                 default:
                     logger.warn("PROV document contains elements that can currently not be parsed. Ignoring them.");
@@ -549,5 +563,95 @@ public class ProvInteroperabilityUtils {
         wasGeneratedBy.setLocation(locations);
 
         return wasGeneratedBy;
+    }
+
+    private org.openprovenance.prov.xml.Used createProvXMLUsed(org.openprovenance.prov.model.Used modelUsed) {
+        final org.openprovenance.prov.xml.Used used = new org.openprovenance.prov.xml.Used();
+        used.setId(modelUsed.getId());
+        used.setEntity(modelUsed.getEntity());
+        used.setActivity(modelUsed.getActivity());
+        used.setTime(modelUsed.getTime());
+        used.getType().addAll(modelUsed.getType());
+        used.getOther().addAll(modelUsed.getOther());
+        used.getLocation().addAll(modelUsed.getLocation());
+        for (org.openprovenance.prov.model.LangString modelLabel : modelUsed.getLabel()) {
+            used.getLabel().add(createProvXMLLabel(modelLabel));
+        }
+        return used;
+    }
+
+    private Used createProvSQLUsed(org.openprovenance.prov.model.Used modelUsed) {
+        final Used used = new Used();
+        used.setId(createProvSQLQualifiedName(modelUsed.getId()));
+        used.setEntity(createProvSQLQualifiedName(modelUsed.getEntity()));
+        used.setActivity(createProvSQLQualifiedName(modelUsed.getActivity()));
+        used.setTime(modelUsed.getTime());
+
+        final List<org.openprovenance.prov.model.Type> types = new ArrayList<>();
+        for (org.openprovenance.prov.model.Type modelType : modelUsed.getType()) {
+            types.add(createProvSQLType(modelType));
+        }
+        used.setType(types);
+
+        final List<org.openprovenance.prov.model.Other> others = new ArrayList<>();
+        for (org.openprovenance.prov.model.Other modelOther : modelUsed.getOther()) {
+            others.add(createProvSQLOther(modelOther));
+        }
+        used.setOther(others);
+
+        final List<org.openprovenance.prov.model.LangString> labels = new ArrayList<>();
+        for (org.openprovenance.prov.model.LangString modelLabel : modelUsed.getLabel()) {
+            labels.add(createProvSQLLabel(modelLabel));
+        }
+        used.setLabel(labels);
+
+        final List<org.openprovenance.prov.model.Location> locations = new ArrayList<>();
+        for (org.openprovenance.prov.model.Location modelLocation : modelUsed.getLocation()) {
+            locations.add(createProvSQLLocation(modelLocation));
+        }
+        used.setLocation(locations);
+
+        return used;
+    }
+
+    private org.openprovenance.prov.xml.WasInfluencedBy createProvXMLWasInfluencedBy(
+            org.openprovenance.prov.model.WasInfluencedBy modelWasInfluencedBy) {
+        final org.openprovenance.prov.xml.WasInfluencedBy wasInfluencedBy = new org.openprovenance.prov.xml.WasInfluencedBy();
+        wasInfluencedBy.setId(modelWasInfluencedBy.getId());
+        wasInfluencedBy.setInfluencee(modelWasInfluencedBy.getInfluencee());
+        wasInfluencedBy.setInfluencer(modelWasInfluencedBy.getInfluencer());
+        wasInfluencedBy.getType().addAll(modelWasInfluencedBy.getType());
+        wasInfluencedBy.getOther().addAll(modelWasInfluencedBy.getOther());
+        for (org.openprovenance.prov.model.LangString modelLabel : modelWasInfluencedBy.getLabel()) {
+            wasInfluencedBy.getLabel().add(createProvXMLLabel(modelLabel));
+        }
+        return wasInfluencedBy;
+    }
+
+    private WasInfluencedBy createProvSQLWasInfluencedBy(org.openprovenance.prov.model.WasInfluencedBy modelWasInfluencedBy) {
+        final WasInfluencedBy wasInfluencedBy = new WasInfluencedBy();
+        wasInfluencedBy.setId(createProvSQLQualifiedName(modelWasInfluencedBy.getId()));
+        wasInfluencedBy.setInfluencee(createProvSQLQualifiedName(modelWasInfluencedBy.getInfluencee()));
+        wasInfluencedBy.setInfluencer(createProvSQLQualifiedName(modelWasInfluencedBy.getInfluencer()));
+
+        final List<org.openprovenance.prov.model.Type> types = new ArrayList<>();
+        for (org.openprovenance.prov.model.Type modelType : modelWasInfluencedBy.getType()) {
+            types.add(createProvSQLType(modelType));
+        }
+        wasInfluencedBy.setType(types);
+
+        final List<org.openprovenance.prov.model.Other> others = new ArrayList<>();
+        for (org.openprovenance.prov.model.Other modelOther : modelWasInfluencedBy.getOther()) {
+            others.add(createProvSQLOther(modelOther));
+        }
+        wasInfluencedBy.setOther(others);
+
+        final List<org.openprovenance.prov.model.LangString> labels = new ArrayList<>();
+        for (org.openprovenance.prov.model.LangString modelLabel : modelWasInfluencedBy.getLabel()) {
+            labels.add(createProvSQLLabel(modelLabel));
+        }
+        wasInfluencedBy.setLabel(labels);
+
+        return wasInfluencedBy;
     }
 }

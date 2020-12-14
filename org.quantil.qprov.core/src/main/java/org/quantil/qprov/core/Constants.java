@@ -122,7 +122,7 @@ public final class Constants {
 
     public static final String QPROV_TYPE_QUBIT_T1 = "t1";
 
-    public static final String QPROV_TYPE_QUBIT_T2 = "t1";
+    public static final String QPROV_TYPE_QUBIT_T2 = "t2";
 
     public static final String QPROV_TYPE_QUBIT_READOUT_ERROR = "readoutError";
 
