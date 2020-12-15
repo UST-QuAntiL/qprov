@@ -48,6 +48,8 @@ public final class Constants {
 
     public static final String PATH_PROV_JPEG = "jpeg";
 
+    public static final String PATH_PROV_PDF = "pdf";
+
     public static final String PATH_PROV_NAMESPACE = "namespace";
 
     public static final String PATH_PROV_PARAMETERS = "parameters";

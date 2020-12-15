@@ -215,6 +215,30 @@ public class ProvDocumentController {
     @Operation(responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "404", description = "Not Found. PROV document with given ID doesn't exist.")
+    }, description = "Retrieve a specific PROV document and return it as PDF.")
+    @GetMapping("/{provDocumentId}/" + Constants.PATH_PROV_PDF)
+    public HttpEntity<RepresentationModel<?>> getProvDocumentPDF(@PathVariable Long provDocumentId, HttpServletResponse response) {
+
+        logger.debug("Serializing PROV document with Id {} to PDF!", provDocumentId);
+        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        if (provDocumentOptional.isEmpty()) {
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        final InteropFramework intF = new InteropFramework();
+        try {
+            intF.writeDocument(response.getOutputStream(), Formats.ProvFormat.PDF,
+                    provInteroperabilityUtils.createProvXMLDocument(provDocumentOptional.get()));
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "404", description = "Not Found. PROV document with given ID doesn't exist.")
     }, description = "Retrieve the namespace of a specific PROV document.")
     @GetMapping("/{provDocumentId}/" + Constants.PATH_PROV_NAMESPACE)
     public ResponseEntity<EntityModel<ProvNamespaceDto>> getProvNamespace(@PathVariable Long provDocumentId) {

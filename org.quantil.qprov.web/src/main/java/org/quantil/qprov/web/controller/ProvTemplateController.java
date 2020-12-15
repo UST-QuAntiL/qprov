@@ -32,7 +32,6 @@ import org.openprovenance.prov.interop.Formats;
 import org.openprovenance.prov.interop.InteropFramework;
 import org.openprovenance.prov.sql.Document;
 import org.quantil.qprov.core.model.ProvTemplate;
-import org.quantil.qprov.core.repositories.prov.ProvEntityRepository;
 import org.quantil.qprov.core.repositories.prov.ProvTemplateRepository;
 import org.quantil.qprov.core.utils.ProvInteroperabilityUtils;
 import org.quantil.qprov.core.utils.Utils;
@@ -76,8 +75,6 @@ public class ProvTemplateController {
     private static final Logger logger = LoggerFactory.getLogger(ProvTemplateController.class);
 
     private final ProvTemplateRepository provTemplateRepository;
-
-    private final ProvEntityRepository provEntityRepository;
 
     private final ProvInteroperabilityUtils provInteroperabilityUtils;
 
@@ -157,6 +154,28 @@ public class ProvTemplateController {
 
         try {
             intF.writeDocument(response.getOutputStream(), Formats.ProvFormat.JPEG,
+                    provInteroperabilityUtils.createProvXMLDocument(provTemplateOptional.get()));
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "404", description = "Not Found. PROV template with given ID doesn't exist.")
+    }, description = "Retrieve a specific PROV template and return it as PDF.")
+    @GetMapping("/{provTemplateId}/" + Constants.PATH_PROV_PDF)
+    public HttpEntity<RepresentationModel<?>> getProvTemplatePDF(@PathVariable Long provTemplateId, HttpServletResponse response) {
+
+        logger.debug("Serializing PROV template with Id {} to PDF!", provTemplateId);
+        final Optional<ProvTemplate> provTemplateOptional = provTemplateRepository.findById(provTemplateId);
+        if (provTemplateOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        try {
+            intF.writeDocument(response.getOutputStream(), Formats.ProvFormat.PDF,
                     provInteroperabilityUtils.createProvXMLDocument(provTemplateOptional.get()));
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (IOException e) {
