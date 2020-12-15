@@ -1,4 +1,4 @@
-FROM maven:3.6.3-openjdk-16 as builder
+FROM maven:3.6.3-jdk-14 as builder
 COPY . /tmp/qprov
 WORKDIR /tmp/qprov
 RUN mvn package -DskipTests
