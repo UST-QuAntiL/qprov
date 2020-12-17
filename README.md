@@ -1,6 +1,6 @@
 # QProv
 
-[![Build Status](https://github.com/UST-QuAntiL/qprov/workflows/Java%20CI%20with%20Maven/badge.svg)]
+![Java CI with Maven](https://github.com/UST-QuAntiL/qprov/workflows/Java%20CI%20with%20Maven/badge.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 A provenance system for quantum computing, which allows collecting and analyzing important provenance attributes about quantum computations.
