@@ -59,6 +59,7 @@ import org.quantil.qprov.ibmq.client.api.LoginApi;
 import org.quantil.qprov.ibmq.client.auth.ApiKeyAuth;
 import org.quantil.qprov.ibmq.client.model.AccessToken;
 import org.quantil.qprov.ibmq.client.model.ApiToken;
+import org.quantil.qprov.ibmq.client.model.BackendStatus;
 import org.quantil.qprov.ibmq.client.model.Device;
 import org.quantil.qprov.ibmq.client.model.DeviceProperties;
 import org.quantil.qprov.ibmq.client.model.DevicePropsGate;
@@ -463,6 +464,14 @@ public class IBMQProvider implements IProvider {
 
                 try {
                     logger.debug("Getting detailed information for the QPU...");
+
+                    // get current queue size and add to QPU characteristics
+                    final BackendStatus backendStatus = backendInformationApi
+                            .getBackendInformationGetDeviceQueueStatus(IBMQConstants.IBMQ_DEFAULT_HUB, IBMQConstants.IBMQ_DEFAULT_GROUP,
+                                    IBMQConstants.IBMQ_DEFAULT_PROJECT, device.getBackendName());
+                    final BigDecimal queueSize = backendStatus.getLengthQueue();
+                    qpu.setQueueSize(queueSize.intValue());
+                    logger.debug("Current queue size: {}", queueSize);
 
                     // skip simulators in further analysis as they do not provide calibration data
                     if (Objects.isNull(device.getSimulator()) || device.getSimulator()) {
