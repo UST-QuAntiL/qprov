@@ -249,10 +249,11 @@ public class IBMQProvider implements IProvider {
         } else {
             // for simulators and QPUs with one qubit no coupling map exists, therefore just add the qubits
             for (int i = 0; i < device.getnQubits().intValue(); i++) {
-                final Qubit qubit = new Qubit();
+                Qubit qubit = new Qubit();
                 qubit.setQpu(qpu);
                 qubit.setName(String.valueOf(i));
                 qpu.getQubits().add(qubit);
+                qubit = qubitRepository.save(qubit);
 
                 qubits.put(qubit.getName(), qubit);
             }
@@ -322,7 +323,7 @@ public class IBMQProvider implements IProvider {
         for (int i = 0; i < deviceProperties.getQubits().size(); i++) {
 
             // get properties and Qubit which belong together (based on the order)
-            final List<Object> propertiesOfQubitList = deviceProperties.getQubits().get(i);
+            final List<Map<String, Object>> propertiesOfQubitList = deviceProperties.getQubits().get(i);
             final Qubit currentQubit = qubitRepository.findByQpuAndName(qpu, String.valueOf(i)).orElse(null);
 
             if (Objects.isNull(currentQubit)) {

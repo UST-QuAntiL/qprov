@@ -14,7 +14,7 @@
         <jackson-databind-nullable-version>0.2.0</jackson-databind-nullable-version>
         <jackson.version>2.11.1</jackson.version>
         <junit.version>4.13.1</junit.version>
-        <openapi-generator.version>4.3.1</openapi-generator.version>
+        <openapi-generator.version>5.0.1</openapi-generator.version>
         <slf4j-api.version>1.7.30</slf4j-api.version>
         <swagger-annotations.version>2.1.5</swagger-annotations.version>
     </properties>
@@ -212,12 +212,11 @@
                         </goals>
                         <configuration>
                             <!-- specify the openapi json/yaml -->
-                            <inputSpec>https://api.quantum-computing.ibm.com/v2/openapi.json</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/openapi.json</inputSpec>
 
                             <!-- target to generate java client code -->
                             <generatorName>java</generatorName>
 
-                            <!-- ibmq api is not valid...^^ -->
                             <skipValidateSpec>true</skipValidateSpec>
 
                             <!-- pass any necessary config options -->
