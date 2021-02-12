@@ -322,7 +322,7 @@ public class IBMQProvider implements IProvider {
         for (int i = 0; i < deviceProperties.getQubits().size(); i++) {
 
             // get properties and Qubit which belong together (based on the order)
-            final List<Object> propertiesOfQubitList = deviceProperties.getQubits().get(i);
+            final List<Map<String, Object>> propertiesOfQubitList = deviceProperties.getQubits().get(i);
             final Qubit currentQubit = qubitRepository.findByQpuAndName(qpu, String.valueOf(i)).orElse(null);
 
             if (Objects.isNull(currentQubit)) {
