@@ -249,10 +249,11 @@ public class IBMQProvider implements IProvider {
         } else {
             // for simulators and QPUs with one qubit no coupling map exists, therefore just add the qubits
             for (int i = 0; i < device.getnQubits().intValue(); i++) {
-                final Qubit qubit = new Qubit();
+                Qubit qubit = new Qubit();
                 qubit.setQpu(qpu);
                 qubit.setName(String.valueOf(i));
                 qpu.getQubits().add(qubit);
+                qubit = qubitRepository.save(qubit);
 
                 qubits.put(qubit.getName(), qubit);
             }
