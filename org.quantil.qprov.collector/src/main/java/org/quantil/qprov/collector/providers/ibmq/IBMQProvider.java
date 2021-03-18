@@ -477,6 +477,7 @@ public class IBMQProvider implements IProvider {
                     // skip simulators in further analysis as they do not provide calibration data
                     if (Objects.isNull(device.getSimulator()) || device.getSimulator()) {
                         logger.debug("Device is simulator. Skipping data retrieval!");
+                        qpuRepository.save(qpu);
                         continue;
                     }
 
