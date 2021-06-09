@@ -23,7 +23,7 @@ spring:
 
 # tomcat
 server:
-  port: ${SERVER_PORT:8081}
+  port: ${SERVER_PORT:5021}
   servlet:
     contextPath: "/qprov-collector"
 
