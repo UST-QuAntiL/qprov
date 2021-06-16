@@ -6,7 +6,7 @@ RUN mvn package -DskipTests
 FROM openjdk:16-jdk-alpine
 LABEL maintainer = "Benjamin Weder <benjamin.weder@iaas.uni-stuttgart.de>"
 
-ENV SERVER_PORT 8080
+ENV SERVER_PORT 5020
 
 COPY --from=builder /tmp/qprov/org.quantil.qprov.web/target/org.quantil.qprov.web.jar /app/
 
