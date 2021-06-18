@@ -51,7 +51,7 @@ jobs:
           tags: planqk/qprov:${{ steps.vars.outputs.tag }}
       -
         name: Build and push QProv Collector latest
-        if: ${{ steps.vars.outputs.tag }} == 'master'
+        if: ${{ steps.vars.outputs.tag == 'master' }}
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -60,7 +60,7 @@ jobs:
           tags: planqk/qprov-collector:latest
       -
         name: Build and push QProv Collector version 
-        if: ${{ steps.vars.outputs.tag }} != 'master'
+        if: ${{ steps.vars.outputs.tag != 'master' }}
         uses: docker/build-push-action@v2
         with:
           context: .
