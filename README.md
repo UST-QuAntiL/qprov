@@ -24,16 +24,16 @@ Alternatively you can build and run the QProv Docker images by your own:
     `docker build -t collector -f Dockerfile-Collector .`
 2. Build the QProv system:
     `docker build -t qprov -f Dockerfile-Web`
-3. Run the Docker containers: `docker run -p 8080:8080 qprov` and `docker run -p 8081:8080 collector`
+3. Run the Docker containers: `docker run -p 5020:5020 qprov` and `docker run -p 5021:5021 collector`
 
-Then, the QProv system can be accessed on <http://localhost:8080/qprov>. 
+Then, the QProv system can be accessed on <http://localhost:5020/qprov>. 
 
-The collection of current data can either be triggered via the collector API (POST on <http://localhost:8081/qprov-collector/collect>) or it can be configured to run the collection periodically (please refer to the [documentation](docs)).
+The collection of current data can either be triggered via the collector API (POST on <http://localhost:5021/qprov-collector/collect>) or it can be configured to run the collection periodically (please refer to the [documentation](docs)).
 
 You can also use the pre-built images:
 
-    docker run -p 8080:8080 planqk/qprov
-    docker run -p 8081:8080 planqk/qprov-collector
+    docker run -p 5020:5020 planqk/qprov
+    docker run -p 5021:5021 planqk/qprov-collector
 
 ## Running on embedded Tomcat
 
@@ -46,13 +46,13 @@ The built products can also be executed directly using the embedded Tomcat serve
 
 The QProv systems provides a Swagger UI, as well as an HAL browser, which can be accessed on the following URLs:
 
-* Swagger UI: <http://localhost:8080/qprov/swagger-ui>
-* HAL browser: <http://localhost:8080/qprov/explorer>
+* Swagger UI: <http://localhost:5020/qprov/swagger-ui>
+* HAL browser: <http://localhost:5020/qprov/explorer>
   
 Furthermore, the OpenAPI specification can be found here:
   
-* OpenAPI Json: <http://localhost:8080/qprov/v3/api-docs>
-* OpenAPI Yaml: <http://localhost:8080/qprov/v3/api-docs.yaml>
+* OpenAPI Json: <http://localhost:5020/qprov/v3/api-docs>
+* OpenAPI Yaml: <http://localhost:5020/qprov/v3/api-docs.yaml>
 
 ## Haftungsausschluss
 
