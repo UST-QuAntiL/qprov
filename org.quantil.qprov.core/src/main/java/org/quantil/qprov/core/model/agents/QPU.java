@@ -125,6 +125,21 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
     }
 
     /**
+     * Return the average readout error from all qubits of the last calibration or null if no calibration data is available
+     *
+     * @return the average readout error of all qubits, or 0 if no calibration data is available
+     */
+    public BigDecimal getAvgReadoutError() {
+        return BigDecimal.valueOf(qubits.stream().map(qubit -> qubit.getQubitCharacteristics().stream()
+                .min(Comparator.comparing(QubitCharacteristics::getCalibrationTime)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .mapToDouble(qubitCharacteristics -> qubitCharacteristics.getReadoutError().doubleValue())
+                .average()
+                .orElse(0));
+    }
+
+    /**
      * Return the maximum gate time from all gates of the last calibration or null if no calibration data is available
      *
      * @return the maximum gate time of all gates on all qubits, or <code>null</code> if no calibration data is available

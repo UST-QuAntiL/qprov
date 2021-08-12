@@ -57,10 +57,13 @@ public class QpuDto {
 
     private BigDecimal avgT1Time;
 
+    private BigDecimal avgReadoutError;
+
     private BigDecimal maxGateTime;
 
     public static QpuDto createDTO(QPU qpu) {
         return new QpuDto(qpu.getDatabaseId(), qpu.getName(), qpu.getVersion(), qpu.getLastUpdated(), qpu.getLastCalibrated(), qpu.getMaxShots(),
-                qpu.getQueueSize(), qpu.getQubits().size(), qpu.isSimulator(), qpu.getAvgT1Time(), qpu.getMaximumGateTime());
+                qpu.getQueueSize(), qpu.getQubits().size(), qpu.isSimulator(), qpu.getAvgT1Time(),
+                qpu.getAvgReadoutError(), qpu.getMaximumGateTime());
     }
 }
