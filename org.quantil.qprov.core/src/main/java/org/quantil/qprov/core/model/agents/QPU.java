@@ -125,6 +125,22 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
     }
 
     /**
+     * Return the average T2 time from all qubits of the last calibration or null if no calibration data is available
+     *
+     * @return the average T2 time of all qubits, or 0 if no calibration data is available
+     */
+    public BigDecimal getAvgT2Time() {
+        return BigDecimal.valueOf(qubits.stream().map(qubit -> qubit.getQubitCharacteristics().stream()
+            .min(Comparator.comparing(QubitCharacteristics::getCalibrationTime)))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .mapToDouble(qubitCharacteristics -> qubitCharacteristics.getT2Time().doubleValue())
+            .average()
+            .orElse(0));
+    }
+
+
+    /**
      * Return the average readout error from all qubits of the last calibration or null if no calibration data is available
      *
      * @return the average readout error of all qubits, or 0 if no calibration data is available
