@@ -172,6 +172,22 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
     }
 
     /**
+     * Return the average multi qubit gate time from all multi qubit gates of the last calibration or null if no calibration data is available
+     *
+     * @return the average multi qubit gate time of all multi qubit gates, or 0 if no calibration data is available
+     */
+    public BigDecimal getAvgMultiQubitGateTime() {
+        return BigDecimal.valueOf(gateSet.stream().filter(gate -> gate.getOperatingQubits().size() > 1)
+            .map(gate -> gate.getGateCharacteristics().stream()
+            .min(Comparator.comparing(GateCharacteristics::getCalibrationTime)))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateTime().doubleValue())
+            .average()
+            .orElse(0));
+    }
+
+    /**
      * Return the maximum gate time from all gates of the last calibration or null if no calibration data is available
      *
      * @return the maximum gate time of all gates on all qubits, or <code>null</code> if no calibration data is available
