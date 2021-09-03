@@ -46,7 +46,7 @@ Trigger the collection of provenance data by executing calibration circuits on t
 
 
 Thereby, `$IP` is the IP address of your system if you run QProv locally, or the IP address of the docker engine if you use the dockerized setup.
-Furthermore, `$COLLECTOR_PORT` is the port where the provenance collector runs and defaults to `8081`.
+Furthermore, `$COLLECTOR_PORT` is the port where the provenance collector runs and defaults to `5021`.
 
 The execution of quantum circuits on IBMQ is done by utilizing the capabilities of the [qiskit-service](https://github.com/UST-QuAntiL/qiskit-service).
 Thus, it has to be started when setting `QPROV_IBMQ_EXECUTE_CIRCUITS` to `true`.

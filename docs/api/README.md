@@ -1,6 +1,6 @@
 # Provenance API
 
-The REST API of the QProv system consists of three major parts which will be discussed in the following and can also be seen in the Swagger UI: <http://localhost:8080/qprov/swagger-ui>
+The REST API of the QProv system consists of three major parts which will be discussed in the following and can also be seen in the Swagger UI: <http://localhost:5020/qprov/swagger-ui>
 
 ### Provider
 
