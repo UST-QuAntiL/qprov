@@ -125,6 +125,22 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
     }
 
     /**
+     * Return the average T2 time from all qubits of the last calibration or null if no calibration data is available
+     *
+     * @return the average T2 time of all qubits, or 0 if no calibration data is available
+     */
+    public BigDecimal getAvgT2Time() {
+        return BigDecimal.valueOf(qubits.stream().map(qubit -> qubit.getQubitCharacteristics().stream()
+            .min(Comparator.comparing(QubitCharacteristics::getCalibrationTime)))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .mapToDouble(qubitCharacteristics -> qubitCharacteristics.getT2Time().doubleValue())
+            .average()
+            .orElse(0));
+    }
+
+
+    /**
      * Return the average readout error from all qubits of the last calibration or null if no calibration data is available
      *
      * @return the average readout error of all qubits, or 0 if no calibration data is available
@@ -137,6 +153,38 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
                 .mapToDouble(qubitCharacteristics -> qubitCharacteristics.getReadoutError().doubleValue())
                 .average()
                 .orElse(0));
+    }
+
+    /**
+     * Return the average multi qubit gate error from all multi qubit gates of the last calibration or null if no calibration data is available
+     *
+     * @return the average multi qubit gate error of all multi qubit gates, or 0 if no calibration data is available
+     */
+    public BigDecimal getAvgMultiQubitGateError() {
+        return BigDecimal.valueOf(gateSet.stream().filter(gate -> gate.getOperatingQubits().size() > 1)
+            .map(gate -> gate.getGateCharacteristics().stream()
+            .min(Comparator.comparing(GateCharacteristics::getCalibrationTime)))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateFidelity().doubleValue())
+            .average()
+            .orElse(0));
+    }
+
+    /**
+     * Return the average multi qubit gate time from all multi qubit gates of the last calibration or null if no calibration data is available
+     *
+     * @return the average multi qubit gate time of all multi qubit gates, or 0 if no calibration data is available
+     */
+    public BigDecimal getAvgMultiQubitGateTime() {
+        return BigDecimal.valueOf(gateSet.stream().filter(gate -> gate.getOperatingQubits().size() > 1)
+            .map(gate -> gate.getGateCharacteristics().stream()
+            .min(Comparator.comparing(GateCharacteristics::getCalibrationTime)))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateTime().doubleValue())
+            .average()
+            .orElse(0));
     }
 
     /**

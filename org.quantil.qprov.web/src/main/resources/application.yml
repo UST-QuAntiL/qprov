@@ -9,7 +9,7 @@ spring:
     show-sql: false
     properties: {hibernate: {dialect: org.hibernate.dialect.PostgreSQLDialect}}
   datasource:
-    url: "jdbc:postgresql://${POSTGRES_HOSTNAME:127.0.0.1}:${POSTGRES_PORT:5432}/${POSTGRES_DB:qprov}"
+    url: "jdbc:postgresql://${POSTGRES_HOSTNAME:127.0.0.1}:${POSTGRES_PORT:5060}/${POSTGRES_DB:qprov}"
     driver-class-name: org.postgresql.Driver
     username: "${POSTGRES_USER:qprov}"
     password: "${POSTGRES_PASSWORD:qprov}"
