@@ -172,6 +172,22 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
     }
 
     /**
+     * Return the average single qubit gate error from all single qubit gates of the last calibration or null if no calibration data is available
+     *
+     * @return the average single qubit gate error of all single qubit gates, or 0 if no calibration data is available
+     */
+    public BigDecimal getAvgSingleQubitGateError() {
+        return BigDecimal.valueOf(gateSet.stream().filter(gate -> gate.getOperatingQubits().size() == 1)
+            .map(gate -> gate.getGateCharacteristics().stream()
+                .min(Comparator.comparing(GateCharacteristics::getCalibrationTime)))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateFidelity().doubleValue())
+            .average()
+            .orElse(0));
+    }
+
+    /**
      * Return the average multi qubit gate time from all multi qubit gates of the last calibration or null if no calibration data is available
      *
      * @return the average multi qubit gate time of all multi qubit gates, or 0 if no calibration data is available
@@ -180,6 +196,22 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
         return BigDecimal.valueOf(gateSet.stream().filter(gate -> gate.getOperatingQubits().size() > 1)
             .map(gate -> gate.getGateCharacteristics().stream()
             .min(Comparator.comparing(GateCharacteristics::getCalibrationTime)))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateTime().doubleValue())
+            .average()
+            .orElse(0));
+    }
+
+    /**
+     * Return the average single qubit gate time from all single qubit gates of the last calibration or null if no calibration data is available
+     *
+     * @return the average single qubit gate time of all single qubit gates, or 0 if no calibration data is available
+     */
+    public BigDecimal getAvgSingleQubitGateTime() {
+        return BigDecimal.valueOf(gateSet.stream().filter(gate -> gate.getOperatingQubits().size() == 1)
+            .map(gate -> gate.getGateCharacteristics().stream()
+                .min(Comparator.comparing(GateCharacteristics::getCalibrationTime)))
             .filter(Optional::isPresent)
             .map(Optional::get)
             .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateTime().doubleValue())
