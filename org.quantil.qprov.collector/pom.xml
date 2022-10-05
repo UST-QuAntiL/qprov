@@ -12,7 +12,7 @@
 
     <properties>
         <jackson-databind-nullable-version>0.2.0</jackson-databind-nullable-version>
-        <jackson.version>2.11.1</jackson.version>
+        <jackson.version>2.12.6.1</jackson.version>
         <junit.version>4.13.1</junit.version>
         <openapi-generator.version>5.1.0</openapi-generator.version>
         <slf4j-api.version>1.7.30</slf4j-api.version>
