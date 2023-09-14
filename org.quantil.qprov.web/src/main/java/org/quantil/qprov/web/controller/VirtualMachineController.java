@@ -132,8 +132,6 @@ public class VirtualMachineController {
         virtualMachineDto.add(linkTo(methodOn(VirtualMachineController.class).getVirtualMachine(virtualMachine.getDatabaseId())).withSelfRel());
         return virtualMachineDto;
     }
-
-
 }
 
 

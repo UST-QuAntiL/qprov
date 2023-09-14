@@ -56,6 +56,4 @@ public class HardwareCharacteristicsDto {
                 hardwareCharacteristics.getClockSpeed(),
                 hardwareCharacteristics.getRamUsage(), hardwareCharacteristics.getDiskUsage());
     }
-
-
 }
