@@ -48,13 +48,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-
-
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 public class VirtualMachine extends org.openprovenance.prov.xml.Agent implements ProvExtension<VirtualMachine> {
-
 
     @Id
     @Getter

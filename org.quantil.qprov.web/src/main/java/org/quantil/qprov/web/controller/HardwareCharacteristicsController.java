@@ -19,7 +19,6 @@
 
 package org.quantil.qprov.web.controller;
 
-
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -53,7 +52,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 
 @io.swagger.v3.oas.annotations.tags.Tag(name = Constants.TAG_VIRTUAL_MACHINE)
 @RestController
@@ -138,6 +136,4 @@ public class HardwareCharacteristicsController {
         virtualMachineDto.add(linkTo(methodOn(VirtualMachineController.class).getVirtualMachine(virtualMachine.getDatabaseId())).withSelfRel());
         return virtualMachineDto;
     }
-
-
 }
