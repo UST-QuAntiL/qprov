@@ -1,11 +1,11 @@
 # spring boot
 spring:
-  output: {ansi: {enabled: ALWAYS}}
-  mvc: {log-request-details: true}
-  jackson: {serialization: {WRITE_DATES_AS_TIMESTAMPS: false}}
+  output: { ansi: { enabled: ALWAYS } }
+  mvc: { log-request-details: true }
+  jackson: { serialization: { WRITE_DATES_AS_TIMESTAMPS: false } }
   jpa:
     generate-ddl: true
-    hibernate: {use-new-id-generator-mappings: false, ddl-auto: update}
+    hibernate: { use-new-id-generator-mappings: false, ddl-auto: update }
     show-sql: false
     properties:
       hibernate:
@@ -45,7 +45,14 @@ qprov:
     auto-collect: ${QPROV_IBMQ_AUTO_COLLECT:false}
     auto-collect-interval: ${QPROV_IBMQ_AUTO_COLLECT_INTERVAL:60}
     auto-collect-interval-circuits: ${QPROV_IBMQ_AUTO_COLLECT_INTERVAL_CIRCUITS:180}
-    qiskit-service:
-      hostname: "${QISKIT_SERVICE_HOSTNAME:127.0.0.1}"
-      port: ${QISKIT_SERVICE_PORT:5013}
-      version: "v1.0"
+  aws:
+    token: "${QPROV_AWS_TOKEN:token}"
+    secret-token: "${QPROV_AWS_SECRET_TOKEN:secretToken}"
+    execute-calibration: ${QPROV_AWS_EXECUTE_CIRCUITS:false}
+    auto-collect: ${QPROV_AWS_AUTO_COLLECT:false}
+    auto-collect-interval: ${QPROV_AWS_AUTO_COLLECT_INTERVAL:60}
+    auto-collect-interval-circuits: ${QPROV_AWS_AUTO_COLLECT_INTERVAL_CIRCUITS:180}
+  qiskit-service:
+    hostname: "${QISKIT_SERVICE_HOSTNAME:127.0.0.1}"
+    port: ${QISKIT_SERVICE_PORT:5013}
+    version: "v1.0"

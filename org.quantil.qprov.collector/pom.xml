@@ -194,6 +194,12 @@
             <artifactId>org.quantil.qprov.core</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-braket</artifactId>
+            <version>1.12.556</version>
+        </dependency>
     </dependencies>
 
     <build>
