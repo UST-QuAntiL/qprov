@@ -19,6 +19,12 @@
 
 package org.quantil.qprov.core.model.entities;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,12 +38,6 @@ import org.openprovenance.prov.model.Statement;
 import org.quantil.qprov.core.Constants;
 import org.quantil.qprov.core.model.ProvExtension;
 import org.quantil.qprov.core.utils.Utils;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @EqualsAndHashCode(callSuper = true)
 @Data

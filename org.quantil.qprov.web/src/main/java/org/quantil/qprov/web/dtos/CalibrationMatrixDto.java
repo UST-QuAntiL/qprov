@@ -19,14 +19,14 @@
 
 package org.quantil.qprov.web.dtos;
 
+import java.util.Date;
+import java.util.UUID;
+import java.util.Vector;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.quantil.qprov.core.model.entities.CalibrationMatrix;
-
-import java.util.Date;
-import java.util.UUID;
-import java.util.Vector;
 
 /**
  * Data transfer object for Calibration Matrices ({@link org.quantil.qprov.core.model.entities.CalibrationMatrix}).

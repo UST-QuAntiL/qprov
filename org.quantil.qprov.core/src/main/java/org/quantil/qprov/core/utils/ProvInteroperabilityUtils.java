@@ -19,6 +19,12 @@
 
 package org.quantil.qprov.core.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import lombok.AllArgsConstructor;
 import org.openprovenance.prov.model.LangString;
 import org.openprovenance.prov.model.Statement;
@@ -29,12 +35,6 @@ import org.quantil.qprov.core.repositories.prov.QualifiedNameRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Utility functions to convert PROV documents from the XML or Model package of the PROV toolbox to equivalent documents from the SQL package and in

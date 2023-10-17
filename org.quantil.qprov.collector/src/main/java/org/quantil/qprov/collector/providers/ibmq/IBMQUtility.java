@@ -19,16 +19,16 @@
 
 package org.quantil.qprov.collector.providers.ibmq;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 import org.quantil.qprov.core.model.entities.Gate;
 import org.quantil.qprov.core.model.entities.Qubit;
 import org.quantil.qprov.ibmq.client.model.DevicePropsGate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 public abstract class IBMQUtility {
 

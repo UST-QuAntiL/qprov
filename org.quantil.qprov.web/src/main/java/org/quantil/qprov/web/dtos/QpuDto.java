@@ -19,14 +19,14 @@
 
 package org.quantil.qprov.web.dtos;
 
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.quantil.qprov.core.model.agents.QPU;
-
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.UUID;
 
 /**
  * Data transfer object for QPUs ({@link org.quantil.qprov.core.model.agents.QPU}).

@@ -19,6 +19,10 @@
 
 package org.quantil.qprov.core.model.agents;
 
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
@@ -28,10 +32,6 @@ import org.quantil.qprov.core.Constants;
 import org.quantil.qprov.core.model.ProvExtension;
 import org.quantil.qprov.core.model.entities.HardwareCharacteristics;
 import org.quantil.qprov.core.utils.Utils;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @EqualsAndHashCode(callSuper = true)
 @Data

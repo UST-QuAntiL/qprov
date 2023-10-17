@@ -19,16 +19,16 @@
 
 package org.quantil.qprov.core.model.entities;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.openprovenance.prov.model.Statement;
 import org.quantil.qprov.core.model.ProvExtension;
 import org.quantil.qprov.core.model.agents.QPU;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @Data

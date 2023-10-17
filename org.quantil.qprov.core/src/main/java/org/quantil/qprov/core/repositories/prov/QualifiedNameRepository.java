@@ -19,12 +19,12 @@
 
 package org.quantil.qprov.core.repositories.prov;
 
+import java.util.Optional;
+
 import org.quantil.qprov.core.model.prov.ProvQualifiedName;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
 
 @RepositoryRestResource(exported = false)
 @Repository
