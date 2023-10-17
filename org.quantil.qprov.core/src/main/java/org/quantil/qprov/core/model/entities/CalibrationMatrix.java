@@ -23,10 +23,20 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.Vector;
 
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 import org.quantil.qprov.core.model.agents.QPU;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.annotations.GenericGenerator;
 
 @Data
 @Entity

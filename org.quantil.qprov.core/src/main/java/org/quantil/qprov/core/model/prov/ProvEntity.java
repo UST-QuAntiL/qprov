@@ -1,6 +1,5 @@
 package org.quantil.qprov.core.model.prov;
 
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 

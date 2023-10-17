@@ -27,6 +27,7 @@ import java.util.Objects;
 import org.quantil.qprov.core.model.entities.Gate;
 import org.quantil.qprov.core.model.entities.Qubit;
 import org.quantil.qprov.ibmq.client.model.DevicePropsGate;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

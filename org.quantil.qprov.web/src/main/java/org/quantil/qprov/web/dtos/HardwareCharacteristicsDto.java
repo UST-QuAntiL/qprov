@@ -22,11 +22,12 @@ package org.quantil.qprov.web.dtos;
 import java.util.Date;
 import java.util.UUID;
 
+import org.quantil.qprov.core.model.entities.HardwareCharacteristics;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.quantil.qprov.core.model.entities.HardwareCharacteristics;
 
 /**
  * Data transfer object for hardware characteristics ({@link org.quantil.qprov.core.model.entities.HardwareCharacteristics}).

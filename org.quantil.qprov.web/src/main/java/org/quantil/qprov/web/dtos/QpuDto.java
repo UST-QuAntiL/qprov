@@ -23,10 +23,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
+import org.quantil.qprov.core.model.agents.QPU;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.quantil.qprov.core.model.agents.QPU;
 
 /**
  * Data transfer object for QPUs ({@link org.quantil.qprov.core.model.agents.QPU}).

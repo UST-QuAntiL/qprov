@@ -21,10 +21,11 @@ package org.quantil.qprov.web.dtos;
 
 import java.util.UUID;
 
+import org.quantil.qprov.core.model.entities.Qubit;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.quantil.qprov.core.model.entities.Qubit;
 
 /**
  * Data transfer object for Qubits ({@link org.quantil.qprov.core.model.entities.Qubit}).

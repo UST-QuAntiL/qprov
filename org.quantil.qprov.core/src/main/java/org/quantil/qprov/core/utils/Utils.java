@@ -21,6 +21,9 @@ package org.quantil.qprov.core.utils;
 
 import java.util.Objects;
 
+import org.quantil.qprov.core.Constants;
+import org.quantil.qprov.core.model.ProvTemplate;
+
 import org.openprovenance.prov.interop.InteropFramework;
 import org.openprovenance.prov.model.Namespace;
 import org.openprovenance.prov.model.ProvFactory;
@@ -28,8 +31,6 @@ import org.openprovenance.prov.model.QualifiedName;
 import org.openprovenance.prov.model.Value;
 import org.openprovenance.prov.xml.Other;
 import org.openprovenance.prov.xml.Type;
-import org.quantil.qprov.core.Constants;
-import org.quantil.qprov.core.model.ProvTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -23,11 +23,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.quantil.qprov.core.model.entities.Gate;
+import org.quantil.qprov.core.model.entities.Qubit;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.quantil.qprov.core.model.entities.Gate;
-import org.quantil.qprov.core.model.entities.Qubit;
 
 /**
  * Data transfer object for Gates ({@link org.quantil.qprov.core.model.entities.Gate}).

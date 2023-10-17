@@ -26,7 +26,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.openprovenance.prov.model.*;
+import org.openprovenance.prov.model.Attribute;
+import org.openprovenance.prov.model.LangString;
+import org.openprovenance.prov.model.Location;
+import org.openprovenance.prov.model.Other;
+import org.openprovenance.prov.model.QualifiedName;
+import org.openprovenance.prov.model.Type;
 import org.openprovenance.prov.sql.Activity;
 
 @EqualsAndHashCode

@@ -23,10 +23,11 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.Vector;
 
+import org.quantil.qprov.core.model.entities.CalibrationMatrix;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.quantil.qprov.core.model.entities.CalibrationMatrix;
 
 /**
  * Data transfer object for Calibration Matrices ({@link org.quantil.qprov.core.model.entities.CalibrationMatrix}).

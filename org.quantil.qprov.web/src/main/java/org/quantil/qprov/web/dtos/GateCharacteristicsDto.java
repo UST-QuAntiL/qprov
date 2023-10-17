@@ -23,11 +23,12 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
+import org.quantil.qprov.core.model.entities.GateCharacteristics;
+import org.quantil.qprov.core.model.entities.QubitCharacteristics;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.quantil.qprov.core.model.entities.GateCharacteristics;
-import org.quantil.qprov.core.model.entities.QubitCharacteristics;
 
 /**
  * Data transfer object for qubit characteristics ({@link QubitCharacteristics}).

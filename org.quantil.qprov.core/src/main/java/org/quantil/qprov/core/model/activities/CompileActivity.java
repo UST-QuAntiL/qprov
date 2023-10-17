@@ -26,6 +26,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.quantil.qprov.core.Constants;
+import org.quantil.qprov.core.model.ProvExtension;
+import org.quantil.qprov.core.utils.Utils;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,9 +40,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.openprovenance.prov.model.Statement;
-import org.quantil.qprov.core.Constants;
-import org.quantil.qprov.core.model.ProvExtension;
-import org.quantil.qprov.core.utils.Utils;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
