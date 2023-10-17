@@ -9,11 +9,11 @@ public class ProvActivity extends Activity {
     @Id
     private Long id;
 
-    public void setProvActivityId(Long id) {
-        this.id = id;
-    }
-
     public Long getProvActivityId() {
         return id;
+    }
+
+    public void setProvActivityId(Long id) {
+        this.id = id;
     }
 }

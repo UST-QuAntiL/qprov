@@ -19,16 +19,15 @@
 
 package org.quantil.qprov.web.dtos;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import org.quantil.qprov.core.model.entities.Gate;
-import org.quantil.qprov.core.model.entities.Qubit;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.quantil.qprov.core.model.entities.Gate;
+import org.quantil.qprov.core.model.entities.Qubit;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Data transfer object for Gates ({@link org.quantil.qprov.core.model.entities.Gate}).

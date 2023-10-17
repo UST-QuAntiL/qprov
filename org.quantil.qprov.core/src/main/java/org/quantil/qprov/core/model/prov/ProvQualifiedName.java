@@ -1,7 +1,9 @@
 package org.quantil.qprov.core.model.prov;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import org.openprovenance.prov.model.QualifiedNameUtils;
 
 @Entity

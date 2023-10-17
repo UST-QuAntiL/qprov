@@ -9,11 +9,11 @@ public class ProvAgent extends Agent {
     @Id
     private Long id;
 
-    public void setProvAgentId(Long id) {
-        this.id = id;
-    }
-
     public Long getProvAgentId() {
         return id;
+    }
+
+    public void setProvAgentId(Long id) {
+        this.id = id;
     }
 }

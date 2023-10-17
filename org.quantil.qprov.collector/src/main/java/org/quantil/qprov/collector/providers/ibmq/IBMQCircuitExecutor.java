@@ -19,11 +19,6 @@
 
 package org.quantil.qprov.collector.providers.ibmq;
 
-import java.net.URI;
-import java.util.Date;
-import java.util.Objects;
-import java.util.Vector;
-
 import org.quantil.qprov.collector.Constants;
 import org.quantil.qprov.collector.providers.ibmq.qiskit.service.QiskitServiceRequest;
 import org.quantil.qprov.collector.providers.ibmq.qiskit.service.QiskitServiceResult;
@@ -38,6 +33,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
+import java.net.URI;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Vector;
 
 @Component
 public class IBMQCircuitExecutor {

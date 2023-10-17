@@ -19,14 +19,13 @@
 
 package org.quantil.qprov.web.dtos;
 
-import java.util.Map;
-
-import org.openprovenance.prov.model.Namespace;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.openprovenance.prov.model.Namespace;
+
+import java.util.Map;
 
 @EqualsAndHashCode
 @Data

@@ -19,9 +19,9 @@
 
 package org.quantil.qprov.core.model;
 
-import java.util.Set;
-
 import org.openprovenance.prov.model.Statement;
+
+import java.util.Set;
 
 /**
  * Interface to define PROV extensions that can be transformed into standard-compliant PROV

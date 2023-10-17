@@ -1,37 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.quantil</groupId>
-	<artifactId>qprov</artifactId>
-	<packaging>pom</packaging>
-	<version>1.1.1</version>
-	<name>qprov</name>
-	<description>Provenance System for Quantum Computing</description>
+    <groupId>org.quantil</groupId>
+    <artifactId>qprov</artifactId>
+    <packaging>pom</packaging>
+    <version>1.1.1</version>
+    <name>qprov</name>
+    <description>Provenance System for Quantum Computing</description>
 
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.1.4</version>
-		<relativePath />
-	</parent>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.1.4</version>
+        <relativePath/>
+    </parent>
 
-	<properties>
-		<java.version>17</java.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.checkstyle.version>3.1.1</maven.checkstyle.version>
-		<checkstyle.addons.version>6.0.1</checkstyle.addons.version>
-		<checkstyle.config.location>checkstyle.xml</checkstyle.config.location>
-		<springfox.version>2.9.2</springfox.version>
-		<springdoc.version>1.4.8</springdoc.version>
-		<spring.version>3.1.4</spring.version>
-		<prov.toolbox.version>2.0.3</prov.toolbox.version>
-		<lombok.version>1.18.30</lombok.version>
-	</properties>
+    <properties>
+        <java.version>17</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.checkstyle.version>3.1.1</maven.checkstyle.version>
+        <checkstyle.addons.version>6.0.1</checkstyle.addons.version>
+        <checkstyle.config.location>checkstyle.xml</checkstyle.config.location>
+        <springfox.version>2.9.2</springfox.version>
+        <springdoc.version>1.4.8</springdoc.version>
+        <spring.version>3.1.4</spring.version>
+        <prov.toolbox.version>2.0.3</prov.toolbox.version>
+        <lombok.version>1.18.30</lombok.version>
+    </properties>
 
-	<modules>
-		<module>org.quantil.qprov.core</module>
-		<module>org.quantil.qprov.web</module>
-		<module>org.quantil.qprov.collector</module>
-	</modules>
+    <modules>
+        <module>org.quantil.qprov.core</module>
+        <module>org.quantil.qprov.web</module>
+        <module>org.quantil.qprov.collector</module>
+    </modules>
 </project>

@@ -20,7 +20,6 @@
 package org.quantil.qprov.collector.providers.ibmq.qiskit.service;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

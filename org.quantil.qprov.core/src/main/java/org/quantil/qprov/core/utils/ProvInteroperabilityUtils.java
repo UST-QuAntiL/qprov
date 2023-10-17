@@ -19,38 +19,22 @@
 
 package org.quantil.qprov.core.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import lombok.AllArgsConstructor;
 import org.openprovenance.prov.model.LangString;
 import org.openprovenance.prov.model.Statement;
 import org.openprovenance.prov.model.StatementOrBundle;
-import org.openprovenance.prov.sql.Activity;
-import org.openprovenance.prov.sql.Agent;
-import org.openprovenance.prov.sql.Bundle;
-import org.openprovenance.prov.sql.Document;
-import org.openprovenance.prov.sql.Entity;
-import org.openprovenance.prov.sql.InternationalizedString;
-import org.openprovenance.prov.sql.Location;
-import org.openprovenance.prov.sql.Namespace;
-import org.openprovenance.prov.sql.Other;
-import org.openprovenance.prov.sql.Type;
-import org.openprovenance.prov.sql.Used;
-import org.openprovenance.prov.sql.Value;
-import org.openprovenance.prov.sql.WasAssociatedWith;
-import org.openprovenance.prov.sql.WasAttributedTo;
-import org.openprovenance.prov.sql.WasGeneratedBy;
-import org.openprovenance.prov.sql.WasInfluencedBy;
+import org.openprovenance.prov.sql.*;
 import org.quantil.qprov.core.model.prov.ProvQualifiedName;
 import org.quantil.qprov.core.repositories.prov.QualifiedNameRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import lombok.AllArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Utility functions to convert PROV documents from the XML or Model package of the PROV toolbox to equivalent documents from the SQL package and in

@@ -10,11 +10,11 @@ public class ProvEntity extends org.openprovenance.prov.sql.Entity {
     @Id
     private Long id;
 
-    public void setProvEntityId(Long id) {
-        this.id = id;
-    }
-
     public Long getProvEntityId() {
         return id;
+    }
+
+    public void setProvEntityId(Long id) {
+        this.id = id;
     }
 }

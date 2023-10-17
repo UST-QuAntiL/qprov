@@ -19,14 +19,13 @@
 
 package org.quantil.qprov.web.dtos;
 
-import java.util.UUID;
-
-import org.quantil.qprov.core.model.agents.VirtualMachine;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.quantil.qprov.core.model.agents.VirtualMachine;
+
+import java.util.UUID;
 
 /**
  * Data transfer object for VirtualMachines ({@link org.quantil.qprov.core.model.agents.VirtualMachine}).

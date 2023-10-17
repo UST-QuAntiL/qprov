@@ -20,12 +20,10 @@
 package org.quantil.qprov.core.model;
 
 import jakarta.persistence.Entity;
-
 import jakarta.persistence.Id;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.openprovenance.prov.sql.Document;
-
-import lombok.Data;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -34,11 +32,11 @@ public class ProvTemplate extends Document {
     @Id
     private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

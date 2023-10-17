@@ -1,11 +1,11 @@
 # spring boot
 spring:
-  output: {ansi: {enabled: ALWAYS}}
-  mvc: {log-request-details: true}
-  jackson: {serialization: {WRITE_DATES_AS_TIMESTAMPS: false}}
+  output: { ansi: { enabled: ALWAYS } }
+  mvc: { log-request-details: true }
+  jackson: { serialization: { WRITE_DATES_AS_TIMESTAMPS: false } }
   jpa:
     generate-ddl: true
-    hibernate: {use-new-id-generator-mappings: false, ddl-auto: update}
+    hibernate: { use-new-id-generator-mappings: false, ddl-auto: update }
     show-sql: false
     properties:
       hibernate:

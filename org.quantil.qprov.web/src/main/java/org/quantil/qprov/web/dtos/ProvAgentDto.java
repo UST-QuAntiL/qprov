@@ -19,20 +19,14 @@
 
 package org.quantil.qprov.web.dtos;
 
-import java.util.List;
-
-import org.openprovenance.prov.model.Attribute;
-import org.openprovenance.prov.model.LangString;
-import org.openprovenance.prov.model.Location;
-import org.openprovenance.prov.model.Other;
-import org.openprovenance.prov.model.QualifiedName;
-import org.openprovenance.prov.model.Type;
-import org.openprovenance.prov.sql.Agent;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.openprovenance.prov.model.*;
+import org.openprovenance.prov.sql.Agent;
+
+import java.util.List;
 
 @EqualsAndHashCode
 @Data

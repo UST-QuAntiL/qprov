@@ -19,14 +19,13 @@
 
 package org.quantil.qprov.web.dtos;
 
-import java.net.URL;
-import java.util.UUID;
-
-import org.quantil.qprov.core.model.agents.Provider;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.quantil.qprov.core.model.agents.Provider;
+
+import java.net.URL;
+import java.util.UUID;
 
 /**
  * Data transfer object for Provider ({@link org.quantil.qprov.core.model.agents.Provider}).

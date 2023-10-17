@@ -19,10 +19,9 @@
 
 package org.quantil.qprov.collector.providers.ibmq;
 
+import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class IBMQRunnableCircuits implements Runnable {

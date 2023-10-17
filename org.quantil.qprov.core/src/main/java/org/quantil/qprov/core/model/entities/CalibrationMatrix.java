@@ -19,19 +19,14 @@
 
 package org.quantil.qprov.core.model.entities;
 
-import java.util.Date;
-import java.util.UUID;
-import java.util.Vector;
 import jakarta.persistence.*;
-
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.quantil.qprov.core.model.agents.QPU;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import java.util.Date;
+import java.util.UUID;
+import java.util.Vector;
 
 @Data
 @Entity

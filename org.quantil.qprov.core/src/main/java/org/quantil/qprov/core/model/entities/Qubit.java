@@ -19,14 +19,8 @@
 
 package org.quantil.qprov.core.model.entities;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import jakarta.persistence.*;
-
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.openprovenance.prov.model.Statement;
 import org.quantil.qprov.core.Constants;
@@ -34,12 +28,8 @@ import org.quantil.qprov.core.model.ProvExtension;
 import org.quantil.qprov.core.model.agents.QPU;
 import org.quantil.qprov.core.utils.Utils;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.ToString;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
