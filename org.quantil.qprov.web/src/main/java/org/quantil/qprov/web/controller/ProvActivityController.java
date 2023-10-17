@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.quantil.qprov.core.model.prov.ProvActivity;
+import org.quantil.qprov.core.model.prov.ProvDocument;
+import org.quantil.qprov.core.model.prov.ProvQualifiedName;
 import org.quantil.qprov.core.repositories.prov.ProvActivityRepository;
 import org.quantil.qprov.core.repositories.prov.ProvDocumentRepository;
 import org.quantil.qprov.core.repositories.prov.QualifiedNameRepository;
@@ -86,7 +89,7 @@ public class ProvActivityController {
     public ResponseEntity<CollectionModel<EntityModel<ProvActivityDto>>> getProvActivities(@PathVariable Long provDocumentId) {
 
         // check availability of PROV document
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -114,8 +117,8 @@ public class ProvActivityController {
     @GetMapping("/{provActitvityId}")
     public ResponseEntity<EntityModel<ProvActivityDto>> getProvActivity(@PathVariable Long provDocumentId, @PathVariable Long provActitvityId) {
 
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
-        final Optional<Activity> provActivityOptional = provActivityRepository.findById(provActitvityId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvActivity> provActivityOptional = provActivityRepository.findById(provActitvityId);
         if (provDocumentOptional.isEmpty() || provActivityOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -131,8 +134,8 @@ public class ProvActivityController {
     @DeleteMapping("/{provActitvityId}")
     public ResponseEntity<Void> deleteProvActivity(@PathVariable Long provDocumentId, @PathVariable Long provActitvityId) {
 
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
-        final Optional<Activity> provActivityOptional = provActivityRepository.findById(provActitvityId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvActivity> provActivityOptional = provActivityRepository.findById(provActitvityId);
         if (provDocumentOptional.isEmpty() || provActivityOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -146,16 +149,16 @@ public class ProvActivityController {
     }, description = "Create a new PROV activity in the specified PROV document.")
     @PostMapping
     public ResponseEntity<EntityModel<ProvActivityDto>> addProvActivityToDocument(@PathVariable Long provDocumentId,
-                                                                                  @RequestBody QualifiedName qualifiedName) {
+                                                                                  @RequestBody ProvQualifiedName qualifiedName) {
 
         logger.debug("Adding new PROV activity to document with Id: {}", provDocumentId);
 
         // check availability of PROV document
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        final Document provDocument = provDocumentOptional.get();
+        final ProvDocument provDocument = provDocumentOptional.get();
 
         final Activity activity = factory.createActivity();
         qualifiedNameRepository.save(qualifiedName);
@@ -176,14 +179,14 @@ public class ProvActivityController {
                                                                         @RequestBody ProvActivityDto provActivityDto) {
 
         // check availability of PROV document and activity
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
-        final Optional<Activity> provActivityOptional = provActivityRepository.findById(provActivityId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvActivity> provActivityOptional = provActivityRepository.findById(provActivityId);
         if (provDocumentOptional.isEmpty() || provActivityOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         // update activity with passed data
-        Activity newActivity = modelMapper.map(provActivityDto, Activity.class);
+        ProvActivity newActivity = modelMapper.map(provActivityDto, ProvActivity.class);
         newActivity.setPk(provActivityId);
         newActivity = provActivityRepository.save(newActivity);
 

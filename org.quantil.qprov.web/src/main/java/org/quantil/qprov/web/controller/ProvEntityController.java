@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.quantil.qprov.core.model.prov.ProvDocument;
+import org.quantil.qprov.core.model.prov.ProvEntity;
+import org.quantil.qprov.core.model.prov.ProvQualifiedName;
 import org.quantil.qprov.core.repositories.prov.ProvDocumentRepository;
 import org.quantil.qprov.core.repositories.prov.ProvEntityRepository;
 import org.quantil.qprov.core.repositories.prov.QualifiedNameRepository;
@@ -86,7 +89,7 @@ public class ProvEntityController {
     public ResponseEntity<CollectionModel<EntityModel<ProvEntityDto>>> getProvEntities(@PathVariable Long provDocumentId) {
 
         // check availability of PROV document
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -114,8 +117,8 @@ public class ProvEntityController {
     @GetMapping("/{provEntityId}")
     public ResponseEntity<EntityModel<ProvEntityDto>> getProvEntity(@PathVariable Long provDocumentId, @PathVariable Long provEntityId) {
 
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
-        final Optional<Entity> provEntityOptional = provEntityRepository.findById(provEntityId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvEntity> provEntityOptional = provEntityRepository.findById(provEntityId);
         if (provDocumentOptional.isEmpty() || provEntityOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -131,8 +134,8 @@ public class ProvEntityController {
     @DeleteMapping("/{provEntityId}")
     public ResponseEntity<Void> deleteProvEntity(@PathVariable Long provDocumentId, @PathVariable Long provEntityId) {
 
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
-        final Optional<Entity> provEntityOptional = provEntityRepository.findById(provEntityId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvEntity> provEntityOptional = provEntityRepository.findById(provEntityId);
         if (provDocumentOptional.isEmpty() || provEntityOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -146,16 +149,16 @@ public class ProvEntityController {
     }, description = "Create a new PROV entity in the specified PROV document.")
     @PostMapping
     public ResponseEntity<EntityModel<ProvEntityDto>> addProvEntityToDocument(@PathVariable Long provDocumentId,
-                                                                              @RequestBody QualifiedName qualifiedName) {
+                                                                              @RequestBody ProvQualifiedName qualifiedName) {
 
         logger.debug("Adding new PROV entity to document with Id: {}", provDocumentId);
 
         // check availability of PROV document
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        final Document provDocument = provDocumentOptional.get();
+        final ProvDocument provDocument = provDocumentOptional.get();
 
         final Entity entity = factory.createEntity();
         qualifiedNameRepository.save(qualifiedName);
@@ -176,14 +179,14 @@ public class ProvEntityController {
                                                                     @RequestBody ProvEntityDto provEntityDto) {
 
         // check availability of PROV document and entity
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
-        final Optional<Entity> provEntityOptional = provEntityRepository.findById(provEntityId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvEntity> provEntityOptional = provEntityRepository.findById(provEntityId);
         if (provDocumentOptional.isEmpty() || provEntityOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         // update entity with passed data
-        Entity newEntity = modelMapper.map(provEntityDto, Entity.class);
+        ProvEntity newEntity = modelMapper.map(provEntityDto, ProvEntity.class);
         newEntity.setPk(provEntityId);
         newEntity = provEntityRepository.save(newEntity);
 

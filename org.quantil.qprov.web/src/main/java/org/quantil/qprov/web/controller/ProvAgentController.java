@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.quantil.qprov.core.model.prov.ProvAgent;
+import org.quantil.qprov.core.model.prov.ProvDocument;
+import org.quantil.qprov.core.model.prov.ProvQualifiedName;
 import org.quantil.qprov.core.repositories.prov.ProvAgentRepository;
 import org.quantil.qprov.core.repositories.prov.ProvDocumentRepository;
 import org.quantil.qprov.core.repositories.prov.QualifiedNameRepository;
@@ -86,7 +89,7 @@ public class ProvAgentController {
     public ResponseEntity<CollectionModel<EntityModel<ProvAgentDto>>> getProvAgents(@PathVariable Long provDocumentId) {
 
         // check availability of PROV document
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -114,8 +117,8 @@ public class ProvAgentController {
     @GetMapping("/{provAgentId}")
     public ResponseEntity<EntityModel<ProvAgentDto>> getProvAgent(@PathVariable Long provDocumentId, @PathVariable Long provAgentId) {
 
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
-        final Optional<Agent> provAgentOptional = provAgentRepository.findById(provAgentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvAgent> provAgentOptional = provAgentRepository.findById(provAgentId);
         if (provDocumentOptional.isEmpty() || provAgentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -131,8 +134,8 @@ public class ProvAgentController {
     @DeleteMapping("/{provAgentId}")
     public ResponseEntity<Void> deleteProvAgent(@PathVariable Long provDocumentId, @PathVariable Long provAgentId) {
 
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
-        final Optional<Agent> provAgentOptional = provAgentRepository.findById(provAgentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvAgent> provAgentOptional = provAgentRepository.findById(provAgentId);
         if (provDocumentOptional.isEmpty() || provAgentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -146,16 +149,16 @@ public class ProvAgentController {
     }, description = "Create a new PROV agent in the specified PROV document.")
     @PostMapping
     public ResponseEntity<EntityModel<ProvAgentDto>> addProvAgentToDocument(@PathVariable Long provDocumentId,
-                                                                            @RequestBody QualifiedName qualifiedName) {
+                                                                            @RequestBody ProvQualifiedName qualifiedName) {
 
         logger.debug("Adding new PROV agent to document with Id: {}", provDocumentId);
 
         // check availability of PROV document
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        final Document provDocument = provDocumentOptional.get();
+        final ProvDocument provDocument = provDocumentOptional.get();
 
         final Agent agent = factory.createAgent();
         qualifiedNameRepository.save(qualifiedName);
@@ -176,14 +179,14 @@ public class ProvAgentController {
                                                                   @RequestBody ProvAgentDto provAgentDto) {
 
         // check availability of PROV document and agent
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
-        final Optional<Agent> provAgentOptional = provAgentRepository.findById(provAgentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvAgent> provAgentOptional = provAgentRepository.findById(provAgentId);
         if (provDocumentOptional.isEmpty() || provAgentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         // update agent with passed data
-        Agent newAgent = modelMapper.map(provAgentDto, Agent.class);
+        ProvAgent newAgent = modelMapper.map(provAgentDto, ProvAgent.class);
         newAgent.setPk(provAgentId);
         newAgent = provAgentRepository.save(newAgent);
 

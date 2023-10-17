@@ -31,14 +31,14 @@ import org.quantil.qprov.core.utils.ProvInteroperabilityUtils;
 import org.quantil.qprov.core.utils.Utils;
 import org.quantil.qprov.web.Constants;
 import org.quantil.qprov.web.dtos.ProvDocumentDto;
-import org.openprovenance.prov.interop.Formats;
-import org.openprovenance.prov.interop.InteropFramework;
-import org.openprovenance.prov.sql.Document;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.openprovenance.prov.interop.Formats;
+import org.openprovenance.prov.interop.InteropFramework;
+import org.openprovenance.prov.sql.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.CollectionModel;
