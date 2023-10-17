@@ -100,7 +100,7 @@ public class QubitController {
                 }
         );
 
-        final var collectionModel = new CollectionModel<>(qubitEntities);
+        final var collectionModel = CollectionModel.of(qubitEntities);
         collectionModel.add(qubitLinks);
         collectionModel.add(linkTo(methodOn(QubitController.class).getQubits(providerId, qpuId)).withSelfRel());
         return ResponseEntity.ok(collectionModel);
@@ -137,7 +137,7 @@ public class QubitController {
     }
 
     private EntityModel<QubitDto> createQubitDto(UUID providerId, UUID qpuId, Qubit qubit) {
-        final EntityModel<QubitDto> qpuDto = new EntityModel<QubitDto>(QubitDto.createDTO(qubit));
+        final EntityModel<QubitDto> qpuDto = EntityModel.of(QubitDto.createDTO(qubit));
         qpuDto.add(linkTo(methodOn(QubitController.class).getQubit(providerId, qpuId, qubit.getDatabaseId()))
                 .withSelfRel());
         qpuDto.add(linkTo(methodOn(QubitCharacteristicsController.class).getQubitCharacterisitcs(providerId, qpuId, qubit.getDatabaseId(), false))

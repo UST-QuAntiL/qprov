@@ -12,12 +12,12 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.3.4.RELEASE</version>
+		<version>3.1.4</version>
 		<relativePath />
 	</parent>
 
 	<properties>
-		<java.version>14</java.version>
+		<java.version>21</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.checkstyle.version>3.1.1</maven.checkstyle.version>
 		<checkstyle.addons.version>6.0.1</checkstyle.addons.version>
@@ -25,7 +25,7 @@
 		<springfox.version>2.9.2</springfox.version>
 		<springdoc.version>1.4.8</springdoc.version>
 		<prov.toolbox.version>0.9.5</prov.toolbox.version>
-		<lombok.version>1.18.16</lombok.version>
+		<lombok.version>1.18.30</lombok.version>
 	</properties>
 
 	<modules>

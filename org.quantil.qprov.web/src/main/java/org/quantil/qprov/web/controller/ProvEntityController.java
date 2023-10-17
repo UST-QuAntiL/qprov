@@ -101,7 +101,7 @@ public class ProvEntityController {
             provElementEntities.add(createEntityModel(provDocumentId, entity));
         }
 
-        final var collectionModel = new CollectionModel<>(provElementEntities);
+        final var collectionModel = CollectionModel.of(provElementEntities);
         collectionModel.add(provElementLinks);
         collectionModel.add(linkTo(methodOn(ProvEntityController.class).getProvEntities(provDocumentId)).withSelfRel());
         return ResponseEntity.ok(collectionModel);
@@ -163,7 +163,7 @@ public class ProvEntityController {
 
         provDocument.getStatementOrBundle().add(entity);
         provDocumentRepository.save(provDocument);
-        return new ResponseEntity<>(new EntityModel<>(ProvEntityDto.createDTO(entity)), HttpStatus.CREATED);
+        return new ResponseEntity<>(EntityModel.of(ProvEntityDto.createDTO(entity)), HttpStatus.CREATED);
     }
 
     @Operation(responses = {
@@ -191,7 +191,7 @@ public class ProvEntityController {
     }
 
     private EntityModel<ProvEntityDto> createEntityModel(Long provDocumentId, Entity entity) {
-        final EntityModel<ProvEntityDto> entityModel = new EntityModel<ProvEntityDto>(ProvEntityDto.createDTO(entity));
+        final EntityModel<ProvEntityDto> entityModel = EntityModel.of(ProvEntityDto.createDTO(entity));
         entityModel.add(linkTo(methodOn(ProvEntityController.class).getProvEntity(provDocumentId, entity.getPk())).withSelfRel());
         return entityModel;
     }

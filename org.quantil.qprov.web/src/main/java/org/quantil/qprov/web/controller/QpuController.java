@@ -89,7 +89,7 @@ public class QpuController {
                 }
         );
 
-        final var collectionModel = new CollectionModel<>(qpuEntities);
+        final var collectionModel = CollectionModel.of(qpuEntities);
         collectionModel.add(qpuLinks);
         collectionModel.add(linkTo(methodOn(QpuController.class).getQPUs(providerId)).withSelfRel());
         return ResponseEntity.ok(collectionModel);
@@ -125,7 +125,7 @@ public class QpuController {
     }
 
     private EntityModel<QpuDto> createQpuDto(UUID providerId, QPU qpu) {
-        final EntityModel<QpuDto> qpuDto = new EntityModel<QpuDto>(QpuDto.createDTO(qpu));
+        final EntityModel<QpuDto> qpuDto = EntityModel.of(QpuDto.createDTO(qpu));
         qpuDto.add(linkTo(methodOn(QpuController.class).getQPU(providerId, qpu.getDatabaseId()))
                 .withSelfRel());
         if (!qpu.isSimulator()) {

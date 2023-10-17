@@ -101,7 +101,7 @@ public class ProvAgentController {
             provAgentEntities.add(createEntityModel(provDocumentId, agent));
         }
 
-        final var collectionModel = new CollectionModel<>(provAgentEntities);
+        final var collectionModel = CollectionModel.of(provAgentEntities);
         collectionModel.add(provAgentLinks);
         collectionModel.add(linkTo(methodOn(ProvAgentController.class).getProvAgents(provDocumentId)).withSelfRel());
         return ResponseEntity.ok(collectionModel);
@@ -163,7 +163,7 @@ public class ProvAgentController {
 
         provDocument.getStatementOrBundle().add(agent);
         provDocumentRepository.save(provDocument);
-        return new ResponseEntity<>(new EntityModel<>(ProvAgentDto.createDTO(agent)), HttpStatus.CREATED);
+        return new ResponseEntity<>(EntityModel.of(ProvAgentDto.createDTO(agent)), HttpStatus.CREATED);
     }
 
     @Operation(responses = {
@@ -191,7 +191,7 @@ public class ProvAgentController {
     }
 
     private EntityModel<ProvAgentDto> createEntityModel(Long provDocumentId, Agent agent) {
-        final EntityModel<ProvAgentDto> entityModel = new EntityModel<ProvAgentDto>(ProvAgentDto.createDTO(agent));
+        final EntityModel<ProvAgentDto> entityModel = EntityModel.of(ProvAgentDto.createDTO(agent));
         entityModel.add(linkTo(methodOn(ProvAgentController.class).getProvAgent(provDocumentId, agent.getPk())).withSelfRel());
         return entityModel;
     }

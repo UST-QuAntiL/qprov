@@ -93,14 +93,14 @@ public class HardwareCharacteristicsController {
 
         final List<EntityModel<HardwareCharacteristicsDto>> entities = new ArrayList<>();
         hardwareCharacteristicsStream.forEach(hardwareCharacteristic -> {
-            entities.add(new EntityModel<HardwareCharacteristicsDto>(HardwareCharacteristicsDto.createDTO(hardwareCharacteristic)));
+            entities.add(EntityModel.of(HardwareCharacteristicsDto.createDTO(hardwareCharacteristic)));
         });
 
         if (entities.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        return ResponseEntity.ok(new CollectionModel<>(entities));
+        return ResponseEntity.ok(CollectionModel.of(entities));
     }
 
     @Operation(responses = {@ApiResponse(responseCode = "201"),
@@ -132,7 +132,7 @@ public class HardwareCharacteristicsController {
     }
 
     private EntityModel<VirtualMachineDto> createEntityModel(VirtualMachine virtualMachine) {
-        final EntityModel<VirtualMachineDto> virtualMachineDto = new EntityModel<VirtualMachineDto>(VirtualMachineDto.createDTO(virtualMachine));
+        final EntityModel<VirtualMachineDto> virtualMachineDto = EntityModel.of(VirtualMachineDto.createDTO(virtualMachine));
         virtualMachineDto.add(linkTo(methodOn(VirtualMachineController.class).getVirtualMachine(virtualMachine.getDatabaseId())).withSelfRel());
         return virtualMachineDto;
     }

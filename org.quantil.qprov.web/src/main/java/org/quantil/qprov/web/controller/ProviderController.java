@@ -74,7 +74,7 @@ public class ProviderController {
         final List<Link> providerLinks = new ArrayList<>();
         providerRepository.findAll().forEach((Provider provider) -> {
                     logger.debug("Found provider with name: {}", provider.getName());
-                    final EntityModel<ProviderDto> providerDto = new EntityModel<ProviderDto>(ProviderDto.createDTO(provider));
+                    final EntityModel<ProviderDto> providerDto = EntityModel.of(ProviderDto.createDTO(provider));
                     providerDto.add(linkTo(methodOn(ProviderController.class).getProvider(provider.getDatabaseId()))
                             .withSelfRel());
                     providerDto.add(linkTo(methodOn(QpuController.class).getQPUs(provider.getDatabaseId())).withRel(Constants.PATH_QPUS));
@@ -84,7 +84,7 @@ public class ProviderController {
                 }
         );
 
-        final var collectionModel = new CollectionModel<>(providerEntities);
+        final var collectionModel = CollectionModel.of(providerEntities);
         collectionModel.add(providerLinks);
         collectionModel.add(linkTo(methodOn(ProviderController.class).getProviders()).withSelfRel());
         return ResponseEntity.ok(collectionModel);
@@ -103,7 +103,7 @@ public class ProviderController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        final EntityModel<ProviderDto> providerDto = new EntityModel<ProviderDto>(ProviderDto.createDTO(provider.get()));
+        final EntityModel<ProviderDto> providerDto = EntityModel.of(ProviderDto.createDTO(provider.get()));
         providerDto.add(linkTo(methodOn(ProviderController.class).getProvider(providerId)).withSelfRel());
         providerDto.add(linkTo(methodOn(QpuController.class).getQPUs(providerId)).withRel(Constants.PATH_QPUS));
         return ResponseEntity.ok(providerDto);

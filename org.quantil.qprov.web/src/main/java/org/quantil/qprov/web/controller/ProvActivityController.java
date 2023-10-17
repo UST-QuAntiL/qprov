@@ -101,7 +101,7 @@ public class ProvActivityController {
             provActivityEntities.add(createEntityModel(provDocumentId, activity));
         }
 
-        final var collectionModel = new CollectionModel<>(provActivityEntities);
+        final var collectionModel = CollectionModel.of(provActivityEntities);
         collectionModel.add(provActivityLinks);
         collectionModel.add(linkTo(methodOn(ProvActivityController.class).getProvActivities(provDocumentId)).withSelfRel());
         return ResponseEntity.ok(collectionModel);
@@ -163,7 +163,7 @@ public class ProvActivityController {
 
         provDocument.getStatementOrBundle().add(activity);
         provDocumentRepository.save(provDocument);
-        return new ResponseEntity<>(new EntityModel<>(ProvActivityDto.createDTO(activity)), HttpStatus.CREATED);
+        return new ResponseEntity<>(EntityModel.of(ProvActivityDto.createDTO(activity)), HttpStatus.CREATED);
     }
 
     @Operation(responses = {
@@ -191,7 +191,7 @@ public class ProvActivityController {
     }
 
     private EntityModel<ProvActivityDto> createEntityModel(Long provDocumentId, Activity activity) {
-        final EntityModel<ProvActivityDto> entityModel = new EntityModel<ProvActivityDto>(ProvActivityDto.createDTO(activity));
+        final EntityModel<ProvActivityDto> entityModel = EntityModel.of(ProvActivityDto.createDTO(activity));
         entityModel.add(linkTo(methodOn(ProvActivityController.class).getProvActivity(provDocumentId, activity.getPk())).withSelfRel());
         return entityModel;
     }

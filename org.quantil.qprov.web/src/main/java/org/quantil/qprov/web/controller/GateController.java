@@ -94,7 +94,7 @@ public class GateController {
                 }
         );
 
-        final var collectionModel = new CollectionModel<>(qubitEntities);
+        final var collectionModel = CollectionModel.of(qubitEntities);
         collectionModel.add(qubitLinks);
         collectionModel.add(linkTo(methodOn(GateController.class).getGates(providerId, qpuId, qubitId)).withSelfRel());
         return ResponseEntity.ok(collectionModel);
@@ -130,7 +130,7 @@ public class GateController {
     }
 
     private EntityModel<GateDto> createGateDto(UUID providerId, UUID qpuId, UUID qubitId, Gate gate) {
-        final EntityModel<GateDto> gateDto = new EntityModel<GateDto>(GateDto.createDTO(gate));
+        final EntityModel<GateDto> gateDto = EntityModel.of(GateDto.createDTO(gate));
         gateDto.add(linkTo(methodOn(GateController.class).getGate(providerId, qpuId, qubitId, gate.getDatabaseId())).withSelfRel());
         for (Qubit qubit : gate.getOperatingQubits()) {
             gateDto.add(linkTo(methodOn(QubitController.class).getQubit(providerId, qpuId, qubit.getDatabaseId()))

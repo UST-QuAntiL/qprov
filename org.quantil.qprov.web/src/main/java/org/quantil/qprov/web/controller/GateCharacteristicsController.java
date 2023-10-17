@@ -120,13 +120,13 @@ public class GateCharacteristicsController {
 
         final List<EntityModel<GateCharacteristicsDto>> entities = new ArrayList<>();
         gateCharacteristicsStream.forEach(gateCharacteristic -> {
-            entities.add(new EntityModel<GateCharacteristicsDto>(GateCharacteristicsDto.createDTO(gateCharacteristic)));
+            entities.add(EntityModel.of(GateCharacteristicsDto.createDTO(gateCharacteristic)));
         });
 
         if (entities.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        return ResponseEntity.ok(new CollectionModel<>(entities));
+        return ResponseEntity.ok(CollectionModel.of(entities));
     }
 }

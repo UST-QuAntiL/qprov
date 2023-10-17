@@ -96,7 +96,7 @@ public class ProvTemplateController {
             provDocumentEntities.add(createEntityModel(provDocument));
         }
 
-        final var collectionModel = new CollectionModel<>(provDocumentEntities);
+        final var collectionModel = CollectionModel.of(provDocumentEntities);
         collectionModel.add(provDocumentLinks);
         collectionModel.add(linkTo(methodOn(ProvTemplateController.class).getProvenanceTemplates()).withSelfRel());
         return ResponseEntity.ok(collectionModel);
@@ -235,7 +235,7 @@ public class ProvTemplateController {
     }
 
     private EntityModel<ProvDocumentDto> createEntityModel(Document provDocument) {
-        final EntityModel<ProvDocumentDto> provDocumentDto = new EntityModel<ProvDocumentDto>(ProvDocumentDto.createDTO(provDocument));
+        final EntityModel<ProvDocumentDto> provDocumentDto = EntityModel.of(ProvDocumentDto.createDTO(provDocument));
         provDocumentDto.add(linkTo(methodOn(ProvTemplateController.class).getProvTemplate(provDocument.getPk())).withSelfRel());
         provDocumentDto
                 .add(linkTo(methodOn(ProvTemplateController.class).getProvTemplateXml(provDocument.getPk(), null))

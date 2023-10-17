@@ -109,9 +109,9 @@ public class QubitCharacteristicsController {
 
         final List<EntityModel<QubitCharacteristicsDto>> entities = new ArrayList<>();
         qubitCharacteristicsStream.forEach(qubitCharacteristics -> {
-            entities.add(new EntityModel<QubitCharacteristicsDto>(QubitCharacteristicsDto.createDTO(qubitCharacteristics)));
+            entities.add(EntityModel.of(QubitCharacteristicsDto.createDTO(qubitCharacteristics)));
         });
 
-        return ResponseEntity.ok(new CollectionModel<>(entities));
+        return ResponseEntity.ok(CollectionModel.of(entities));
     }
 }

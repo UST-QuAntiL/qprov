@@ -72,7 +72,7 @@ public class VirtualMachineController {
         final List<Link> virtualMachineLinks = new ArrayList<>();
         virtualMachineRepository.findAll().forEach((VirtualMachine virtualMachine) -> {
             logger.debug("Found VirtualMachine with name: {}", virtualMachine.getName());
-            final EntityModel<VirtualMachineDto> virtualMachineDto = new EntityModel<VirtualMachineDto>(VirtualMachineDto.createDTO(virtualMachine));
+            final EntityModel<VirtualMachineDto> virtualMachineDto = EntityModel.of(VirtualMachineDto.createDTO(virtualMachine));
             virtualMachineDto.add(linkTo(methodOn(VirtualMachineController.class).getVirtualMachine(virtualMachine.getDatabaseId())).withSelfRel());
             virtualMachineDto.add(linkTo(methodOn(HardwareCharacteristicsController.class).getHardwareCharacteristics(virtualMachine.getDatabaseId(),
                     false)).withRel(Constants.PATH_CHARACTERISTICS));
@@ -81,7 +81,7 @@ public class VirtualMachineController {
             virtualMachineEntities.add(virtualMachineDto);
         });
 
-        final var collectionModel = new CollectionModel<>(virtualMachineEntities);
+        final var collectionModel = CollectionModel.of(virtualMachineEntities);
         collectionModel.add(virtualMachineLinks);
         collectionModel.add(linkTo(methodOn(VirtualMachineController.class).getVirtualMachines()).withSelfRel());
         return ResponseEntity.ok(collectionModel);
@@ -99,7 +99,7 @@ public class VirtualMachineController {
         }
 
         final EntityModel<VirtualMachineDto> virtualMachineDto =
-                new EntityModel<VirtualMachineDto>(VirtualMachineDto.createDTO(virtualMachine.get()));
+                EntityModel.of(VirtualMachineDto.createDTO(virtualMachine.get()));
         virtualMachineDto.add(linkTo(methodOn(VirtualMachineController.class).getVirtualMachine(virtualMachineId)).withSelfRel());
         virtualMachineDto.add(
                 linkTo(methodOn(HardwareCharacteristicsController.class).getHardwareCharacteristics(virtualMachine.get().getDatabaseId(),
@@ -128,7 +128,7 @@ public class VirtualMachineController {
     }
 
     private EntityModel<VirtualMachineDto> createEntityModel(VirtualMachine virtualMachine) {
-        final EntityModel<VirtualMachineDto> virtualMachineDto = new EntityModel<VirtualMachineDto>(VirtualMachineDto.createDTO(virtualMachine));
+        final EntityModel<VirtualMachineDto> virtualMachineDto = EntityModel.of(VirtualMachineDto.createDTO(virtualMachine));
         virtualMachineDto.add(linkTo(methodOn(VirtualMachineController.class).getVirtualMachine(virtualMachine.getDatabaseId())).withSelfRel());
         return virtualMachineDto;
     }

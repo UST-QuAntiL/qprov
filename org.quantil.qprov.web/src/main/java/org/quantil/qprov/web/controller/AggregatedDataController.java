@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
-import javax.transaction.Transactional;
 import javax.ws.rs.QueryParam;
 
 import org.quantil.qprov.core.model.agents.Provider;
@@ -103,7 +102,6 @@ public class AggregatedDataController {
     @Operation(responses = {@ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "404", description = "Provider or QPU not found or no calibration matrix available for this QPU.")})
     @GetMapping("/" + Constants.PATH_CALIBRATION_MATRIX)
-    @Transactional
     public ResponseEntity<CollectionModel<EntityModel<CalibrationMatrixDto>>> getCalibrationMatrix(@PathVariable UUID providerId,
                                                                                                    @PathVariable UUID qpuId,
                                                                                                    @QueryParam("latest") boolean latest) {
@@ -134,7 +132,7 @@ public class AggregatedDataController {
 
         final List<EntityModel<CalibrationMatrixDto>> entities = new ArrayList<>();
         calibrationMatrixStream.forEach(calibrationMatrix -> {
-            entities.add(new EntityModel<CalibrationMatrixDto>(CalibrationMatrixDto.createDTO(calibrationMatrix)));
+            entities.add(EntityModel.of(CalibrationMatrixDto.createDTO(calibrationMatrix)));
         });
         logger.debug("Retrieved {} calibration matrix records for QPU with name: {}", entities.size(), qpu.getName());
 
@@ -142,6 +140,6 @@ public class AggregatedDataController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        return ResponseEntity.ok(new CollectionModel<>(entities));
+        return ResponseEntity.ok(CollectionModel.of(entities));
     }
 }

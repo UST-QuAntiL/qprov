@@ -100,7 +100,7 @@ public class ProvDocumentController {
             provDocumentEntities.add(createEntityModel(provDocument));
         }
 
-        final var collectionModel = new CollectionModel<>(provDocumentEntities);
+        final var collectionModel = CollectionModel.of(provDocumentEntities);
         collectionModel.add(provDocumentLinks);
         collectionModel.add(linkTo(methodOn(ProvDocumentController.class).getProvenanceDocuments()).withSelfRel());
         return ResponseEntity.ok(collectionModel);
@@ -249,7 +249,7 @@ public class ProvDocumentController {
         }
 
         final EntityModel<ProvNamespaceDto> provDocumentDto =
-                new EntityModel<ProvNamespaceDto>(ProvNamespaceDto.createDTO(provDocumentOptional.get().getNamespace()));
+                EntityModel.of(ProvNamespaceDto.createDTO(provDocumentOptional.get().getNamespace()));
         provDocumentDto.add(linkTo(methodOn(ProvDocumentController.class).getProvNamespace(provDocumentId)).withSelfRel());
         return ResponseEntity.ok(provDocumentDto);
     }
@@ -281,13 +281,13 @@ public class ProvDocumentController {
         provDocumentRepository.save(provDocument);
 
         final EntityModel<ProvNamespaceDto> provDocumentDto =
-                new EntityModel<ProvNamespaceDto>(ProvNamespaceDto.createDTO(provDocumentOptional.get().getNamespace()));
+                EntityModel.of(ProvNamespaceDto.createDTO(provDocumentOptional.get().getNamespace()));
         provDocumentDto.add(linkTo(methodOn(ProvDocumentController.class).getProvNamespace(provDocumentId)).withSelfRel());
         return ResponseEntity.ok(provDocumentDto);
     }
 
     private EntityModel<ProvDocumentDto> createEntityModel(Document provDocument) {
-        final EntityModel<ProvDocumentDto> provDocumentDto = new EntityModel<ProvDocumentDto>(ProvDocumentDto.createDTO(provDocument));
+        final EntityModel<ProvDocumentDto> provDocumentDto = EntityModel.of(ProvDocumentDto.createDTO(provDocument));
         provDocumentDto.add(linkTo(methodOn(ProvDocumentController.class).getProvDocument(provDocument.getPk())).withSelfRel());
         provDocumentDto.add(linkTo(methodOn(ProvDocumentController.class).getProvNamespace(provDocument.getPk()))
                 .withRel(Constants.PATH_PROV_NAMESPACE));
