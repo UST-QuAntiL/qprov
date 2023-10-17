@@ -33,8 +33,8 @@ import org.quantil.qprov.core.model.entities.CalibrationMatrix;
 import org.quantil.qprov.core.repositories.ProviderRepository;
 import org.quantil.qprov.core.repositories.QPURepository;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
@@ -42,8 +42,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Component
 public class IBMQCircuitExecutor {
-
-    private static final Logger logger = LoggerFactory.getLogger(IBMQCircuitExecutor.class);
+    protected static final Logger logger = LogManager.getLogger();
 
     private final ProviderRepository providerRepository;
 

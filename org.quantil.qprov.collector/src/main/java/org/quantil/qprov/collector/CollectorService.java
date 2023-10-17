@@ -23,8 +23,8 @@ import java.util.Set;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpEntity;
@@ -35,8 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController()
 public class CollectorService {
-
-    private static final Logger logger = LoggerFactory.getLogger(CollectorService.class);
+    protected static final Logger logger = LogManager.getLogger();
 
     private final Set<IProvider> availableProviders;
 

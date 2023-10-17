@@ -65,15 +65,15 @@ import org.quantil.qprov.ibmq.client.model.DeviceProperties;
 import org.quantil.qprov.ibmq.client.model.DevicePropsGate;
 import org.quantil.qprov.ibmq.client.model.Parameter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class IBMQProvider implements IProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(IBMQProvider.class);
+    protected static final Logger logger = LogManager.getLogger();
 
     private final ProviderRepository providerRepository;
 
@@ -117,6 +117,8 @@ public class IBMQProvider implements IProvider {
 
         this.defaultClient = Configuration.getDefaultApiClient();
         this.defaultClient.setBasePath("https://api.quantum-computing.ibm.com/v2");
+
+        logger.debug("Started IBMQ Provider with auto collect: {}", autoCollect);
 
         // periodically collect data if activated in properties/environment variables
         if (autoCollect) {

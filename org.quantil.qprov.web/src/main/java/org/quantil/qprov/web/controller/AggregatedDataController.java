@@ -39,8 +39,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.RepresentationModel;
@@ -63,8 +63,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @AllArgsConstructor
 @Slf4j
 public class AggregatedDataController {
-
-    private final Logger logger = LoggerFactory.getLogger(AggregatedDataController.class);
+    protected static final Logger logger = LogManager.getLogger();
 
     private final ProviderRepository providerRepository;
 

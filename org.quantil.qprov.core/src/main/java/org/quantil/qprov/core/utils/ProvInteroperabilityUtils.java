@@ -29,6 +29,8 @@ import org.quantil.qprov.core.model.prov.ProvQualifiedName;
 import org.quantil.qprov.core.repositories.prov.QualifiedNameRepository;
 
 import lombok.AllArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openprovenance.prov.model.LangString;
 import org.openprovenance.prov.model.Statement;
 import org.openprovenance.prov.model.StatementOrBundle;
@@ -48,8 +50,6 @@ import org.openprovenance.prov.sql.WasAssociatedWith;
 import org.openprovenance.prov.sql.WasAttributedTo;
 import org.openprovenance.prov.sql.WasGeneratedBy;
 import org.openprovenance.prov.sql.WasInfluencedBy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -62,8 +62,7 @@ import org.springframework.stereotype.Component;
 @Component
 @AllArgsConstructor
 public class ProvInteroperabilityUtils {
-
-    private static final Logger logger = LoggerFactory.getLogger(ProvInteroperabilityUtils.class);
+    protected static final Logger logger = LogManager.getLogger();
 
     private final QualifiedNameRepository qualifiedNameRepository;
 

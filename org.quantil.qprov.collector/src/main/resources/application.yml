@@ -40,10 +40,10 @@ logging:
 # config
 qprov:
   ibmq:
-    token: "${QPROV_IBMQ_TOKEN:token}"
+    token: "${QPROV_IBMQ_TOKEN:b9fa89e0ff409a33d5fe8ef317df65bd24c3a60dc765401afcad2ce203f55f584b157b4db6b536b2fcc886ad71421912f9a38cbeb3afa330864805cbb1c43307}"
     execute-calibration: ${QPROV_IBMQ_EXECUTE_CIRCUITS:false}
-    auto-collect: ${QPROV_IBMQ_AUTO_COLLECT:false}
-    auto-collect-interval: ${QPROV_IBMQ_AUTO_COLLECT_INTERVAL:60}
+    auto-collect: ${QPROV_IBMQ_AUTO_COLLECT:true}
+    auto-collect-interval: ${QPROV_IBMQ_AUTO_COLLECT_INTERVAL:1}
     auto-collect-interval-circuits: ${QPROV_IBMQ_AUTO_COLLECT_INTERVAL_CIRCUITS:180}
     qiskit-service:
       hostname: "${QISKIT_SERVICE_HOSTNAME:127.0.0.1}"

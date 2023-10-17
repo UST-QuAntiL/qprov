@@ -24,6 +24,8 @@ import java.util.Objects;
 import org.quantil.qprov.core.Constants;
 import org.quantil.qprov.core.model.ProvTemplate;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openprovenance.prov.interop.InteropFramework;
 import org.openprovenance.prov.model.Namespace;
 import org.openprovenance.prov.model.ProvFactory;
@@ -31,12 +33,9 @@ import org.openprovenance.prov.model.QualifiedName;
 import org.openprovenance.prov.model.Value;
 import org.openprovenance.prov.xml.Other;
 import org.openprovenance.prov.xml.Type;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class Utils {
-
-    private static final Logger logger = LoggerFactory.getLogger(Utils.class);
+    private static final Logger logger = LogManager.getLogger();
 
     private static final ProvFactory pFactory = InteropFramework.getDefaultFactory();
 
