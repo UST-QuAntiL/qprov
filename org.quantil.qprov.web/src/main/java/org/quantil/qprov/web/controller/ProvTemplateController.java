@@ -131,8 +131,8 @@ public class ProvTemplateController {
         }
 
         try {
-            intF.writeDocument(response.getOutputStream(), Formats.ProvFormat.XML,
-                    provInteroperabilityUtils.createProvXMLDocument(provTemplateOptional.get()));
+            intF.writeDocument(response.getOutputStream(), provInteroperabilityUtils.createProvXMLDocument(provTemplateOptional.get()),
+                    Formats.ProvFormat.PROVX);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -153,8 +153,8 @@ public class ProvTemplateController {
         }
 
         try {
-            intF.writeDocument(response.getOutputStream(), Formats.ProvFormat.JPEG,
-                    provInteroperabilityUtils.createProvXMLDocument(provTemplateOptional.get()));
+            intF.writeDocument(response.getOutputStream(), provInteroperabilityUtils.createProvXMLDocument(provTemplateOptional.get()),
+                    Formats.ProvFormat.JPEG);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -175,8 +175,8 @@ public class ProvTemplateController {
         }
 
         try {
-            intF.writeDocument(response.getOutputStream(), Formats.ProvFormat.PDF,
-                    provInteroperabilityUtils.createProvXMLDocument(provTemplateOptional.get()));
+            intF.writeDocument(response.getOutputStream(), provInteroperabilityUtils.createProvXMLDocument(provTemplateOptional.get()),
+                    Formats.ProvFormat.PDF);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -207,7 +207,7 @@ public class ProvTemplateController {
                                                                                  @RequestParam("format") Formats.ProvFormat format) {
 
         try {
-            final org.openprovenance.prov.model.Document template = intF.readDocument(file.getInputStream(), format, "");
+            final org.openprovenance.prov.model.Document template = intF.readDocument(file.getInputStream(), format);
             final Document templateSql = provInteroperabilityUtils.createProvSQLDocument(template);
             ProvTemplate mappedTemplate = Utils.createProvTemplate(templateSql);
             mappedTemplate = provTemplateRepository.save(mappedTemplate);
