@@ -155,6 +155,8 @@ public class IBMQProvider implements IProvider {
 
         try {
             // get a short-lived access token with the api token
+            logger.debug("Changing base path to authenticate to: https://auth.quantum-computing.ibm.com/api");
+            this.defaultClient.setBasePath("https://auth.quantum-computing.ibm.com/api");
             logger.debug("IBMQProvider try to get an accessToken via supplied apiToken!");
             final AccessToken accessToken = new LoginApi(this.defaultClient).loginLoginWithApiToken(apiToken);
             logger.debug("IBMQProvider successfully got an accessToken!");
@@ -529,6 +531,8 @@ public class IBMQProvider implements IProvider {
         logger.debug("Successfully authenticated. Starting retrieval of QPUs...");
 
         // add the IBMQ provider as object to the database if it was not created in a previous collection and otherwise retrieve it
+        logger.debug("Setting base path for data retrieval: https://api.quantum-computing.ibm.com/api");
+        this.defaultClient.setBasePath("https://api.quantum-computing.ibm.com/api");
         final Provider ibmqProvider = addProviderToDatabase();
 
         final boolean qpuRetrievalSuccess = collectQPUs(ibmqProvider);
