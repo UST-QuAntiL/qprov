@@ -34,7 +34,7 @@ import io.swagger.v3.oas.annotations.info.License;
 
 @EnableAsync
 @SpringBootApplication(scanBasePackages = "org.quantil.qprov.*")
-@EntityScan(basePackages = {"org.quantil.qprov.*", "org.openprovenance.prov.*"})
+@EntityScan(basePackages = {"org.quantil.qprov.*", "org.openprovenance.prov.*", "org.quantil.qprov.core.*"})
 @EnableJpaRepositories("org.quantil.qprov.*")
 @OpenAPIDefinition(info = @Info(
         title = "QProv Collector",

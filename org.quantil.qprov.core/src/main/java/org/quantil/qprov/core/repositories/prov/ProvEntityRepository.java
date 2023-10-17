@@ -19,12 +19,12 @@
 
 package org.quantil.qprov.core.repositories.prov;
 
-import org.openprovenance.prov.sql.Entity;
+import org.quantil.qprov.core.model.prov.ProvEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.stereotype.Repository;
 
 @RepositoryRestResource(exported = false)
 @Repository
-public interface ProvEntityRepository extends JpaRepository<Entity, Long> {
+public interface ProvEntityRepository extends JpaRepository<ProvEntity, Long> {
 }

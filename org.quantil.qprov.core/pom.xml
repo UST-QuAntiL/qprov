@@ -57,7 +57,7 @@
         <dependency>
             <groupId>org.openprovenance.prov</groupId>
             <artifactId>prov-sql</artifactId>
-            <version>${prov.toolbox.version}</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.openprovenance.prov</groupId>
@@ -67,7 +67,7 @@
         <dependency>
             <groupId>org.openprovenance.prov</groupId>
             <artifactId>prov-xml</artifactId>
-            <version>${prov.toolbox.version}</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.openprovenance.prov</groupId>
