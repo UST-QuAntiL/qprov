@@ -1,9 +1,11 @@
-FROM maven:3.6.3-adoptopenjdk-17 as builder
+FROM openjdk:17-jdk-bullseye as builder
 COPY . /tmp/qprov
 WORKDIR /tmp/qprov
-RUN mvn package -DskipTests
+RUN wget https://dlcdn.apache.org/maven/maven-3/3.8.8/binaries/apache-maven-3.8.8-bin.zip
+RUN unzip apache-maven-3.8.8-bin.zip
+RUN PATH=$PATH:/tmp/qprov/apache-maven-3.8.8/bin mvn package -DskipTests
 
-FROM eclipse-temurin:16-jdk
+FROM eclipse-temurin:17-jdk
 LABEL maintainer = "Benjamin Weder <benjamin.weder@iaas.uni-stuttgart.de>"
 
 ENV SERVER_PORT 5021
