@@ -1,13 +1,13 @@
 # spring boot
 spring:
-  output: {ansi: {enabled: ALWAYS}}
-  mvc: {log-request-details: true}
-  jackson: {serialization: {WRITE_DATES_AS_TIMESTAMPS: false}}
+  output: { ansi: { enabled: ALWAYS } }
+  mvc: { log-request-details: true }
+  jackson: { serialization: { WRITE_DATES_AS_TIMESTAMPS: false } }
   jpa:
     generate-ddl: true
-    hibernate: {use-new-id-generator-mappings: false, ddl-auto: update}
+    hibernate: { use-new-id-generator-mappings: false, ddl-auto: update }
     show-sql: false
-    properties: {hibernate: {dialect: org.hibernate.dialect.PostgreSQLDialect}}
+    properties: { hibernate: { dialect: org.hibernate.dialect.PostgreSQLDialect } }
   datasource:
     url: "jdbc:postgresql://${POSTGRES_HOSTNAME:127.0.0.1}:${POSTGRES_PORT:5060}/${POSTGRES_DB:qprov}"
     driver-class-name: org.postgresql.Driver
@@ -29,7 +29,7 @@ logging:
     mvc: "${LOGGING_LEVEL_MVC:debug}"
     org.quantil.qprov: "${LOGGING_LEVEL_QPROV:debug}"
     springdoc: "${LOGGING_LEVEL_SPRINGDOC:debug}"
-    springfox: {documentation: "${LOGGING_LEVEL_WEB:debug}"}
+    springfox: { documentation: "${LOGGING_LEVEL_WEB:debug}" }
     springframework: "${LOGGING_LEVEL_SPRINGFRAMEWORK:debug}"
     web: "${LOGGING_LEVEL_WEB:debug}"
     org.hibernate.orm.deprecation: "${LOGGING_LEVEL_HIBERNATE_ORM:error}"

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -27,17 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.openprovenance.prov.model.Statement;
 import org.quantil.qprov.core.Constants;
 import org.quantil.qprov.core.model.ProvExtension;
 import org.quantil.qprov.core.model.entities.CalibrationMatrix;
@@ -47,11 +37,21 @@ import org.quantil.qprov.core.model.entities.Qubit;
 import org.quantil.qprov.core.model.entities.QubitCharacteristics;
 import org.quantil.qprov.core.utils.Utils;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.GenericGenerator;
+import org.openprovenance.prov.model.Statement;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -116,7 +116,7 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
      */
     public BigDecimal getAvgT1Time() {
         return BigDecimal.valueOf(qubits.stream().map(qubit -> qubit.getQubitCharacteristics().stream()
-                .min(Comparator.comparing(QubitCharacteristics::getCalibrationTime)))
+                        .min(Comparator.comparing(QubitCharacteristics::getCalibrationTime)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .mapToDouble(qubitCharacteristics -> qubitCharacteristics.getT1Time().doubleValue())
@@ -131,14 +131,13 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
      */
     public BigDecimal getAvgT2Time() {
         return BigDecimal.valueOf(qubits.stream().map(qubit -> qubit.getQubitCharacteristics().stream()
-            .min(Comparator.comparing(QubitCharacteristics::getCalibrationTime)))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .mapToDouble(qubitCharacteristics -> qubitCharacteristics.getT2Time().doubleValue())
-            .average()
-            .orElse(0));
+                        .min(Comparator.comparing(QubitCharacteristics::getCalibrationTime)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .mapToDouble(qubitCharacteristics -> qubitCharacteristics.getT2Time().doubleValue())
+                .average()
+                .orElse(0));
     }
-
 
     /**
      * Return the average readout error from all qubits of the last calibration or null if no calibration data is available
@@ -147,7 +146,7 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
      */
     public BigDecimal getAvgReadoutError() {
         return BigDecimal.valueOf(qubits.stream().map(qubit -> qubit.getQubitCharacteristics().stream()
-                .min(Comparator.comparing(QubitCharacteristics::getCalibrationTime)))
+                        .min(Comparator.comparing(QubitCharacteristics::getCalibrationTime)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .mapToDouble(qubitCharacteristics -> qubitCharacteristics.getReadoutError().doubleValue())
@@ -162,13 +161,13 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
      */
     public BigDecimal getAvgMultiQubitGateError() {
         return BigDecimal.valueOf(gateSet.stream().filter(gate -> gate.getOperatingQubits().size() > 1)
-            .map(gate -> gate.getGateCharacteristics().stream()
-            .min(Comparator.comparing(GateCharacteristics::getCalibrationTime)))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateFidelity().doubleValue())
-            .average()
-            .orElse(0));
+                .map(gate -> gate.getGateCharacteristics().stream()
+                        .min(Comparator.comparing(GateCharacteristics::getCalibrationTime)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateFidelity().doubleValue())
+                .average()
+                .orElse(0));
     }
 
     /**
@@ -178,13 +177,13 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
      */
     public BigDecimal getAvgSingleQubitGateError() {
         return BigDecimal.valueOf(gateSet.stream().filter(gate -> gate.getOperatingQubits().size() == 1)
-            .map(gate -> gate.getGateCharacteristics().stream()
-                .min(Comparator.comparing(GateCharacteristics::getCalibrationTime)))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateFidelity().doubleValue())
-            .average()
-            .orElse(0));
+                .map(gate -> gate.getGateCharacteristics().stream()
+                        .min(Comparator.comparing(GateCharacteristics::getCalibrationTime)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateFidelity().doubleValue())
+                .average()
+                .orElse(0));
     }
 
     /**
@@ -194,13 +193,13 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
      */
     public BigDecimal getAvgMultiQubitGateTime() {
         return BigDecimal.valueOf(gateSet.stream().filter(gate -> gate.getOperatingQubits().size() > 1)
-            .map(gate -> gate.getGateCharacteristics().stream()
-            .min(Comparator.comparing(GateCharacteristics::getCalibrationTime)))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateTime().doubleValue())
-            .average()
-            .orElse(0));
+                .map(gate -> gate.getGateCharacteristics().stream()
+                        .min(Comparator.comparing(GateCharacteristics::getCalibrationTime)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateTime().doubleValue())
+                .average()
+                .orElse(0));
     }
 
     /**
@@ -210,13 +209,13 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
      */
     public BigDecimal getAvgSingleQubitGateTime() {
         return BigDecimal.valueOf(gateSet.stream().filter(gate -> gate.getOperatingQubits().size() == 1)
-            .map(gate -> gate.getGateCharacteristics().stream()
-                .min(Comparator.comparing(GateCharacteristics::getCalibrationTime)))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateTime().doubleValue())
-            .average()
-            .orElse(0));
+                .map(gate -> gate.getGateCharacteristics().stream()
+                        .min(Comparator.comparing(GateCharacteristics::getCalibrationTime)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateTime().doubleValue())
+                .average()
+                .orElse(0));
     }
 
     /**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -58,6 +58,8 @@ public final class Constants {
     public static final String QPROV_TYPE_QPU = "qpu";
 
     public static final String QPROV_TYPE_QUBIT = "qubit";
+
+    public static final String QPROV_TYPE_VIRTUAL_MACHINE = "virtualMachine";
 
     /**** QProv type attributes ****/
     public static final String QPROV_TYPE_SUFFIX = "Type";
@@ -127,6 +129,26 @@ public final class Constants {
     public static final String QPROV_TYPE_QUBIT_READOUT_ERROR = "readoutError";
 
     public static final String QPROV_TYPE_QUBIT_CALIBRATION_TIME = "calibrationTime";
+
+    public static final String QPROV_TYPE_VIRTUAL_MACHINE_NAME = "virtualMachineName";
+
+    public static final String QPROV_TYPE_VIRTUAL_MACHINE_CPU_NAME = "virtualMachineCpuName";
+
+    public static final String QPROV_TYPE_VIRTUAL_MACHINE_CPU_CORES_COUNT = "virtualMachineCpuCoresCount";
+
+    public static final String QPROV_TYPE_VIRTUAL_MACHINE_RAM_SIZE = "virtualMachineRamSize";
+
+    public static final String QPROV_TYPE_VIRTUAL_MACHINE_DISK_SIZE = "virtualMachineDiskSize";
+
+    public static final String QPROV_TYPE_VIRTUAL_MACHINE_RECORDING_TIME = "recordingTime";
+
+    public static final String QPROV_TYPE_VIRTUAL_MACHINE_CPU_USAGE = "cpuUsage";
+
+    public static final String QPROV_TYPE_VIRTUAL_MACHINE_CLOCK_SPEED = "clockSpeed";
+
+    public static final String QPROV_TYPE_VIRTUAL_MACHINE_RAM_USAGE = "ramUsage";
+
+    public static final String QPROV_TYPE_VIRTUAL_MACHINE_DISK_USAGE = "diskUsage";
 
     /**** Default values ****/
 

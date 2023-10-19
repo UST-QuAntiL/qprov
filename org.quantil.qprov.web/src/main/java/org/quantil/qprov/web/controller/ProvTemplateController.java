@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,24 +19,26 @@
 
 package org.quantil.qprov.web.controller;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 
-import org.openprovenance.prov.interop.Formats;
-import org.openprovenance.prov.interop.InteropFramework;
-import org.openprovenance.prov.sql.Document;
 import org.quantil.qprov.core.model.ProvTemplate;
 import org.quantil.qprov.core.repositories.prov.ProvTemplateRepository;
 import org.quantil.qprov.core.utils.ProvInteroperabilityUtils;
 import org.quantil.qprov.core.utils.Utils;
 import org.quantil.qprov.web.Constants;
 import org.quantil.qprov.web.dtos.ProvDocumentDto;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.openprovenance.prov.interop.Formats;
+import org.openprovenance.prov.interop.InteropFramework;
+import org.openprovenance.prov.sql.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.CollectionModel;
@@ -56,10 +58,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * Controller to access and create PROV templates for quantum computations
@@ -96,7 +96,7 @@ public class ProvTemplateController {
             provDocumentEntities.add(createEntityModel(provDocument));
         }
 
-        final var collectionModel = new CollectionModel<>(provDocumentEntities);
+        final var collectionModel = CollectionModel.of(provDocumentEntities);
         collectionModel.add(provDocumentLinks);
         collectionModel.add(linkTo(methodOn(ProvTemplateController.class).getProvenanceTemplates()).withSelfRel());
         return ResponseEntity.ok(collectionModel);
@@ -131,8 +131,8 @@ public class ProvTemplateController {
         }
 
         try {
-            intF.writeDocument(response.getOutputStream(), Formats.ProvFormat.XML,
-                    provInteroperabilityUtils.createProvXMLDocument(provTemplateOptional.get()));
+            intF.writeDocument(response.getOutputStream(), provInteroperabilityUtils.createProvXMLDocument(provTemplateOptional.get()),
+                    Formats.ProvFormat.PROVX);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -153,8 +153,8 @@ public class ProvTemplateController {
         }
 
         try {
-            intF.writeDocument(response.getOutputStream(), Formats.ProvFormat.JPEG,
-                    provInteroperabilityUtils.createProvXMLDocument(provTemplateOptional.get()));
+            intF.writeDocument(response.getOutputStream(), provInteroperabilityUtils.createProvXMLDocument(provTemplateOptional.get()),
+                    Formats.ProvFormat.JPEG);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -175,8 +175,8 @@ public class ProvTemplateController {
         }
 
         try {
-            intF.writeDocument(response.getOutputStream(), Formats.ProvFormat.PDF,
-                    provInteroperabilityUtils.createProvXMLDocument(provTemplateOptional.get()));
+            intF.writeDocument(response.getOutputStream(), provInteroperabilityUtils.createProvXMLDocument(provTemplateOptional.get()),
+                    Formats.ProvFormat.PDF);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -207,7 +207,7 @@ public class ProvTemplateController {
                                                                                  @RequestParam("format") Formats.ProvFormat format) {
 
         try {
-            final org.openprovenance.prov.model.Document template = intF.readDocument(file.getInputStream(), format, "");
+            final org.openprovenance.prov.model.Document template = intF.readDocument(file.getInputStream(), format);
             final Document templateSql = provInteroperabilityUtils.createProvSQLDocument(template);
             ProvTemplate mappedTemplate = Utils.createProvTemplate(templateSql);
             mappedTemplate = provTemplateRepository.save(mappedTemplate);
@@ -235,7 +235,7 @@ public class ProvTemplateController {
     }
 
     private EntityModel<ProvDocumentDto> createEntityModel(Document provDocument) {
-        final EntityModel<ProvDocumentDto> provDocumentDto = new EntityModel<ProvDocumentDto>(ProvDocumentDto.createDTO(provDocument));
+        final EntityModel<ProvDocumentDto> provDocumentDto = EntityModel.of(ProvDocumentDto.createDTO(provDocument));
         provDocumentDto.add(linkTo(methodOn(ProvTemplateController.class).getProvTemplate(provDocument.getPk())).withSelfRel());
         provDocumentDto
                 .add(linkTo(methodOn(ProvTemplateController.class).getProvTemplateXml(provDocument.getPk(), null))

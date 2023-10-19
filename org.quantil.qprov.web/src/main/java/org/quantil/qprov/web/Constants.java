@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -29,6 +29,8 @@ public final class Constants {
 
     public static final String TAG_PROVIDER = "provider";
 
+    public static final String TAG_VIRTUAL_MACHINE = "virtual-machine";
+
     public static final String TAG_PROV = "provenance-document";
 
     public static final String TAG_PROV_TEMPLATE = "provenance-template";
@@ -55,6 +57,8 @@ public final class Constants {
     public static final String PATH_PROV_PARAMETERS = "parameters";
 
     public static final String PATH_PROVIDERS = "providers";
+
+    public static final String PATH_VIRTUAL_MACHINES = "virtual-machines";
 
     public static final String PATH_QPUS = "qpus";
 

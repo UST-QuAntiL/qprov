@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,9 +19,6 @@
 
 package org.quantil.qprov.web.controller;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,8 +30,13 @@ import org.quantil.qprov.core.repositories.ProviderRepository;
 import org.quantil.qprov.core.repositories.QPURepository;
 import org.quantil.qprov.web.Constants;
 import org.quantil.qprov.web.dtos.QpuDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -46,10 +48,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @io.swagger.v3.oas.annotations.tags.Tag(name = Constants.TAG_PROVIDER)
 @RestController
@@ -58,8 +58,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @Slf4j
 public class QpuController {
-
-    private static final Logger logger = LoggerFactory.getLogger(QpuController.class);
+    protected static final Logger logger = LogManager.getLogger();
 
     private final ProviderRepository providerRepository;
 
@@ -89,7 +88,7 @@ public class QpuController {
                 }
         );
 
-        final var collectionModel = new CollectionModel<>(qpuEntities);
+        final var collectionModel = CollectionModel.of(qpuEntities);
         collectionModel.add(qpuLinks);
         collectionModel.add(linkTo(methodOn(QpuController.class).getQPUs(providerId)).withSelfRel());
         return ResponseEntity.ok(collectionModel);
@@ -125,7 +124,7 @@ public class QpuController {
     }
 
     private EntityModel<QpuDto> createQpuDto(UUID providerId, QPU qpu) {
-        final EntityModel<QpuDto> qpuDto = new EntityModel<QpuDto>(QpuDto.createDTO(qpu));
+        final EntityModel<QpuDto> qpuDto = EntityModel.of(QpuDto.createDTO(qpu));
         qpuDto.add(linkTo(methodOn(QpuController.class).getQPU(providerId, qpu.getDatabaseId()))
                 .withSelfRel());
         if (!qpu.isSimulator()) {

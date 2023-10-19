@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,25 +19,28 @@
 
 package org.quantil.qprov.web.controller;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.modelmapper.ModelMapper;
-import org.openprovenance.prov.sql.Activity;
-import org.openprovenance.prov.sql.Document;
-import org.openprovenance.prov.sql.ObjectFactory;
-import org.openprovenance.prov.sql.QualifiedName;
+import org.quantil.qprov.core.model.prov.ProvActivity;
+import org.quantil.qprov.core.model.prov.ProvDocument;
+import org.quantil.qprov.core.model.prov.ProvQualifiedName;
 import org.quantil.qprov.core.repositories.prov.ProvActivityRepository;
 import org.quantil.qprov.core.repositories.prov.ProvDocumentRepository;
 import org.quantil.qprov.core.repositories.prov.QualifiedNameRepository;
 import org.quantil.qprov.web.Constants;
 import org.quantil.qprov.web.dtos.ProvActivityDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.modelmapper.ModelMapper;
+import org.openprovenance.prov.sql.Activity;
+import org.openprovenance.prov.sql.ObjectFactory;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -53,10 +56,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @io.swagger.v3.oas.annotations.tags.Tag(name = Constants.TAG_PROV)
 @RestController
@@ -65,8 +66,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @Slf4j
 public class ProvActivityController {
-
-    private static final Logger logger = LoggerFactory.getLogger(ProvActivityController.class);
+    protected static final Logger logger = LogManager.getLogger();
 
     private final ProvDocumentRepository provDocumentRepository;
 
@@ -86,7 +86,7 @@ public class ProvActivityController {
     public ResponseEntity<CollectionModel<EntityModel<ProvActivityDto>>> getProvActivities(@PathVariable Long provDocumentId) {
 
         // check availability of PROV document
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -101,7 +101,7 @@ public class ProvActivityController {
             provActivityEntities.add(createEntityModel(provDocumentId, activity));
         }
 
-        final var collectionModel = new CollectionModel<>(provActivityEntities);
+        final var collectionModel = CollectionModel.of(provActivityEntities);
         collectionModel.add(provActivityLinks);
         collectionModel.add(linkTo(methodOn(ProvActivityController.class).getProvActivities(provDocumentId)).withSelfRel());
         return ResponseEntity.ok(collectionModel);
@@ -114,8 +114,8 @@ public class ProvActivityController {
     @GetMapping("/{provActitvityId}")
     public ResponseEntity<EntityModel<ProvActivityDto>> getProvActivity(@PathVariable Long provDocumentId, @PathVariable Long provActitvityId) {
 
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
-        final Optional<Activity> provActivityOptional = provActivityRepository.findById(provActitvityId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvActivity> provActivityOptional = provActivityRepository.findById(provActitvityId);
         if (provDocumentOptional.isEmpty() || provActivityOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -131,8 +131,8 @@ public class ProvActivityController {
     @DeleteMapping("/{provActitvityId}")
     public ResponseEntity<Void> deleteProvActivity(@PathVariable Long provDocumentId, @PathVariable Long provActitvityId) {
 
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
-        final Optional<Activity> provActivityOptional = provActivityRepository.findById(provActitvityId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvActivity> provActivityOptional = provActivityRepository.findById(provActitvityId);
         if (provDocumentOptional.isEmpty() || provActivityOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -146,16 +146,16 @@ public class ProvActivityController {
     }, description = "Create a new PROV activity in the specified PROV document.")
     @PostMapping
     public ResponseEntity<EntityModel<ProvActivityDto>> addProvActivityToDocument(@PathVariable Long provDocumentId,
-                                                                                  @RequestBody QualifiedName qualifiedName) {
+                                                                                  @RequestBody ProvQualifiedName qualifiedName) {
 
         logger.debug("Adding new PROV activity to document with Id: {}", provDocumentId);
 
         // check availability of PROV document
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        final Document provDocument = provDocumentOptional.get();
+        final ProvDocument provDocument = provDocumentOptional.get();
 
         final Activity activity = factory.createActivity();
         qualifiedNameRepository.save(qualifiedName);
@@ -163,7 +163,7 @@ public class ProvActivityController {
 
         provDocument.getStatementOrBundle().add(activity);
         provDocumentRepository.save(provDocument);
-        return new ResponseEntity<>(new EntityModel<>(ProvActivityDto.createDTO(activity)), HttpStatus.CREATED);
+        return new ResponseEntity<>(EntityModel.of(ProvActivityDto.createDTO(activity)), HttpStatus.CREATED);
     }
 
     @Operation(responses = {
@@ -172,18 +172,18 @@ public class ProvActivityController {
     }, description = "Update the activity in a specific PROV document.")
     @PutMapping("/{provActivityId}")
     public ResponseEntity<EntityModel<ProvActivityDto>> setProvActivity(@PathVariable Long provDocumentId,
-                                                                      @PathVariable Long provActivityId,
-                                                                      @RequestBody ProvActivityDto provActivityDto) {
+                                                                        @PathVariable Long provActivityId,
+                                                                        @RequestBody ProvActivityDto provActivityDto) {
 
         // check availability of PROV document and activity
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
-        final Optional<Activity> provActivityOptional = provActivityRepository.findById(provActivityId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvActivity> provActivityOptional = provActivityRepository.findById(provActivityId);
         if (provDocumentOptional.isEmpty() || provActivityOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         // update activity with passed data
-        Activity newActivity = modelMapper.map(provActivityDto, Activity.class);
+        ProvActivity newActivity = modelMapper.map(provActivityDto, ProvActivity.class);
         newActivity.setPk(provActivityId);
         newActivity = provActivityRepository.save(newActivity);
 
@@ -191,7 +191,7 @@ public class ProvActivityController {
     }
 
     private EntityModel<ProvActivityDto> createEntityModel(Long provDocumentId, Activity activity) {
-        final EntityModel<ProvActivityDto> entityModel = new EntityModel<ProvActivityDto>(ProvActivityDto.createDTO(activity));
+        final EntityModel<ProvActivityDto> entityModel = EntityModel.of(ProvActivityDto.createDTO(activity));
         entityModel.add(linkTo(methodOn(ProvActivityController.class).getProvActivity(provDocumentId, activity.getPk())).withSelfRel());
         return entityModel;
     }

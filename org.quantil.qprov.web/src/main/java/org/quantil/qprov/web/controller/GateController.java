@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,9 +19,6 @@
 
 package org.quantil.qprov.web.controller;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +32,11 @@ import org.quantil.qprov.core.repositories.QPURepository;
 import org.quantil.qprov.core.repositories.QubitRepository;
 import org.quantil.qprov.web.Constants;
 import org.quantil.qprov.web.dtos.GateDto;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -46,10 +48,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @io.swagger.v3.oas.annotations.tags.Tag(name = Constants.TAG_PROVIDER)
 @RestController
@@ -94,7 +94,7 @@ public class GateController {
                 }
         );
 
-        final var collectionModel = new CollectionModel<>(qubitEntities);
+        final var collectionModel = CollectionModel.of(qubitEntities);
         collectionModel.add(qubitLinks);
         collectionModel.add(linkTo(methodOn(GateController.class).getGates(providerId, qpuId, qubitId)).withSelfRel());
         return ResponseEntity.ok(collectionModel);
@@ -130,7 +130,7 @@ public class GateController {
     }
 
     private EntityModel<GateDto> createGateDto(UUID providerId, UUID qpuId, UUID qubitId, Gate gate) {
-        final EntityModel<GateDto> gateDto = new EntityModel<GateDto>(GateDto.createDTO(gate));
+        final EntityModel<GateDto> gateDto = EntityModel.of(GateDto.createDTO(gate));
         gateDto.add(linkTo(methodOn(GateController.class).getGate(providerId, qpuId, qubitId, gate.getDatabaseId())).withSelfRel());
         for (Qubit qubit : gate.getOperatingQubits()) {
             gateDto.add(linkTo(methodOn(QubitController.class).getQubit(providerId, qpuId, qubit.getDatabaseId()))

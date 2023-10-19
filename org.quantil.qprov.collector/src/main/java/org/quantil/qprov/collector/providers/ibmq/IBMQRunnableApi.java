@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,15 +19,13 @@
 
 package org.quantil.qprov.collector.providers.ibmq;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import lombok.AllArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @AllArgsConstructor
 public class IBMQRunnableApi implements Runnable {
-
-    private static final Logger logger = LoggerFactory.getLogger(IBMQRunnableApi.class);
+    protected static final Logger logger = LogManager.getLogger();
 
     private IBMQProvider ibmqProvider;
 
