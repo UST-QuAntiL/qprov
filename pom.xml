@@ -6,7 +6,7 @@
     <groupId>org.quantil</groupId>
     <artifactId>qprov</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.1</version>
+    <version>1.3.0</version>
     <name>qprov</name>
     <description>Provenance System for Quantum Computing</description>
 
