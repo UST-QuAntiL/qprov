@@ -25,6 +25,8 @@ jobs:
           tags: |
             # set latest tag for master branch
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
+            # set tag when a tag is pushed
+            type=ref,event=tag
       - name: Extract metadata (tags, labels) for Docker
         id: meta-collector
         uses: docker/metadata-action@v4
