@@ -213,6 +213,7 @@
             <groupId>org.quantil</groupId>
             <artifactId>org.quantil.qprov.core</artifactId>
             <version>${project.version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
