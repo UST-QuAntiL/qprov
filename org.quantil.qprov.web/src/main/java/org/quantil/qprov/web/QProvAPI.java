@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,6 +19,10 @@
 
 package org.quantil.qprov.web;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Contact;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.info.License;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -27,18 +31,13 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.info.Contact;
-import io.swagger.v3.oas.annotations.info.Info;
-import io.swagger.v3.oas.annotations.info.License;
-
 @EnableAsync
 @SpringBootApplication(scanBasePackages = "org.quantil.qprov.*")
 @EntityScan(basePackages = {"org.quantil.qprov.*", "org.openprovenance.prov.*"})
 @EnableJpaRepositories("org.quantil.qprov.*")
 @OpenAPIDefinition(info = @Info(
         title = "QProv API",
-        version = "1.1.1",
+        version = "1.3.0",
         license = @License(name = "Apache 2.0", url = "http://www.apache.org/licenses/LICENSE-2.0.html"),
         contact = @Contact(url = "https://github.com/UST-QuAntiL/QProv", name = "GitHub Repository")))
 public class QProvAPI extends SpringBootServletInitializer {

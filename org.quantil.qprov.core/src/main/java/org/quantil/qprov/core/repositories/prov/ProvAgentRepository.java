@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,12 +19,13 @@
 
 package org.quantil.qprov.core.repositories.prov;
 
-import org.openprovenance.prov.sql.Agent;
+import org.quantil.qprov.core.model.prov.ProvAgent;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.stereotype.Repository;
 
 @RepositoryRestResource(exported = false)
 @Repository
-public interface ProvAgentRepository extends JpaRepository<Agent, Long> {
+public interface ProvAgentRepository extends JpaRepository<ProvAgent, Long> {
 }

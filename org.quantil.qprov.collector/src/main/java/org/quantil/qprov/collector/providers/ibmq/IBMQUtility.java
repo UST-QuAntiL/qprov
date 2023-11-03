@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -27,12 +27,13 @@ import java.util.Objects;
 import org.quantil.qprov.core.model.entities.Gate;
 import org.quantil.qprov.core.model.entities.Qubit;
 import org.quantil.qprov.ibmq.client.model.DevicePropsGate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class IBMQUtility {
 
-    private static final Logger logger = LoggerFactory.getLogger(IBMQUtility.class);
+    protected static final Logger logger = LogManager.getLogger();
 
     /**
      * Parse the objects returned by IBM to a Java Map

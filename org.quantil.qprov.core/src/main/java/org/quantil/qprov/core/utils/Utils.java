@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -21,6 +21,11 @@ package org.quantil.qprov.core.utils;
 
 import java.util.Objects;
 
+import org.quantil.qprov.core.Constants;
+import org.quantil.qprov.core.model.ProvTemplate;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openprovenance.prov.interop.InteropFramework;
 import org.openprovenance.prov.model.Namespace;
 import org.openprovenance.prov.model.ProvFactory;
@@ -28,14 +33,9 @@ import org.openprovenance.prov.model.QualifiedName;
 import org.openprovenance.prov.model.Value;
 import org.openprovenance.prov.xml.Other;
 import org.openprovenance.prov.xml.Type;
-import org.quantil.qprov.core.Constants;
-import org.quantil.qprov.core.model.ProvTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class Utils {
-
-    private static final Logger logger = LoggerFactory.getLogger(Utils.class);
+    private static final Logger logger = LogManager.getLogger();
 
     private static final ProvFactory pFactory = InteropFramework.getDefaultFactory();
 

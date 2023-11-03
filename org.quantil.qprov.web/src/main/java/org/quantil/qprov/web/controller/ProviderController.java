@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,9 +19,6 @@
 
 package org.quantil.qprov.web.controller;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,8 +28,13 @@ import org.quantil.qprov.core.model.agents.Provider;
 import org.quantil.qprov.core.repositories.ProviderRepository;
 import org.quantil.qprov.web.Constants;
 import org.quantil.qprov.web.dtos.ProviderDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -44,10 +46,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * Controller to access the quantum hardware providers and the corresponding QPUs that were collected as provenance data
@@ -59,8 +59,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @Slf4j
 public class ProviderController {
-
-    private static final Logger logger = LoggerFactory.getLogger(ProviderController.class);
+    protected static final Logger logger = LogManager.getLogger();
 
     private final ProviderRepository providerRepository;
 
@@ -74,7 +73,7 @@ public class ProviderController {
         final List<Link> providerLinks = new ArrayList<>();
         providerRepository.findAll().forEach((Provider provider) -> {
                     logger.debug("Found provider with name: {}", provider.getName());
-                    final EntityModel<ProviderDto> providerDto = new EntityModel<ProviderDto>(ProviderDto.createDTO(provider));
+                    final EntityModel<ProviderDto> providerDto = EntityModel.of(ProviderDto.createDTO(provider));
                     providerDto.add(linkTo(methodOn(ProviderController.class).getProvider(provider.getDatabaseId()))
                             .withSelfRel());
                     providerDto.add(linkTo(methodOn(QpuController.class).getQPUs(provider.getDatabaseId())).withRel(Constants.PATH_QPUS));
@@ -84,7 +83,7 @@ public class ProviderController {
                 }
         );
 
-        final var collectionModel = new CollectionModel<>(providerEntities);
+        final var collectionModel = CollectionModel.of(providerEntities);
         collectionModel.add(providerLinks);
         collectionModel.add(linkTo(methodOn(ProviderController.class).getProviders()).withSelfRel());
         return ResponseEntity.ok(collectionModel);
@@ -103,7 +102,7 @@ public class ProviderController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        final EntityModel<ProviderDto> providerDto = new EntityModel<ProviderDto>(ProviderDto.createDTO(provider.get()));
+        final EntityModel<ProviderDto> providerDto = EntityModel.of(ProviderDto.createDTO(provider.get()));
         providerDto.add(linkTo(methodOn(ProviderController.class).getProvider(providerId)).withSelfRel());
         providerDto.add(linkTo(methodOn(QpuController.class).getQPUs(providerId)).withRel(Constants.PATH_QPUS));
         return ResponseEntity.ok(providerDto);

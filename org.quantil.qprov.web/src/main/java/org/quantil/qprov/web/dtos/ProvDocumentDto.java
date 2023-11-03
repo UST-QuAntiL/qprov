@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -21,14 +21,13 @@ package org.quantil.qprov.web.dtos;
 
 import java.util.List;
 
-import org.openprovenance.prov.model.Namespace;
-import org.openprovenance.prov.model.StatementOrBundle;
-import org.openprovenance.prov.sql.Document;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.openprovenance.prov.model.Namespace;
+import org.openprovenance.prov.model.StatementOrBundle;
+import org.openprovenance.prov.sql.Document;
 
 /**
  * Data transfer object for PROV Documents ({@link org.openprovenance.prov.sql.Document}).

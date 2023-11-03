@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -36,6 +36,11 @@ import org.quantil.qprov.core.repositories.QubitCharacteristicsRepository;
 import org.quantil.qprov.core.repositories.QubitRepository;
 import org.quantil.qprov.web.Constants;
 import org.quantil.qprov.web.dtos.QubitCharacteristicsDto;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -45,11 +50,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @io.swagger.v3.oas.annotations.tags.Tag(name = Constants.TAG_PROVIDER)
 @RestController
@@ -109,9 +109,9 @@ public class QubitCharacteristicsController {
 
         final List<EntityModel<QubitCharacteristicsDto>> entities = new ArrayList<>();
         qubitCharacteristicsStream.forEach(qubitCharacteristics -> {
-            entities.add(new EntityModel<QubitCharacteristicsDto>(QubitCharacteristicsDto.createDTO(qubitCharacteristics)));
+            entities.add(EntityModel.of(QubitCharacteristicsDto.createDTO(qubitCharacteristics)));
         });
 
-        return ResponseEntity.ok(new CollectionModel<>(entities));
+        return ResponseEntity.ok(CollectionModel.of(entities));
     }
 }

@@ -13,7 +13,7 @@ spring:
         enable_lazy_load_no_trans: true
   datasource:
 
-    url: "jdbc:postgresql://${POSTGRES_HOSTNAME:127.0.0.1}:${POSTGRES_PORT:5060}/${POSTGRES_DB:qprov}"
+    url: "jdbc:postgresql://${POSTGRES_HOSTNAME:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:qprov}"
     driver-class-name: org.postgresql.Driver
     username: "${POSTGRES_USER:qprov}"
     password: "${POSTGRES_PASSWORD:qprov}"

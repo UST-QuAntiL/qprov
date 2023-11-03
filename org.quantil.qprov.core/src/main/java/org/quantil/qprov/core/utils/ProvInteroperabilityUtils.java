@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -25,6 +25,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.quantil.qprov.core.model.prov.ProvQualifiedName;
+import org.quantil.qprov.core.repositories.prov.QualifiedNameRepository;
+
+import lombok.AllArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openprovenance.prov.model.LangString;
 import org.openprovenance.prov.model.Statement;
 import org.openprovenance.prov.model.StatementOrBundle;
@@ -37,7 +43,6 @@ import org.openprovenance.prov.sql.InternationalizedString;
 import org.openprovenance.prov.sql.Location;
 import org.openprovenance.prov.sql.Namespace;
 import org.openprovenance.prov.sql.Other;
-import org.openprovenance.prov.sql.QualifiedName;
 import org.openprovenance.prov.sql.Type;
 import org.openprovenance.prov.sql.Used;
 import org.openprovenance.prov.sql.Value;
@@ -45,12 +50,7 @@ import org.openprovenance.prov.sql.WasAssociatedWith;
 import org.openprovenance.prov.sql.WasAttributedTo;
 import org.openprovenance.prov.sql.WasGeneratedBy;
 import org.openprovenance.prov.sql.WasInfluencedBy;
-import org.quantil.qprov.core.repositories.prov.QualifiedNameRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import lombok.AllArgsConstructor;
 
 /**
  * Utility functions to convert PROV documents from the XML or Model package of the PROV toolbox to equivalent documents from the SQL package and in
@@ -62,8 +62,7 @@ import lombok.AllArgsConstructor;
 @Component
 @AllArgsConstructor
 public class ProvInteroperabilityUtils {
-
-    private static final Logger logger = LoggerFactory.getLogger(ProvInteroperabilityUtils.class);
+    protected static final Logger logger = LogManager.getLogger();
 
     private final QualifiedNameRepository qualifiedNameRepository;
 
@@ -187,18 +186,18 @@ public class ProvInteroperabilityUtils {
         return statementOrBundles;
     }
 
-    private QualifiedName createProvSQLQualifiedName(org.openprovenance.prov.model.QualifiedName modelQualifiedName) {
+    private ProvQualifiedName createProvSQLQualifiedName(org.openprovenance.prov.model.QualifiedName modelQualifiedName) {
         if (Objects.isNull(modelQualifiedName)) {
             return null;
         }
 
         // reuse existing qualified name
-        final Optional<QualifiedName> qualifiedNameOptional = qualifiedNameRepository.findByUri(modelQualifiedName.getUri());
+        final Optional<ProvQualifiedName> qualifiedNameOptional = qualifiedNameRepository.findByUri(modelQualifiedName.getUri());
         if (qualifiedNameOptional.isPresent()) {
             return qualifiedNameOptional.get();
         }
 
-        QualifiedName qualifiedName = new QualifiedName();
+        ProvQualifiedName qualifiedName = new ProvQualifiedName();
         qualifiedName.setLocalPart(modelQualifiedName.getLocalPart());
         qualifiedName.setNamespaceURI(modelQualifiedName.getNamespaceURI());
         qualifiedName.setPrefix(modelQualifiedName.getPrefix());

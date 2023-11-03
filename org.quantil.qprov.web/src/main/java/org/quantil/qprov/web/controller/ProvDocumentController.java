@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,9 +19,6 @@
 
 package org.quantil.qprov.web.controller;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,15 +27,21 @@ import java.util.Objects;
 import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 
-import org.openprovenance.prov.interop.Formats;
-import org.openprovenance.prov.interop.InteropFramework;
-import org.openprovenance.prov.sql.Document;
-import org.openprovenance.prov.sql.Namespace;
+import org.quantil.qprov.core.model.prov.ProvDocument;
 import org.quantil.qprov.core.repositories.prov.ProvDocumentRepository;
 import org.quantil.qprov.core.utils.ProvInteroperabilityUtils;
 import org.quantil.qprov.web.Constants;
 import org.quantil.qprov.web.dtos.ProvDocumentDto;
 import org.quantil.qprov.web.dtos.ProvNamespaceDto;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.openprovenance.prov.interop.Formats;
+import org.openprovenance.prov.interop.InteropFramework;
+import org.openprovenance.prov.sql.Document;
+import org.openprovenance.prov.sql.Namespace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.CollectionModel;
@@ -60,10 +63,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * Controller to access and create provenance graphs about quantum computations
@@ -100,7 +101,7 @@ public class ProvDocumentController {
             provDocumentEntities.add(createEntityModel(provDocument));
         }
 
-        final var collectionModel = new CollectionModel<>(provDocumentEntities);
+        final var collectionModel = CollectionModel.of(provDocumentEntities);
         collectionModel.add(provDocumentLinks);
         collectionModel.add(linkTo(methodOn(ProvDocumentController.class).getProvenanceDocuments()).withSelfRel());
         return ResponseEntity.ok(collectionModel);
@@ -113,12 +114,12 @@ public class ProvDocumentController {
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam(value = "format", required = false) Formats.ProvFormat format) {
 
-        Document provDocument = new Document();
+        ProvDocument provDocument = new ProvDocument();
         if (Objects.nonNull(file) && Objects.nonNull(format)) {
             // create document that is passed as input
             try {
-                final org.openprovenance.prov.model.Document inputDocument = intF.readDocument(file.getInputStream(), format, "");
-                provDocument = provInteroperabilityUtils.createProvSQLDocument(inputDocument);
+                final org.openprovenance.prov.model.Document inputDocument = intF.readDocument(file.getInputStream(), format);
+                provDocument = (ProvDocument) provInteroperabilityUtils.createProvSQLDocument(inputDocument);
             } catch (IOException e) {
                 e.printStackTrace();
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -141,7 +142,7 @@ public class ProvDocumentController {
     @GetMapping("/{provDocumentId}")
     public ResponseEntity<EntityModel<ProvDocumentDto>> getProvDocument(@PathVariable Long provDocumentId) {
 
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -156,7 +157,7 @@ public class ProvDocumentController {
     }, description = "Delete a PROV document.")
     @DeleteMapping("/{provDocumentId}")
     public ResponseEntity<Void> deleteProvDocument(@PathVariable Long provDocumentId) {
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -173,15 +174,15 @@ public class ProvDocumentController {
     public HttpEntity<RepresentationModel<?>> getProvDocumentXml(@PathVariable Long provDocumentId, HttpServletResponse response) {
 
         logger.debug("Serializing PROV document with Id {} to XML!", provDocumentId);
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         final InteropFramework intF = new InteropFramework();
         try {
-            intF.writeDocument(response.getOutputStream(), Formats.ProvFormat.XML,
-                    provInteroperabilityUtils.createProvXMLDocument(provDocumentOptional.get()));
+            intF.writeDocument(response.getOutputStream(), provInteroperabilityUtils.createProvXMLDocument(provDocumentOptional.get()),
+                    Formats.ProvFormat.PROVX);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -196,7 +197,7 @@ public class ProvDocumentController {
     public HttpEntity<RepresentationModel<?>> getProvDocumentJPEG(@PathVariable Long provDocumentId, HttpServletResponse response) {
 
         logger.debug("Serializing PROV document with Id {} to JPEG!", provDocumentId);
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             response.setStatus(HttpStatus.NOT_FOUND.value());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -204,8 +205,8 @@ public class ProvDocumentController {
 
         final InteropFramework intF = new InteropFramework();
         try {
-            intF.writeDocument(response.getOutputStream(), Formats.ProvFormat.JPEG,
-                    provInteroperabilityUtils.createProvXMLDocument(provDocumentOptional.get()));
+            intF.writeDocument(response.getOutputStream(), provInteroperabilityUtils.createProvXMLDocument(provDocumentOptional.get()),
+                    Formats.ProvFormat.JPEG);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -220,7 +221,7 @@ public class ProvDocumentController {
     public HttpEntity<RepresentationModel<?>> getProvDocumentPDF(@PathVariable Long provDocumentId, HttpServletResponse response) {
 
         logger.debug("Serializing PROV document with Id {} to PDF!", provDocumentId);
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             response.setStatus(HttpStatus.NOT_FOUND.value());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -228,8 +229,8 @@ public class ProvDocumentController {
 
         final InteropFramework intF = new InteropFramework();
         try {
-            intF.writeDocument(response.getOutputStream(), Formats.ProvFormat.PDF,
-                    provInteroperabilityUtils.createProvXMLDocument(provDocumentOptional.get()));
+            intF.writeDocument(response.getOutputStream(), provInteroperabilityUtils.createProvXMLDocument(provDocumentOptional.get()),
+                    Formats.ProvFormat.PDF);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -243,13 +244,13 @@ public class ProvDocumentController {
     @GetMapping("/{provDocumentId}/" + Constants.PATH_PROV_NAMESPACE)
     public ResponseEntity<EntityModel<ProvNamespaceDto>> getProvNamespace(@PathVariable Long provDocumentId) {
 
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         final EntityModel<ProvNamespaceDto> provDocumentDto =
-                new EntityModel<ProvNamespaceDto>(ProvNamespaceDto.createDTO(provDocumentOptional.get().getNamespace()));
+                EntityModel.of(ProvNamespaceDto.createDTO(provDocumentOptional.get().getNamespace()));
         provDocumentDto.add(linkTo(methodOn(ProvDocumentController.class).getProvNamespace(provDocumentId)).withSelfRel());
         return ResponseEntity.ok(provDocumentDto);
     }
@@ -262,11 +263,11 @@ public class ProvDocumentController {
     public ResponseEntity<EntityModel<ProvNamespaceDto>> setProvNamespace(@PathVariable Long provDocumentId,
                                                                           @RequestBody ProvNamespaceDto provNamespaceDto) {
 
-        final Optional<Document> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
+        final Optional<ProvDocument> provDocumentOptional = provDocumentRepository.findById(provDocumentId);
         if (provDocumentOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        final Document provDocument = provDocumentOptional.get();
+        final ProvDocument provDocument = provDocumentOptional.get();
 
         // update the namespaces and prefixes
         final org.openprovenance.prov.model.Namespace namespace = provDocument.getNamespace();
@@ -281,13 +282,13 @@ public class ProvDocumentController {
         provDocumentRepository.save(provDocument);
 
         final EntityModel<ProvNamespaceDto> provDocumentDto =
-                new EntityModel<ProvNamespaceDto>(ProvNamespaceDto.createDTO(provDocumentOptional.get().getNamespace()));
+                EntityModel.of(ProvNamespaceDto.createDTO(provDocumentOptional.get().getNamespace()));
         provDocumentDto.add(linkTo(methodOn(ProvDocumentController.class).getProvNamespace(provDocumentId)).withSelfRel());
         return ResponseEntity.ok(provDocumentDto);
     }
 
     private EntityModel<ProvDocumentDto> createEntityModel(Document provDocument) {
-        final EntityModel<ProvDocumentDto> provDocumentDto = new EntityModel<ProvDocumentDto>(ProvDocumentDto.createDTO(provDocument));
+        final EntityModel<ProvDocumentDto> provDocumentDto = EntityModel.of(ProvDocumentDto.createDTO(provDocument));
         provDocumentDto.add(linkTo(methodOn(ProvDocumentController.class).getProvDocument(provDocument.getPk())).withSelfRel());
         provDocumentDto.add(linkTo(methodOn(ProvDocumentController.class).getProvNamespace(provDocument.getPk()))
                 .withRel(Constants.PATH_PROV_NAMESPACE));
