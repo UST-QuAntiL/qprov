@@ -25,15 +25,22 @@ import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.handlers.RequestHandler2;
 import com.amazonaws.http.HttpResponse;
-import com.amazonaws.services.braket.AWSBraket;
 import com.amazonaws.services.braket.AWSBraketClient;
 import com.amazonaws.services.braket.AWSBraketClientBuilder;
+import com.amazonaws.services.braket.model.SearchDevicesRequest;
 import com.amazonaws.util.IOUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import org.quantil.qprov.collector.Constants;
 import org.quantil.qprov.collector.IProvider;
 import org.quantil.qprov.core.model.agents.Provider;
+import org.quantil.qprov.core.model.agents.QPU;
+import org.quantil.qprov.core.model.entities.Gate;
+import org.quantil.qprov.core.model.entities.GateCharacteristics;
+import org.quantil.qprov.core.model.entities.Qubit;
+import org.quantil.qprov.core.model.entities.QubitCharacteristics;
 import org.quantil.qprov.core.repositories.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +48,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -53,6 +61,26 @@ import java.util.stream.Collectors;
 public class AWSProvider implements IProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(AWSProvider.class);
+    private static final Map<String, Integer> qubitsPerGateQasm = ImmutableMap.<String, Integer>builder()
+            .put("x", Integer.valueOf(1))
+            .put("y", Integer.valueOf(1))
+            .put("z", Integer.valueOf(1))
+            .put("rx", Integer.valueOf(1))
+            .put("ry", Integer.valueOf(1))
+            .put("rz", Integer.valueOf(1))
+            .put("h", Integer.valueOf(1))
+            .put("s", Integer.valueOf(1))
+            .put("si", Integer.valueOf(1))
+            .put("t", Integer.valueOf(1))
+            .put("ti", Integer.valueOf(1))
+            .put("v", Integer.valueOf(1))
+            .put("vi", Integer.valueOf(1))
+            .put("cnot", Integer.valueOf(2))
+            .put("xx", Integer.valueOf(2))
+            .put("yy", Integer.valueOf(2))
+            .put("zz", Integer.valueOf(2))
+            .put("swap", Integer.valueOf(2))
+            .build();
 
     private final ProviderRepository providerRepository;
 
@@ -66,16 +94,21 @@ public class AWSProvider implements IProvider {
 
     private final GateRepository gateRepository;
 
-    private final Boolean executeCalibrationCircuits;
 
     // Checkout https://docs.aws.amazon.com/braket/latest/developerguide/braket-regions.html for regions
-    private final List<String> regions = List.of(
-            "us-east-1",    // IonQ and QuEra
-            "us-west-1",        // Rigetti
-            "eu-west-2");                // OQC
+    private final Map<String, String> providersAndRegions = Map.of(
+            "ionq", "us-east-1",
+            "rigetti", "us-west-1",
+            "aws", "us-east-1");
 
-    private final Map<String, AWSBraket> clientsPerRegion = new HashMap<>();
-    private final Map<String, List<AWSDevice>> devicesPerRegion = new HashMap<>();
+    private final Map<String, String> offeringURLs = Map.of(
+            "ionq", "https://ionq.com/",
+            "rigetti", "https://www.rigetti.com/",
+            "aws", "https://aws.amazon.com/braket/"
+    );
+
+    private final Map<String, List<AWSDevice>> devicesPerProvider = new HashMap<>();
+    private List<AWSDevice> simulators;
 
     @Value("${qprov.aws.token}")
     private String accessToken;
@@ -97,9 +130,6 @@ public class AWSProvider implements IProvider {
         this.qubitCharacteristicsRepository = qubitCharacteristicsRepository;
         this.gateCharacteristicsRepository = gateCharacteristicsRepository;
         this.gateRepository = gateRepository;
-        this.executeCalibrationCircuits = executeCalibrationCircuits;
-
-        regions.forEach(this::constructAWSBraketClient);
 
         // periodically collect data if activated in properties/environment variables
         if (autoCollect) {
@@ -118,7 +148,62 @@ public class AWSProvider implements IProvider {
         }
     }
 
-    private void constructAWSBraketClient(String region) {
+    @Override
+    public String getProviderId() {
+        return AWSConstants.PROVIDER_ID;
+    }
+
+    @Override
+    public boolean collectFromApi() {
+        for (Map.Entry<String, String> providerAndRegion : providersAndRegions.entrySet()) {
+            try {
+                getDevices(providerAndRegion.getKey(), providerAndRegion.getValue());
+            } catch (RuntimeException runtimeException) {
+                logger.error("Encountered an error when retrieving devices for provider {}", providerAndRegion.getKey());
+                logger.error(runtimeException.getMessage());
+                logger.error("Access key: {}", accessToken);
+            }
+        }
+        for (String provider : providersAndRegions.keySet()) {
+            Provider providerObj = addProviderToDatabase(provider);
+            if (devicesPerProvider.get(provider) == null) {
+                logger.error("Devices for provider {} could not be retrieved.", provider);
+                continue;
+            }
+            for (AWSDevice device : devicesPerProvider.get(provider)) {
+                final QPU qpu = addQPUToDatabase(providerObj, device);
+                // Not entirely sure whether the updatedAt property is the calibrationDate
+                Date lastCalibrated = new Date();
+                if (device.getCalibrationTime() == null) {
+                    logger.error("Device {} of provider {} does not have a valid calibration time.", device, provider);
+                } else {
+                    lastCalibrated = new Date(device.getCalibrationTime().toInstant().toEpochMilli());
+                    qpu.setLastCalibrated(lastCalibrated);
+                }
+                qpu.setLastUpdated(new Date(System.currentTimeMillis()));
+                qpuRepository.save(qpu);
+                // add new qubit and gate characteristics if a new calibration was done since the last retrieval
+                updateQubitCharacteristicsOfQPU(qpu, device, lastCalibrated);
+                updateGateCharacteristicsOfQPU(qpu.getDatabaseId(), device, lastCalibrated);
+            }
+        }
+        if (simulators == null) {
+            logger.error("No simulators from AWS retrieved.");
+            return false;
+        }
+        for (AWSDevice simulator : simulators) {
+            Provider providerObj = addProviderToDatabase("aws");
+            addQPUToDatabase(providerObj, simulator);
+        }
+        return true;
+    }
+
+    private void getDevices(String provider, String region) {
+        getQPUs(provider, region);
+        getSimulators();
+    }
+
+    private void getSimulators() {
         AWSBraketClientBuilder builder = AWSBraketClient.builder();
         builder.setCredentials(new AWSCredentialsProvider() {
             @Override
@@ -131,62 +216,469 @@ public class AWSProvider implements IProvider {
 
             }
         });
-        builder.setRegion("us-east-1");
+        builder.setRegion("us-west-1");
+        simulators = new ArrayList<>();
         builder.setRequestHandlers(new RequestHandler2() {
             @Override
             public HttpResponse beforeUnmarshalling(Request<?> request, HttpResponse httpResponse) {
                 try {
-                    // Get array of devices
                     ObjectMapper mapper = new ObjectMapper();
-                    JsonNode node = mapper.readTree(IOUtils.toString(httpResponse.getContent())).get("devices");
-                    List<AWSDevice> devices = Arrays.asList(mapper.treeToValue(node, AWSDevice[].class));
-                    devicesPerRegion.put(region, devices.stream().filter(awsDevice -> awsDevice.getDeviceType().equals("QPU")).collect(Collectors.toList()));
+                    String json = IOUtils.toString(httpResponse.getContent());
+                    JsonNode node = mapper.readTree(json).get("devices");
+                    if (node == null) {
+                        System.out.println("JSON response does not contain a devices property.");
+                        return super.beforeUnmarshalling(request, httpResponse);
+                    }
+                    // Get array of devices
+                    simulators = Arrays.asList(mapper.treeToValue(node, AWSDevice[].class));
+                    simulators = simulators.stream()
+                            .filter(awsDevice -> awsDevice.getDeviceType().equals("SIMULATOR"))
+                            .collect(Collectors.toList());
+                    for (AWSDevice awsDevice : simulators) {
+                        awsDevice.recoverPropertiesFromDeviceCapabilities();
+                    }
+                    super.beforeUnmarshalling(request, httpResponse);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
                 return super.beforeUnmarshalling(request, httpResponse);
             }
         });
-        clientsPerRegion.put(region, builder.build());
+        AWSBraketClient client = (AWSBraketClient) builder.build();
+        SearchDevicesRequest request = new SearchDevicesRequest();
+        request.setFilters(new ArrayList<>());
+        // The handling is done within the beforeUnmarshalling handler as the SDK discards the deviceCapabilities.
+        client.searchDevices(request);
     }
 
+    private void getQPUs(String provider, String region) {
+        AWSBraketClientBuilder builder = AWSBraketClient.builder();
+        builder.setCredentials(new AWSCredentialsProvider() {
+            @Override
+            public AWSCredentials getCredentials() {
+                return new BasicAWSCredentials(accessToken, secretAccessToken);
+            }
+
+            @Override
+            public void refresh() {
+
+            }
+        });
+        builder.setRegion(region);
+        builder.setRequestHandlers(new RequestHandler2() {
+            @Override
+            public HttpResponse beforeUnmarshalling(Request<?> request, HttpResponse httpResponse) {
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    String json = IOUtils.toString(httpResponse.getContent());
+                    JsonNode node = mapper.readTree(json).get("devices");
+                    if (node == null) {
+                        System.out.println("JSON response does not contain a devices property.");
+                        return super.beforeUnmarshalling(request, httpResponse);
+                    }
+                    // Get array of devices
+                    List<AWSDevice> devices = Arrays.asList(mapper.treeToValue(node, AWSDevice[].class));
+                    devices = devices.stream()
+                            .filter(awsDevice -> awsDevice.getDeviceType().equals("QPU"))
+                            .filter(awsDevice -> awsDevice.getProviderName().toLowerCase().equals(provider))
+                            .filter(awsDevice -> !awsDevice.getDeviceStatus().equals("RETIRED"))
+                            .collect(Collectors.toList());
+                    for (AWSDevice device : devices) {
+                        device.recoverPropertiesFromDeviceCapabilities();
+                    }
+                    devicesPerProvider.put(provider, devices);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                return super.beforeUnmarshalling(request, httpResponse);
+            }
+        });
+        AWSBraketClient client = (AWSBraketClient) builder.build();
+        SearchDevicesRequest request = new SearchDevicesRequest();
+        request.setFilters(new ArrayList<>());
+        // The handling is done within the beforeUnmarshalling handler as the SDK discards the deviceCapabilities.
+        client.searchDevices(request);
+    }
+
+
     /**
-     * Check if IBMQ provider already exists in the database and return it or otherwise create it
+     * Check if provider already exists in the database and return it or otherwise create it
      *
      * @return the retrieved or created IBMQ provider object
      */
-    private Provider addProviderToDatabase() {
-        final Optional<Provider> providerOptional = providerRepository.findByName(AWSConstants.PROVIDER_ID);
+    private Provider addProviderToDatabase(String provider) {
+        final Optional<Provider> providerOptional = providerRepository.findByName(provider);
         if (providerOptional.isPresent()) {
             logger.debug("Provider already present, skipping creation.");
             return providerOptional.get();
         }
 
         // create a new Provider object representing the IBMQ provider that is handled by this collector
-        final Provider provider = new Provider();
-        provider.setName(AWSConstants.PROVIDER_ID);
+        final Provider providerObj = new Provider();
+        providerObj.setName(provider);
         try {
-            provider.setOfferingURL(new URL(AWSConstants.PROVIDER_URL));
+            providerObj.setOfferingURL(new URL(offeringURLs.get(provider)));
         } catch (MalformedURLException e) {
             logger.error("Unable to add provider URL due to MalformedURLException!");
         }
-        providerRepository.save(provider);
+        providerRepository.save(providerObj);
 
-        return provider;
+        return providerObj;
     }
 
-    @Override
-    public String getProviderId() {
-        return AWSConstants.PROVIDER_ID;
+    private QPU addQPUToDatabase(Provider provider, AWSDevice device) {
+        final Optional<QPU> qpuOptional = qpuRepository.findByName(device.getDeviceName());
+        if (qpuOptional.isPresent()) {
+            logger.debug("QPU already present, updating information.");
+            QPU qpu = qpuOptional.get();
+            if (device.getMaxShots() == null) {
+                logger.error("For device {} of provider {} the max shots property is null.", device.getDeviceName(), provider);
+            } else {
+                qpu.setMaxShots(device.getMaxShots().intValue());
+            }
+            qpu = qpuRepository.save(qpu);
+            return qpu;
+        }
+
+        // create a new QPU object representing the retrieved device
+        QPU qpu = new QPU();
+        qpu.setName(device.getDeviceName());
+
+        qpu.setProvider(provider);
+        if (device.getMaxShots() == null) {
+            logger.error("For device {} of provider {} the max shots property is null.", device.getDeviceName(), provider);
+        } else {
+            qpu.setMaxShots(device.getMaxShots().intValue());
+        }
+        qpu = qpuRepository.save(qpu);
+
+        addQubits(provider, device, qpu);
+
+        // add gates to the qubits on which they can be executed
+        if (device.getGates() == null) {
+            logger.error("Device {} of provider {} has no gates in the model.", device, provider);
+        } else {
+            for (String gate : device.getGates()) {
+                addGateFromDevice(gate, qpu, device);
+            }
+        }
+
+        qpu = qpuRepository.save(qpu);
+        return qpu;
     }
 
-    @Override
-    public boolean collectFromApi() {
-        return false;
+    private void addQubits(Provider provider, AWSDevice device, QPU qpu) {
+        // TODO: Adapted this, is this correct -> Benjamin
+        // add qubits
+        final Map<String, Qubit> qubits = new HashMap<>();
+        if (Objects.nonNull(device.getConnectivityMap())) {
+            // Preconstruct the qubits
+            device.getConnectivityMap().keySet().stream().map(String::valueOf)
+                    .map(qubitName -> constructQubit(qpu, qubitName))
+                    .forEach(qubit -> {
+                        qubits.put(qubit.getName(), qubit);
+                        qpu.getQubits().add(qubit);
+                    });
+
+            // for each qubit, find all connected qubits
+            for (Integer qubitId : device.getConnectivityMap().keySet()) {
+                final String qubitName = qubitId.toString();
+                // create new qubit if not already done
+                Qubit qubit = qubits.get(qubitName);
+                Set<Qubit> connectedQubits = device.getConnectivityMap().keySet().stream().map(String::valueOf).map(qubits::get).collect(Collectors.toSet());
+                qubit.setConnectedQubits(connectedQubits);
+            }
+        } else {
+            if (device.getNumberQubits() == null) {
+                logger.error("For device {} of provider {} the number of qubits property is null.", device.getDeviceName(), provider);
+                return;
+            }
+            // for simulators and QPUs with one qubit no coupling map exists, therefore just add the qubits
+            for (int i = 0; i < device.getNumberQubits().intValue(); i++) {
+                Qubit qubit = new Qubit();
+                qubit.setQpu(qpu);
+                qubit.setName(String.valueOf(i));
+                qubit = qubitRepository.save(qubit);
+
+                qubits.put(qubit.getName(), qubit);
+                qpu.getQubits().add(qubit);
+            }
+        }
+    }
+
+    private Qubit constructQubit(QPU qpu, String qubitName) {
+        Qubit qubit = new Qubit();
+        qubit.setQpu(qpu);
+        qubit.setName(qubitName);
+        return qubitRepository.save(qubit);
+    }
+
+    /**
+     * Add the gate of the device to the corresponding qubits
+     *
+     * @param qpu the qpu to which the qubits belong
+     */
+    public void addGateFromDevice(String gateName, QPU qpu, AWSDevice device) {
+        Gate gate = new Gate();
+        gate.setName(gateName);
+        gate.setQpu(qpu);
+        gate = gateRepository.save(gate);
+
+        // add gate to each qubit in the coupling if it operates on multiple qubits
+        final Set<Qubit> operatingQubits = new HashSet<>();
+        // Collect all distinct qubit ids
+        if (device.getConnectivityMap() != null) {
+            List<Integer> qubitIds = device.getConnectivityMap().keySet().stream()
+                    .map(device.getConnectivityMap()::get)
+                    .flatMap(List::stream)
+                    .distinct()
+                    .collect(Collectors.toList());
+            for (Integer qubitId : qubitIds) {
+                final Qubit qubit = qubitRepository.findByQpuAndName(qpu, qubitId.toString()).orElse(null);
+                if (Objects.nonNull(qubit)) {
+                    qubit.getSupportedGates().add(gate);
+                    operatingQubits.add(qubit);
+                } else {
+                    logger.error("Qubit is null for device {}", device.getDeviceName());
+                }
+            }
+            gate.setOperatingQubits(operatingQubits);
+            gateRepository.save(gate);
+        }
+    }
+
+    /**
+     * Update the qubit characteristics of the given QPU with the latest calibration data and add to the database
+     *
+     * @param qpu the QPU to update the qubit characteristics for
+     */
+    private void updateQubitCharacteristicsOfQPU(QPU qpu, AWSDevice device, Date calibrationTime) {
+        // iterate through all properties and update corresponding Qubit
+        if (device.getConnectivityMap() != null) {
+            // We do this in case the qubits are not numbered/named sequentially
+            for (Integer qubitId : device.getConnectivityMap().keySet()) {
+                updateQubitCharacteristicsOfQPU(qubitId.toString(), qpu, device, calibrationTime);
+            }
+        } else {
+            for (int i = 0; i < qpu.getQubits().size(); i++) {
+                updateQubitCharacteristicsOfQPU(String.valueOf(i), qpu, device, calibrationTime);
+            }
+        }
+    }
+
+    private void updateQubitCharacteristicsOfQPU(String qubitId, QPU qpu, AWSDevice device, Date calibrationTime) {
+        final Qubit currentQubit = qubitRepository.findByQpuAndName(qpu, qubitId).orElse(null);
+
+        if (Objects.isNull(currentQubit)) {
+            logger.warn("Unable to retrieve related qubit with name {} for QPU {}", qubitId, qpu.getName());
+            return;
+        }
+
+        // skip update if latest characteristics have the same time stamp then current calibration data
+        final QubitCharacteristics latestCharacteristics =
+                qubitCharacteristicsRepository.findByQubitOrderByCalibrationTimeDesc(currentQubit).stream().findFirst().orElse(null);
+        if (Objects.nonNull(latestCharacteristics) && !calibrationTime.after(latestCharacteristics.getCalibrationTime())) {
+            logger.debug("Stored characteristics are up-to-date. No update needed!");
+            return;
+        }
+
+        // create new characteristics object with the current characteristics
+        final QubitCharacteristics qubitCharacteristics = new QubitCharacteristics();
+        qubitCharacteristics.setQubit(currentQubit);
+        qubitCharacteristics.setCalibrationTime(calibrationTime);
+
+        // retrieve T1, T2, and readout error
+        switch (device.getProviderName().toLowerCase()) {
+            case "ionq":
+                handleIonqQubitProperties(qubitCharacteristics, device);
+                break;
+            case "rigetti":
+                handleRigettiQubitProperties(qubitCharacteristics, device);
+                break;
+            default:
+                logger.warn("For device {} of provider {} no qubit handler is available. Qubit properties will be null.", device.getDeviceName(), device.getProviderName());
+        }
+
+        // update qubit object with new characteristics object
+        currentQubit.getQubitCharacteristics().add(qubitCharacteristics);
+        qubitRepository.save(currentQubit);
+    }
+
+    private void handleRigettiQubitProperties(QubitCharacteristics qubitCharacteristics, AWSDevice device) {
+        logger.warn("Retrieving Qubit properties for Rigetti devices not yet supported!");
+        // TODO: Implement me
+    }
+
+    private void handleIonqQubitProperties(QubitCharacteristics qubitCharacteristics, AWSDevice device) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            JsonNode providerNode = mapper.readTree(device.getDeviceCapabilities()).get("provider");
+            if (providerNode == null) {
+                logger.warn("The IONQ device json has not the expected format. Cannot find provider node.");
+                return;
+            }
+            // Fidelities
+            JsonNode fidelityNode = providerNode.get("fidelity");
+            if (fidelityNode != null) {
+                JsonNode readoutError = fidelityNode.get("spam");
+                if (readoutError == null) {
+                    logger.warn("The IONQ device json has not the expected format. Cannot find spam/readout error node.");
+                } else {
+                    qubitCharacteristics.setReadoutError(BigDecimal.valueOf(1.0).subtract(BigDecimal.valueOf(readoutError.get("mean").asDouble())));
+                }
+            } else {
+                logger.warn("The IONQ device json has not the expected format. Cannot find fidelity node.");
+            }
+            JsonNode timingNode = providerNode.get("timing");
+            if (timingNode != null) {
+                JsonNode t1 = timingNode.get("T1");
+                JsonNode t2 = timingNode.get("T2");
+                if (t1 != null) {
+                    qubitCharacteristics.setT1Time(BigDecimal.valueOf(t1.asDouble()));
+                } else {
+                    logger.warn("The IONQ device json has not the expected format. Cannot find t1 timing node.");
+                }
+                if (t2 != null) {
+                    qubitCharacteristics.setT2Time(BigDecimal.valueOf(t2.asDouble()));
+                } else {
+                    logger.warn("The IONQ device json has not the expected format. Cannot find t2 timing node.");
+                }
+            } else {
+                logger.warn("The IONQ device json has not the expected format. Cannot find timing node.");
+            }
+        } catch (JsonProcessingException ex) {
+            logger.error("Error processing qubit properties for QPU {} of provider {}:", device.getDeviceName(), device.getProviderName());
+            logger.error(ex.getMessage());
+        }
+
+    }
+
+    /**
+     * Update the gate characteristics of the given QPU with the latest calibration data and add to the database
+     *
+     * @param qpuId           the Id of the QPU to update the gate characteristics for
+     * @param calibrationTime the time of the calibration the given device properties were retrieved from
+     */
+    private void updateGateCharacteristicsOfQPU(UUID qpuId, AWSDevice device, Date calibrationTime) {
+        final QPU qpu = qpuRepository.findById(qpuId).orElse(null);
+        if (Objects.isNull(qpu)) {
+            logger.error("Unable to retrieve QPU with Id: {}", qpuId);
+            return;
+        }
+
+        logger.debug("QPU {} has {} qubits", qpu.getName(), qpu.getQubits().size());
+        final List<Gate> gates =
+                qpu.getQubits().stream().flatMap(qubit -> qubit.getSupportedGates().stream()).distinct().collect(Collectors.toList());
+        logger.debug("Updating characteristics for {} gates of QPU: {}", gates.size(), qpu.getName());
+
+        for (Gate gate : gates) {
+            // skip update if latest characteristics have the same time stamp then current calibration data
+            final GateCharacteristics latestCharacteristics =
+                    gateCharacteristicsRepository.findByGateOrderByCalibrationTimeDesc(gate).stream().findFirst().orElse(null);
+            if (Objects.nonNull(latestCharacteristics) && !calibrationTime.after(latestCharacteristics.getCalibrationTime())) {
+                logger.debug("Stored gate characteristics are up-to-date. No update needed!");
+                continue;
+            }
+
+            final GateCharacteristics gateCharacteristics = new GateCharacteristics();
+            gateCharacteristics.setGate(gate);
+            gateCharacteristics.setCalibrationTime(calibrationTime);
+
+            switch (device.getProviderName().toLowerCase()) {
+                case "ionq":
+                    handleIonqGateProperties(gateCharacteristics, device);
+                    break;
+                case "rigetti":
+                    handleRigettiGateProperties(gateCharacteristics, device);
+                    break;
+                default:
+                    logger.warn("For device {} of provider {} no qubit handler is available. Qubit properties will be null.", device.getDeviceName(), device.getProviderName());
+            }
+
+            // update gate object with new characteristics object
+            gate.getGateCharacteristics().add(gateCharacteristics);
+            gateRepository.save(gate);
+        }
+    }
+
+    private void handleIonqGateProperties(GateCharacteristics gateCharacteristics, AWSDevice device) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            JsonNode providerNode = mapper.readTree(device.getDeviceCapabilities()).get("provider");
+            if (providerNode == null) {
+                logger.warn("The IONQ device json has not the expected format. Cannot find provider node.");
+                return;
+            }
+            JsonNode fidelityNode = providerNode.get("fidelity");
+            JsonNode timingNode = providerNode.get("timing");
+            // If not updated (in case json is incomplete) just set them null
+            BigDecimal fidelity;
+            BigDecimal gateTime;
+            if (is1QubitGateQasm(gateCharacteristics.getGate().getName())) { // 1 Qubit gate
+                fidelity = retrieveFidelity("1Q", fidelityNode);
+                gateTime = retrieveTiming("1Q", timingNode);
+
+            } else { // 2 Qubit gate
+                fidelity = retrieveFidelity("2Q", fidelityNode);
+                gateTime = retrieveTiming("2Q", timingNode);
+            }
+            logger.debug("For gate {}, setting gate time to: {} and gateError to: {}", gateCharacteristics.getGate().getName(), gateTime, fidelity);
+            gateCharacteristics.setGateTime(gateTime);
+            gateCharacteristics.setGateFidelity(fidelity);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    // Gate type is 1Q or 2Q for 1 or 2 qubit gates
+    private BigDecimal retrieveTiming(String gateType, JsonNode timingNode) {
+        boolean timingAvailable = timingNode != null;
+        if (!timingAvailable) {
+            logger.warn("The IONQ device json has not the expected format. Cannot find timing node.");
+        }
+        if (timingAvailable) {
+            timingNode = timingNode.get(gateType);
+            if (timingNode == null) {
+                logger.warn("The IONQ device json has not the expected format. Cannot find timing node for 1 Qubit gates.");
+            } else {
+                return BigDecimal.valueOf(timingNode.asDouble());
+            }
+        }
+        return null;
+
+    }
+
+    // Gate type is 1Q or 2Q for 1 or 2 qubit gates
+    private BigDecimal retrieveFidelity(String gateType, JsonNode fidelityNode) {
+        boolean fidelityAvailable = fidelityNode != null;
+        if (!fidelityAvailable) {
+            logger.warn("The IONQ device json has not the expected format. Cannot find fidelity node.");
+        }
+        if (fidelityAvailable) {
+            fidelityNode = fidelityNode.get(gateType);
+            if (fidelityNode == null) {
+                logger.warn("The IONQ device json has not the expected format. Cannot find fidelity node for 1 Qubit gates.");
+            } else {
+                fidelityNode = fidelityNode.get("mean");
+                return BigDecimal.valueOf(1.0).subtract(BigDecimal.valueOf(fidelityNode.asDouble()));
+            }
+        }
+        return null;
+    }
+
+    private boolean is1QubitGateQasm(String name) {
+        return qubitsPerGateQasm.get(name).intValue() == 1;
+    }
+
+    private void handleRigettiGateProperties(GateCharacteristics gateCharacteristics, AWSDevice device) {
+        logger.warn("Retrieving Gate properties for Rigetti devices not yet supported!");
+        //TODO: Implement
     }
 
     @Override
     public boolean collectThroughCircuits() {
+        logger.warn("Collect through circuit not implemented");
         return false;
     }
 }
