@@ -19,16 +19,15 @@
 
 package org.quantil.qprov.web.dtos;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.UUID;
-
-import org.quantil.qprov.core.model.entities.GateCharacteristics;
-import org.quantil.qprov.core.model.entities.QubitCharacteristics;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.quantil.qprov.core.model.entities.GateCharacteristics;
+import org.quantil.qprov.core.model.entities.QubitCharacteristics;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * Data transfer object for qubit characteristics ({@link QubitCharacteristics}).
@@ -44,11 +43,11 @@ public class GateCharacteristicsDto {
 
     private BigDecimal gateTime;
 
-    private BigDecimal gateFidelity;
+    private BigDecimal gateErrorRate;
 
     public static GateCharacteristicsDto createDTO(GateCharacteristics gateCharacteristics) {
         return new GateCharacteristicsDto(gateCharacteristics.getDatabaseId(), gateCharacteristics.getCalibrationTime(),
                 gateCharacteristics.getGateTime(),
-                gateCharacteristics.getGateFidelity());
+                gateCharacteristics.getGateErrorRate());
     }
 }

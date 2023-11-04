@@ -55,6 +55,7 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Component
@@ -171,6 +172,7 @@ public class AWSProvider implements IProvider {
                 continue;
             }
             for (AWSDevice device : devicesPerProvider.get(provider)) {
+                logger.debug("Adding QPU {} of provider {} to database", device.getDeviceName(), device.getProviderName());
                 final QPU qpu = addQPUToDatabase(providerObj, device);
                 // Not entirely sure whether the updatedAt property is the calibrationDate
                 Date lastCalibrated = new Date();
@@ -183,7 +185,9 @@ public class AWSProvider implements IProvider {
                 qpu.setLastUpdated(new Date(System.currentTimeMillis()));
                 qpuRepository.save(qpu);
                 // add new qubit and gate characteristics if a new calibration was done since the last retrieval
+                logger.debug("Updating qubit characteristics...");
                 updateQubitCharacteristicsOfQPU(qpu, device, lastCalibrated);
+                logger.debug("Updating gate characteristics...");
                 updateGateCharacteristicsOfQPU(qpu.getDatabaseId(), device, lastCalibrated);
             }
         }
@@ -358,9 +362,9 @@ public class AWSProvider implements IProvider {
         if (device.getGates() == null) {
             logger.error("Device {} of provider {} has no gates in the model.", device, provider);
         } else {
-            for (String gate : device.getGates()) {
-                addGateFromDevice(gate, qpu, device);
-            }
+            logger.debug("QPU {} has gates {}", device.getDeviceName(), device.getGates());
+            logger.debug("Adding gates to device model...");
+            addGatesFromDevice(device.getGates(), qpu, device);
         }
 
         qpu = qpuRepository.save(qpu);
@@ -372,7 +376,7 @@ public class AWSProvider implements IProvider {
         // add qubits
         final Map<String, Qubit> qubits = new HashMap<>();
         if (Objects.nonNull(device.getConnectivityMap())) {
-            // Preconstruct the qubits
+            // Preconstruct the qubits based on the connectivity map keys
             device.getConnectivityMap().keySet().stream().map(String::valueOf)
                     .map(qubitName -> constructQubit(qpu, qubitName))
                     .forEach(qubit -> {
@@ -413,37 +417,59 @@ public class AWSProvider implements IProvider {
         return qubitRepository.save(qubit);
     }
 
-    /**
-     * Add the gate of the device to the corresponding qubits
-     *
-     * @param qpu the qpu to which the qubits belong
-     */
-    public void addGateFromDevice(String gateName, QPU qpu, AWSDevice device) {
-        Gate gate = new Gate();
-        gate.setName(gateName);
-        gate.setQpu(qpu);
-        gate = gateRepository.save(gate);
-
+    public void addGatesFromDevice(List<String> gateNames, QPU qpu, AWSDevice device) {
         // add gate to each qubit in the coupling if it operates on multiple qubits
-        final Set<Qubit> operatingQubits = new HashSet<>();
+        List<String> oneQubitGates = gateNames.parallelStream().filter(this::is1QubitGateQasm).collect(Collectors.toList());
+        logger.debug("1 Qubit gate list {}", oneQubitGates);
+        List<String> twoQubitGates = gateNames.parallelStream().filter(Predicate.not(this::is1QubitGateQasm)).collect(Collectors.toList());
+        logger.debug("2 Qubit gate list {}", twoQubitGates);
+        HashMap<Integer, Qubit> qubits = new HashMap<>();
+        for (Integer qubitId : device.getConnectivityMap().keySet()) {
+            Optional<Qubit> optQubit = qubitRepository.findByQpuAndName(qpu, String.valueOf(qubitId));
+            if (optQubit.isEmpty()) {
+                logger.error("Qubit {} is null for device {}", qubitId, device.getDeviceName());
+                continue;
+            }
+            qubits.put(qubitId, optQubit.get());
+        }
         // Collect all distinct qubit ids
         if (device.getConnectivityMap() != null) {
-            List<Integer> qubitIds = device.getConnectivityMap().keySet().stream()
-                    .map(device.getConnectivityMap()::get)
-                    .flatMap(List::stream)
-                    .distinct()
-                    .collect(Collectors.toList());
-            for (Integer qubitId : qubitIds) {
-                final Qubit qubit = qubitRepository.findByQpuAndName(qpu, qubitId.toString()).orElse(null);
-                if (Objects.nonNull(qubit)) {
-                    qubit.getSupportedGates().add(gate);
-                    operatingQubits.add(qubit);
-                } else {
-                    logger.error("Qubit is null for device {}", device.getDeviceName());
+            for (Integer sourceQubitId : device.getConnectivityMap().keySet()) {
+                Qubit sourceQubit = qubits.get(sourceQubitId);
+                for (String gateName : oneQubitGates) {
+                    Gate gate = new Gate();
+                    gate.setName(gateName);
+                    gate.setQpu(qpu);
+                    // Add gate to supported gates of the qubit it operates on
+                    sourceQubit.getSupportedGates().add(gate);
+                    gate.addOperatingQubit(sourceQubit);
+                    qubitRepository.save(sourceQubit);
+                    // TODO: This leads to an illegal state representation and it appears to work anyway. Not sure if we need it? (i am not familiar enough with JPA)
+                    // gateRepository.save(gate);
+                }
+                // Use sublist to ensure no double counting e.g. 0-1 and 1-0 (assumes the list are sorted
+                // Assuming sorted list (is the case for ionq)
+                List<Integer> targetQubitIds = device.getConnectivityMap().get(sourceQubitId);
+                // Assumes that the sourceQubitIds are numbered from 0 and the keyset is sorted:
+                targetQubitIds = targetQubitIds.subList(sourceQubitId.intValue(), targetQubitIds.size());
+                for (Integer targetQubitId : targetQubitIds) {
+                    Qubit targetQubit = qubits.get(targetQubitId);
+                    for (String gateName : twoQubitGates) {
+                        Gate gate = new Gate();
+                        gate.setName(gateName);
+                        gate.setQpu(qpu);
+                        // Add gate to supported gates of the qubits it operates on; This sets the operating qubits of the gate automatically
+                        sourceQubit.getSupportedGates().add(gate);
+                        targetQubit.getSupportedGates().add(gate);
+                        gate.addOperatingQubit(sourceQubit);
+                        gate.addOperatingQubit(targetQubit);
+                        qubitRepository.save(sourceQubit);
+                        qubitRepository.save(targetQubit);
+                        // TODO: This leads to an illegal state representation and it appears to work anyway. Not sure if we need it? (i am not familiar enough with JPA)
+                        // gateRepository.save(gate);
+                    }
                 }
             }
-            gate.setOperatingQubits(operatingQubits);
-            gateRepository.save(gate);
         }
     }
 
@@ -524,7 +550,7 @@ public class AWSProvider implements IProvider {
                 if (readoutError == null) {
                     logger.warn("The IONQ device json has not the expected format. Cannot find spam/readout error node.");
                 } else {
-                    qubitCharacteristics.setReadoutError(BigDecimal.valueOf(1.0).subtract(BigDecimal.valueOf(readoutError.get("mean").asDouble())));
+                    qubitCharacteristics.setReadoutError(BigDecimal.valueOf(1.0).subtract(new BigDecimal(readoutError.get("mean").asText())));
                 }
             } else {
                 logger.warn("The IONQ device json has not the expected format. Cannot find fidelity node.");
@@ -534,11 +560,13 @@ public class AWSProvider implements IProvider {
                 JsonNode t1 = timingNode.get("T1");
                 JsonNode t2 = timingNode.get("T2");
                 if (t1 != null) {
+                    // in seconds
                     qubitCharacteristics.setT1Time(BigDecimal.valueOf(t1.asDouble()));
                 } else {
                     logger.warn("The IONQ device json has not the expected format. Cannot find t1 timing node.");
                 }
                 if (t2 != null) {
+                    // in seconds
                     qubitCharacteristics.setT2Time(BigDecimal.valueOf(t2.asDouble()));
                 } else {
                     logger.warn("The IONQ device json has not the expected format. Cannot find t2 timing node.");
@@ -612,19 +640,19 @@ public class AWSProvider implements IProvider {
             JsonNode fidelityNode = providerNode.get("fidelity");
             JsonNode timingNode = providerNode.get("timing");
             // If not updated (in case json is incomplete) just set them null
-            BigDecimal fidelity;
+            BigDecimal gateErrorRate;
             BigDecimal gateTime;
             if (is1QubitGateQasm(gateCharacteristics.getGate().getName())) { // 1 Qubit gate
-                fidelity = retrieveFidelity("1Q", fidelityNode);
+                gateErrorRate = retrieveGateErrorRate("1Q", fidelityNode);
                 gateTime = retrieveTiming("1Q", timingNode);
 
             } else { // 2 Qubit gate
-                fidelity = retrieveFidelity("2Q", fidelityNode);
+                gateErrorRate = retrieveGateErrorRate("2Q", fidelityNode);
                 gateTime = retrieveTiming("2Q", timingNode);
             }
-            logger.debug("For gate {}, setting gate time to: {} and gateError to: {}", gateCharacteristics.getGate().getName(), gateTime, fidelity);
+            // in seconds
             gateCharacteristics.setGateTime(gateTime);
-            gateCharacteristics.setGateFidelity(fidelity);
+            gateCharacteristics.setGateErrorRate(gateErrorRate);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -642,7 +670,7 @@ public class AWSProvider implements IProvider {
             if (timingNode == null) {
                 logger.warn("The IONQ device json has not the expected format. Cannot find timing node for 1 Qubit gates.");
             } else {
-                return BigDecimal.valueOf(timingNode.asDouble());
+                return new BigDecimal(timingNode.asText());
             }
         }
         return null;
@@ -650,7 +678,7 @@ public class AWSProvider implements IProvider {
     }
 
     // Gate type is 1Q or 2Q for 1 or 2 qubit gates
-    private BigDecimal retrieveFidelity(String gateType, JsonNode fidelityNode) {
+    private BigDecimal retrieveGateErrorRate(String gateType, JsonNode fidelityNode) {
         boolean fidelityAvailable = fidelityNode != null;
         if (!fidelityAvailable) {
             logger.warn("The IONQ device json has not the expected format. Cannot find fidelity node.");
@@ -661,14 +689,17 @@ public class AWSProvider implements IProvider {
                 logger.warn("The IONQ device json has not the expected format. Cannot find fidelity node for 1 Qubit gates.");
             } else {
                 fidelityNode = fidelityNode.get("mean");
-                return BigDecimal.valueOf(1.0).subtract(BigDecimal.valueOf(fidelityNode.asDouble()));
+                return BigDecimal.valueOf(1.0).subtract(new BigDecimal(fidelityNode.asText()));
             }
         }
         return null;
     }
 
     private boolean is1QubitGateQasm(String name) {
-        return qubitsPerGateQasm.get(name).intValue() == 1;
+        if (!qubitsPerGateQasm.keySet().contains(name)) {
+            logger.error("Unknown number of qubits for gate {} defaulting to 1", name);
+        }
+        return qubitsPerGateQasm.getOrDefault(name, 1) == 1;
     }
 
     private void handleRigettiGateProperties(GateCharacteristics gateCharacteristics, AWSDevice device) {
