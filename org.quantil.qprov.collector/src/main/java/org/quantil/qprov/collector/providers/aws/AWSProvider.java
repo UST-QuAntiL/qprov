@@ -27,6 +27,9 @@ import com.amazonaws.handlers.RequestHandler2;
 import com.amazonaws.http.HttpResponse;
 import com.amazonaws.services.braket.AWSBraketClient;
 import com.amazonaws.services.braket.AWSBraketClientBuilder;
+import com.amazonaws.services.braket.model.DeviceQueueInfo;
+import com.amazonaws.services.braket.model.GetDeviceRequest;
+import com.amazonaws.services.braket.model.GetDeviceResult;
 import com.amazonaws.services.braket.model.SearchDevicesRequest;
 import com.amazonaws.util.IOUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -174,6 +177,7 @@ public class AWSProvider implements IProvider {
             for (AWSDevice device : devicesPerProvider.get(provider)) {
                 logger.debug("Adding QPU {} of provider {} to database", device.getDeviceName(), device.getProviderName());
                 final QPU qpu = addQPUToDatabase(providerObj, device);
+                setQueueSize(qpu, device, providersAndRegions.get(provider));
                 // Not entirely sure whether the updatedAt property is the calibrationDate
                 Date lastCalibrated = new Date();
                 if (device.getCalibrationTime() == null) {
@@ -200,6 +204,34 @@ public class AWSProvider implements IProvider {
             addQPUToDatabase(providerObj, simulator);
         }
         return true;
+    }
+
+    private void setQueueSize(QPU qpu, AWSDevice device, String region) {
+        AWSBraketClientBuilder builder = AWSBraketClient.builder();
+        builder.setCredentials(new AWSCredentialsProvider() {
+            @Override
+            public AWSCredentials getCredentials() {
+                return new BasicAWSCredentials(accessToken, secretAccessToken);
+            }
+
+            @Override
+            public void refresh() {
+
+            }
+        });
+        builder.setRegion(region);
+        AWSBraketClient client = (AWSBraketClient) builder.build();
+        GetDeviceRequest request = new GetDeviceRequest();
+        request.setDeviceArn(device.getDeviceArn());
+        GetDeviceResult result = client.getDevice(request);
+        // We retrieve three queues: {Queue: QUANTUM_TASKS_QUEUE,QueuePriority: Normal,QueueSize: 0}, {Queue: QUANTUM_TASKS_QUEUE,QueuePriority: Priority,QueueSize: 0}, {Queue: JOBS_QUEUE,QueueSize: 0} for now we only retrieve the first one
+        Integer queueSize = result.getDeviceQueueInfo().stream().filter(deviceQueueInfo -> deviceQueueInfo.getQueue().equals("QUANTUM_TASKS_QUEUE")).filter(deviceQueueInfo -> deviceQueueInfo.getQueuePriority().equals("Normal")).map(DeviceQueueInfo::getQueueSize).map(Integer::valueOf).findFirst().orElse(-1);
+        if (queueSize == -1) {
+            logger.error("Could not retrieve the queue size of the quantum task queue.");
+            return;
+        }
+        logger.debug("Queue size retrieved: {}", queueSize);
+        qpu.setQueueSize(queueSize);
     }
 
     private void getDevices(String provider, String region) {
