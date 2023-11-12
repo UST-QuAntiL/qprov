@@ -35,7 +35,6 @@ import com.amazonaws.util.IOUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import org.quantil.qprov.collector.Constants;
 import org.quantil.qprov.collector.IProvider;
 import org.quantil.qprov.core.model.agents.Provider;
@@ -65,26 +64,6 @@ import java.util.stream.Collectors;
 public class AWSProvider implements IProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(AWSProvider.class);
-    private static final Map<String, Integer> qubitsPerGateQasm = ImmutableMap.<String, Integer>builder()
-            .put("x", Integer.valueOf(1))
-            .put("y", Integer.valueOf(1))
-            .put("z", Integer.valueOf(1))
-            .put("rx", Integer.valueOf(1))
-            .put("ry", Integer.valueOf(1))
-            .put("rz", Integer.valueOf(1))
-            .put("h", Integer.valueOf(1))
-            .put("s", Integer.valueOf(1))
-            .put("si", Integer.valueOf(1))
-            .put("t", Integer.valueOf(1))
-            .put("ti", Integer.valueOf(1))
-            .put("v", Integer.valueOf(1))
-            .put("vi", Integer.valueOf(1))
-            .put("cnot", Integer.valueOf(2))
-            .put("xx", Integer.valueOf(2))
-            .put("yy", Integer.valueOf(2))
-            .put("zz", Integer.valueOf(2))
-            .put("swap", Integer.valueOf(2))
-            .build();
 
     private final ProviderRepository providerRepository;
 
@@ -97,19 +76,6 @@ public class AWSProvider implements IProvider {
     private final GateCharacteristicsRepository gateCharacteristicsRepository;
 
     private final GateRepository gateRepository;
-
-
-    // Checkout https://docs.aws.amazon.com/braket/latest/developerguide/braket-regions.html for regions
-    private final Map<String, String> providersAndRegions = Map.of(
-            "ionq", "us-east-1",
-            "rigetti", "us-west-1",
-            "aws", "us-east-1");
-
-    private final Map<String, String> offeringURLs = Map.of(
-            "ionq", "https://ionq.com/",
-            "rigetti", "https://www.rigetti.com/",
-            "aws", "https://aws.amazon.com/braket/"
-    );
 
     private final Map<String, List<AWSDevice>> devicesPerProvider = new HashMap<>();
     private List<AWSDevice> simulators;
@@ -159,7 +125,7 @@ public class AWSProvider implements IProvider {
 
     @Override
     public boolean collectFromApi() {
-        for (Map.Entry<String, String> providerAndRegion : providersAndRegions.entrySet()) {
+        for (Map.Entry<String, String> providerAndRegion : AWSConstants.PROVIDERS.entrySet()) {
             try {
                 getDevices(providerAndRegion.getKey(), providerAndRegion.getValue());
             } catch (RuntimeException runtimeException) {
@@ -168,7 +134,7 @@ public class AWSProvider implements IProvider {
                 logger.error("Access key: {}", accessToken);
             }
         }
-        for (String provider : providersAndRegions.keySet()) {
+        for (String provider : AWSConstants.PROVIDERS.keySet()) {
             Provider providerObj = addProviderToDatabase(provider);
             if (devicesPerProvider.get(provider) == null) {
                 logger.error("Devices for provider {} could not be retrieved.", provider);
@@ -177,7 +143,7 @@ public class AWSProvider implements IProvider {
             for (AWSDevice device : devicesPerProvider.get(provider)) {
                 logger.debug("Adding QPU {} of provider {} to database", device.getDeviceName(), device.getProviderName());
                 final QPU qpu = addQPUToDatabase(providerObj, device);
-                setQueueSize(qpu, device, providersAndRegions.get(provider));
+                setQueueSize(qpu, device, AWSConstants.PROVIDERS.get(provider));
                 // Not entirely sure whether the updatedAt property is the calibrationDate
                 Date lastCalibrated = new Date();
                 if (device.getCalibrationTime() == null) {
@@ -353,7 +319,7 @@ public class AWSProvider implements IProvider {
         final Provider providerObj = new Provider();
         providerObj.setName(provider);
         try {
-            providerObj.setOfferingURL(new URL(offeringURLs.get(provider)));
+            providerObj.setOfferingURL(new URL(AWSConstants.OFFERINGS.get(provider)));
         } catch (MalformedURLException e) {
             logger.error("Unable to add provider URL due to MalformedURLException!");
         }
@@ -404,7 +370,6 @@ public class AWSProvider implements IProvider {
     }
 
     private void addQubits(Provider provider, AWSDevice device, QPU qpu) {
-        // TODO: Adapted this, is this correct -> Benjamin
         // add qubits
         final Map<String, Qubit> qubits = new HashMap<>();
         if (Objects.nonNull(device.getConnectivityMap())) {
@@ -728,10 +693,10 @@ public class AWSProvider implements IProvider {
     }
 
     private boolean is1QubitGateQasm(String name) {
-        if (!qubitsPerGateQasm.keySet().contains(name)) {
+        if (!AWSConstants.QUBITS_PER_GATE.keySet().contains(name)) {
             logger.error("Unknown number of qubits for gate {} defaulting to 1", name);
         }
-        return qubitsPerGateQasm.getOrDefault(name, 1) == 1;
+        return AWSConstants.QUBITS_PER_GATE.getOrDefault(name, 1) == 1;
     }
 
     private void handleRigettiGateProperties(GateCharacteristics gateCharacteristics, AWSDevice device) {

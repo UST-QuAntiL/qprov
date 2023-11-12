@@ -19,9 +19,45 @@
 
 package org.quantil.qprov.collector.providers.aws;
 
+import com.google.common.collect.ImmutableMap;
+
+import java.util.Map;
+
 public abstract class AWSConstants {
 
     public static final String PROVIDER_ID = "aws";
 
-    public static final String PROVIDER_URL = "https://aws.amazon.com/braket/";
+    public static final Map<String, String> OFFERINGS = Map.of(
+            "ionq", "https://ionq.com/",
+            "rigetti", "https://www.rigetti.com/",
+            "aws", "https://aws.amazon.com/braket/"
+    );
+
+    // Checkout https://docs.aws.amazon.com/braket/latest/developerguide/braket-regions.html for regions
+    public static final Map<String, String> PROVIDERS = Map.of(
+            "ionq", "us-east-1",
+            "rigetti", "us-west-1",
+            "aws", "us-east-1"
+    );
+
+    public static final Map<String, Integer> QUBITS_PER_GATE = ImmutableMap.<String, Integer>builder()
+            .put("x", 1)
+            .put("y", 1)
+            .put("z", 1)
+            .put("rx", 1)
+            .put("ry", 1)
+            .put("rz", 1)
+            .put("h", 1)
+            .put("s", 1)
+            .put("si", 1)
+            .put("t", 1)
+            .put("ti", 1)
+            .put("v", 1)
+            .put("vi", 1)
+            .put("cnot", 2)
+            .put("xx", 2)
+            .put("yy", 2)
+            .put("zz", 2)
+            .put("swap", 2)
+            .build();
 }
