@@ -17,23 +17,18 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.collector.providers.qiskit.service;
+package org.quantil.qprov.collector.providers.ibmq.service;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class QiskitServiceResult {
+public class QiskitServiceRequest {
 
-    private String id;
+    @JsonProperty("qpu-name")
+    private String qpu_name;
 
-    private boolean complete;
-
-    private Map<String, Object> result = new HashMap<>();
+    private String token;
 }

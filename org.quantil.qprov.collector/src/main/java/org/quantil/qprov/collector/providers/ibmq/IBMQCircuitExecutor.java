@@ -19,17 +19,16 @@
 
 package org.quantil.qprov.collector.providers.ibmq;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quantil.qprov.collector.Constants;
-import org.quantil.qprov.collector.providers.qiskit.service.QiskitServiceRequest;
-import org.quantil.qprov.collector.providers.qiskit.service.QiskitServiceResult;
+import org.quantil.qprov.collector.providers.ibmq.service.QiskitServiceRequest;
+import org.quantil.qprov.collector.providers.ibmq.service.QiskitServiceResult;
 import org.quantil.qprov.core.model.agents.Provider;
 import org.quantil.qprov.core.model.agents.QPU;
 import org.quantil.qprov.core.model.entities.CalibrationMatrix;
 import org.quantil.qprov.core.repositories.ProviderRepository;
 import org.quantil.qprov.core.repositories.QPURepository;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
@@ -51,9 +50,9 @@ public class IBMQCircuitExecutor {
     private URI createCalibrationMatrixApiEndpoint;
 
     public IBMQCircuitExecutor(ProviderRepository providerRepository, QPURepository qpuRepository,
-                               @Value("${qprov.qiskit-service.hostname}") String hostname,
-                               @Value("${qprov.qiskit-service.port}") int port,
-                               @Value("${qprov.qiskit-service.version}") String version) {
+                               @Value("${qprov.ibmq.qiskit-service.hostname}") String hostname,
+                               @Value("${qprov.ibmq.qiskit-service.port}") int port,
+                               @Value("${qprov.ibmq.qiskit-service.version}") String version) {
         this.providerRepository = providerRepository;
         this.qpuRepository = qpuRepository;
 
