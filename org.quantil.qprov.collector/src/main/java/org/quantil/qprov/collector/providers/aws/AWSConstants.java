@@ -40,6 +40,9 @@ public abstract class AWSConstants {
             "aws", "us-east-1"
     );
 
+    // Simulators are available in all regions
+    public static final String SIMULATOR_REGION = "us-west-1";
+
     public static final Map<String, Integer> QUBITS_PER_GATE = ImmutableMap.<String, Integer>builder()
             .put("x", 1)
             .put("y", 1)

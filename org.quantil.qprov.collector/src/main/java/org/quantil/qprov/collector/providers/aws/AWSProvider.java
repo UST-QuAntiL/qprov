@@ -218,7 +218,7 @@ public class AWSProvider implements IProvider {
 
             }
         });
-        builder.setRegion("us-west-1");
+        builder.setRegion(AWSConstants.SIMULATOR_REGION);
         simulators = new ArrayList<>();
         builder.setRequestHandlers(new RequestHandler2() {
             @Override
