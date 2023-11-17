@@ -45,6 +45,10 @@ qprov:
     auto-collect: ${QPROV_IBMQ_AUTO_COLLECT:false}
     auto-collect-interval: ${QPROV_IBMQ_AUTO_COLLECT_INTERVAL:60}
     auto-collect-interval-circuits: ${QPROV_IBMQ_AUTO_COLLECT_INTERVAL_CIRCUITS:180}
+    qiskit-service:
+      hostname: "${QISKIT_SERVICE_HOSTNAME:127.0.0.1}"
+      port: ${QISKIT_SERVICE_PORT:5013}
+      version: "v1.0"
   aws:
     token: "${QPROV_AWS_TOKEN:token}"
     secret-token: "${QPROV_AWS_SECRET_TOKEN:secretToken}"
@@ -52,7 +56,3 @@ qprov:
     auto-collect: ${QPROV_AWS_AUTO_COLLECT:false}
     auto-collect-interval: ${QPROV_AWS_AUTO_COLLECT_INTERVAL:60}
     auto-collect-interval-circuits: ${QPROV_AWS_AUTO_COLLECT_INTERVAL_CIRCUITS:180}
-  qiskit-service:
-    hostname: "${QISKIT_SERVICE_HOSTNAME:127.0.0.1}"
-    port: ${QISKIT_SERVICE_PORT:5013}
-    version: "v1.0"

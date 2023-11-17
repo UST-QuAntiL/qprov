@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -39,6 +39,9 @@ public abstract class AWSConstants {
             "rigetti", "us-west-1",
             "aws", "us-east-1"
     );
+
+    // Simulators are available in all regions
+    public static final String SIMULATOR_REGION = "us-west-1";
 
     public static final Map<String, Integer> QUBITS_PER_GATE = ImmutableMap.<String, Integer>builder()
             .put("x", 1)

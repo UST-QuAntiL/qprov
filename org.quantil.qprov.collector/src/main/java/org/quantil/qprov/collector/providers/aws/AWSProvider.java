@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 the QProv contributors.
+ * Copyright (c) 2023 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -218,7 +218,7 @@ public class AWSProvider implements IProvider {
 
             }
         });
-        builder.setRegion("us-west-1");
+        builder.setRegion(AWSConstants.SIMULATOR_REGION);
         simulators = new ArrayList<>();
         builder.setRequestHandlers(new RequestHandler2() {
             @Override
@@ -441,8 +441,6 @@ public class AWSProvider implements IProvider {
                     sourceQubit.getSupportedGates().add(gate);
                     gate.addOperatingQubit(sourceQubit);
                     qubitRepository.save(sourceQubit);
-                    // TODO: This leads to an illegal state representation and it appears to work anyway. Not sure if we need it? (i am not familiar enough with JPA)
-                    // gateRepository.save(gate);
                 }
                 // Use sublist to ensure no double counting e.g. 0-1 and 1-0 (assumes the list are sorted
                 // Assuming sorted list (is the case for ionq)
@@ -462,8 +460,6 @@ public class AWSProvider implements IProvider {
                         gate.addOperatingQubit(targetQubit);
                         qubitRepository.save(sourceQubit);
                         qubitRepository.save(targetQubit);
-                        // TODO: This leads to an illegal state representation and it appears to work anyway. Not sure if we need it? (i am not familiar enough with JPA)
-                        // gateRepository.save(gate);
                     }
                 }
             }
@@ -558,13 +554,13 @@ public class AWSProvider implements IProvider {
                 JsonNode t2 = timingNode.get("T2");
                 if (t1 != null) {
                     // in seconds
-                    qubitCharacteristics.setT1Time(BigDecimal.valueOf(t1.asDouble()));
+                    qubitCharacteristics.setT1Time(BigDecimal.valueOf(t1.asDouble()).scaleByPowerOfTen(6));
                 } else {
                     logger.warn("The IONQ device json has not the expected format. Cannot find t1 timing node.");
                 }
                 if (t2 != null) {
                     // in seconds
-                    qubitCharacteristics.setT2Time(BigDecimal.valueOf(t2.asDouble()));
+                    qubitCharacteristics.setT2Time(BigDecimal.valueOf(t2.asDouble()).scaleByPowerOfTen(6));
                 } else {
                     logger.warn("The IONQ device json has not the expected format. Cannot find t2 timing node.");
                 }
@@ -667,7 +663,7 @@ public class AWSProvider implements IProvider {
             if (timingNode == null) {
                 logger.warn("The IONQ device json has not the expected format. Cannot find timing node for 1 Qubit gates.");
             } else {
-                return new BigDecimal(timingNode.asText());
+                return new BigDecimal(timingNode.asText()).scaleByPowerOfTen(6);
             }
         }
         return null;

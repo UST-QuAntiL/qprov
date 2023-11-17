@@ -26,44 +26,44 @@
       "description": "The interval in minutes in which quantum circuits are executed to retrieve provenance data. Only needed if qprov.ibmq.auto-collect and qprov.ibmq.execute-calibration are set to true."
     },
     {
-      "name": "qprov.aws.token",
-      "type": "java.lang.String",
-      "description": "Token to enable access to AWS."
-    },
-    {
-      "name": "qprov.aws.secret-token",
-      "type": "java.lang.String",
-      "description": "Token to enable access to AWS."
-    },
-    {
-      "name": "qprov.aws.execute-calibration",
-      "type": "java.lang.Boolean",
-      "description": "True if QProv should execute calibration circuits on IBMQ to determine required data, false otherwise. When set to false some functionality may not be available in the QProv API."
-    },
-    {
-      "name": "qprov.aws.auto-collect",
-      "type": "java.lang.Boolean",
-      "description": "True if QProv should automatically retrieve provenance data regularly from IBMQ, false if the collection should only be done when invoking the collector API."
-    },
-    {
-      "name": "qprov.aws.auto-collect-interval",
-      "type": "java.lang.Integer",
-      "description": "The interval in minutes in which the provenance data is retrieved if qprov.ibmq.auto-collect is set to true."
-    },
-    {
-      "name": "qprov.aws.auto-collect-interval-circuits",
-      "type": "java.lang.Integer",
-      "description": "The interval in minutes in which quantum circuits are executed to retrieve provenance data. Only needed if qprov.ibmq.auto-collect and qprov.ibmq.execute-calibration are set to true."
-    },
-    {
-      "name": "qprov.qiskit-service.hostname",
+      "name": "qprov.ibmq.qiskit-service.hostname",
       "type": "java.lang.String",
       "description": "The hostname to access the Qiskit service if qprov.ibmq.execute-calibration is set to true."
     },
     {
-      "name": "qprov.qiskit-service.port",
+      "name": "qprov.ibmq.qiskit-service.port",
       "type": "java.lang.Integer",
       "description": "The port to access the Qiskit service if qprov.ibmq.execute-calibration is set to true."
+    },
+    {
+      "name": "qprov.aws.token",
+      "type": "java.lang.String",
+      "description": "Access Token to enable access to AWS."
+    },
+    {
+      "name": "qprov.aws.secret-token",
+      "type": "java.lang.String",
+      "description": "Secret Token to enable access to AWS. This token is only visible in the AWS Console directly after creation."
+    },
+    {
+      "name": "qprov.aws.execute-calibration",
+      "type": "java.lang.Boolean",
+      "description": "True if QProv should execute calibration circuits on AWS to determine required data, false otherwise. When set to false some functionality may not be available in the QProv API."
+    },
+    {
+      "name": "qprov.aws.auto-collect",
+      "type": "java.lang.Boolean",
+      "description": "True if QProv should automatically retrieve provenance data regularly from AWS, false if the collection should only be done when invoking the collector API."
+    },
+    {
+      "name": "qprov.aws.auto-collect-interval",
+      "type": "java.lang.Integer",
+      "description": "The interval in minutes in which the provenance data is retrieved if qprov.aws.auto-collect is set to true."
+    },
+    {
+      "name": "qprov.aws.auto-collect-interval-circuits",
+      "type": "java.lang.Integer",
+      "description": "The interval in minutes in which quantum circuits are executed to retrieve provenance data. Only needed if qprov.ibmq.auto-collect and qprov.aws.execute-calibration are set to true."
     }
   ]
 }
