@@ -56,6 +56,7 @@ public class RootController {
         responseEntity.add(linkTo(methodOn(ProviderController.class).getProviders()).withRel(Constants.PATH_PROVIDERS));
         responseEntity.add(linkTo(methodOn(ProvTemplateController.class).getProvenanceTemplates()).withRel(Constants.PATH_PROV_TEMPLATE));
         responseEntity.add(linkTo(methodOn(ProvDocumentController.class).getProvenanceDocuments()).withRel(Constants.PATH_PROV));
+        responseEntity.add(linkTo(methodOn(VirtualMachineController.class).getVirtualMachines()).withRel(Constants.PATH_VIRTUAL_MACHINES));
 
         return ResponseEntity.ok(responseEntity);
     }
