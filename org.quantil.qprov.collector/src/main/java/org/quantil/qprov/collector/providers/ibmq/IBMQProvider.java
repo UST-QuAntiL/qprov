@@ -377,7 +377,7 @@ public class IBMQProvider implements IProvider {
             final GateCharacteristics latestCharacteristics =
                     gateCharacteristicsRepository.findByGateOrderByCalibrationTimeDesc(gate).stream().findFirst().orElse(null);
             if (Objects.nonNull(latestCharacteristics) && !calibrationTime.after(latestCharacteristics.getCalibrationTime())) {
-                logger.debug("Stored gate characteristics are up-to-date. No update needed!");
+                // logger.debug("Stored gate characteristics are up-to-date. No update needed!");
                 continue;
             }
 
