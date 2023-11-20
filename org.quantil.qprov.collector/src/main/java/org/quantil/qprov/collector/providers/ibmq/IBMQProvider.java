@@ -279,8 +279,8 @@ public class IBMQProvider implements IProvider {
             for (BigDecimal qubitId : coupling) {
                 final Qubit qubit = qubitRepository.findByQpuAndName(qpu, qubitId.toString()).orElse(null);
                 if (Objects.nonNull(qubit)) {
-                    qubit.getSupportedGates().add(gate);
-                    operatingQubits.add(qubit);
+                    qubit.addSupportedGate(gate);
+                    qubitRepository.save(qubit);
                 }
             }
             gate.setOperatingQubits(operatingQubits);

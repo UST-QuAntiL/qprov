@@ -136,7 +136,7 @@ public class AWSProvider implements IProvider {
         }
         for (String provider : AWSConstants.PROVIDERS.keySet()) {
             Provider providerObj = addProviderToDatabase(provider);
-            if (devicesPerProvider.get(provider) == null) {
+            if (Objects.isNull(devicesPerProvider.get(provider))) {
                 logger.error("Devices for provider {} could not be retrieved.", provider);
                 continue;
             }
@@ -146,7 +146,7 @@ public class AWSProvider implements IProvider {
                 setQueueSize(qpu, device, AWSConstants.PROVIDERS.get(provider));
                 // Not entirely sure whether the updatedAt property is the calibrationDate
                 Date lastCalibrated = new Date();
-                if (device.getCalibrationTime() == null) {
+                if (Objects.isNull(device.getCalibrationTime())) {
                     logger.error("Device {} of provider {} does not have a valid calibration time.", device, provider);
                 } else {
                     lastCalibrated = new Date(device.getCalibrationTime().toInstant().toEpochMilli());
@@ -161,7 +161,7 @@ public class AWSProvider implements IProvider {
                 updateGateCharacteristicsOfQPU(qpu.getDatabaseId(), device, lastCalibrated);
             }
         }
-        if (simulators == null) {
+        if (Objects.isNull(simulators)) {
             logger.error("No simulators from AWS retrieved.");
             return false;
         }
@@ -227,7 +227,7 @@ public class AWSProvider implements IProvider {
                     ObjectMapper mapper = new ObjectMapper();
                     String json = IOUtils.toString(httpResponse.getContent());
                     JsonNode node = mapper.readTree(json).get("devices");
-                    if (node == null) {
+                    if (Objects.isNull(node)) {
                         System.out.println("JSON response does not contain a devices property.");
                         return super.beforeUnmarshalling(request, httpResponse);
                     }
@@ -274,7 +274,7 @@ public class AWSProvider implements IProvider {
                     ObjectMapper mapper = new ObjectMapper();
                     String json = IOUtils.toString(httpResponse.getContent());
                     JsonNode node = mapper.readTree(json).get("devices");
-                    if (node == null) {
+                    if (Objects.isNull(node)) {
                         System.out.println("JSON response does not contain a devices property.");
                         return super.beforeUnmarshalling(request, httpResponse);
                     }
@@ -333,7 +333,7 @@ public class AWSProvider implements IProvider {
         if (qpuOptional.isPresent()) {
             logger.debug("QPU already present, updating information.");
             QPU qpu = qpuOptional.get();
-            if (device.getMaxShots() == null) {
+            if (Objects.isNull(device.getMaxShots())) {
                 logger.error("For device {} of provider {} the max shots property is null.", device.getDeviceName(), provider);
             } else {
                 qpu.setMaxShots(device.getMaxShots().intValue());
@@ -347,7 +347,7 @@ public class AWSProvider implements IProvider {
         qpu.setName(device.getDeviceName());
 
         qpu.setProvider(provider);
-        if (device.getMaxShots() == null) {
+        if (Objects.isNull(device.getMaxShots())) {
             logger.error("For device {} of provider {} the max shots property is null.", device.getDeviceName(), provider);
         } else {
             qpu.setMaxShots(device.getMaxShots().intValue());
@@ -357,7 +357,7 @@ public class AWSProvider implements IProvider {
         addQubits(provider, device, qpu);
 
         // add gates to the qubits on which they can be executed
-        if (device.getGates() == null) {
+        if (Objects.isNull(device.getGates())) {
             logger.error("Device {} of provider {} has no gates in the model.", device, provider);
         } else {
             logger.debug("QPU {} has gates {}", device.getDeviceName(), device.getGates());
@@ -390,7 +390,7 @@ public class AWSProvider implements IProvider {
                 qubit.setConnectedQubits(connectedQubits);
             }
         } else {
-            if (device.getNumberQubits() == null) {
+            if (Objects.isNull(device.getNumberQubits())) {
                 logger.error("For device {} of provider {} the number of qubits property is null.", device.getDeviceName(), provider);
                 return;
             }
@@ -421,6 +421,10 @@ public class AWSProvider implements IProvider {
         List<String> twoQubitGates = gateNames.parallelStream().filter(Predicate.not(this::is1QubitGateQasm)).collect(Collectors.toList());
         logger.debug("2 Qubit gate list {}", twoQubitGates);
         HashMap<Integer, Qubit> qubits = new HashMap<>();
+        if (Objects.isNull(device.getConnectivityMap())) {
+            logger.error("Connectivity map for device {} is null, cannot add gates", device.getDeviceName());
+            return;
+        }
         for (Integer qubitId : device.getConnectivityMap().keySet()) {
             Optional<Qubit> optQubit = qubitRepository.findByQpuAndName(qpu, String.valueOf(qubitId));
             if (optQubit.isEmpty()) {
@@ -430,39 +434,34 @@ public class AWSProvider implements IProvider {
             qubits.put(qubitId, optQubit.get());
         }
         // Collect all distinct qubit ids
-        if (device.getConnectivityMap() != null) {
-            for (Integer sourceQubitId : device.getConnectivityMap().keySet()) {
-                Qubit sourceQubit = qubits.get(sourceQubitId);
-                for (String gateName : oneQubitGates) {
+        for (Integer sourceQubitId : device.getConnectivityMap().keySet()) {
+            Qubit sourceQubit = qubits.get(sourceQubitId);
+            for (String gateName : oneQubitGates) {
+                Gate gate = new Gate();
+                gate.setName(gateName);
+                gate.setQpu(qpu);
+                // Add gate to supported gates of the qubit it operates on
+                gateRepository.save(gate);
+                sourceQubit.addSupportedGate(gate);
+            }
+            // Use sublist to ensure no double counting e.g. 0-1 and 1-0 (assumes the list are sorted
+            // Assuming sorted list (is the case for ionq)
+            List<Integer> targetQubitIds = device.getConnectivityMap().get(sourceQubitId);
+            // Assumes that the sourceQubitIds are numbered from 0 and the keyset is sorted:
+            targetQubitIds = targetQubitIds.subList(sourceQubitId.intValue(), targetQubitIds.size());
+            for (Integer targetQubitId : targetQubitIds) {
+                Qubit targetQubit = qubits.get(targetQubitId);
+                for (String gateName : twoQubitGates) {
                     Gate gate = new Gate();
                     gate.setName(gateName);
                     gate.setQpu(qpu);
-                    // Add gate to supported gates of the qubit it operates on
-                    sourceQubit.getSupportedGates().add(gate);
-                    gate.addOperatingQubit(sourceQubit);
-                    qubitRepository.save(sourceQubit);
-                }
-                // Use sublist to ensure no double counting e.g. 0-1 and 1-0 (assumes the list are sorted
-                // Assuming sorted list (is the case for ionq)
-                List<Integer> targetQubitIds = device.getConnectivityMap().get(sourceQubitId);
-                // Assumes that the sourceQubitIds are numbered from 0 and the keyset is sorted:
-                targetQubitIds = targetQubitIds.subList(sourceQubitId.intValue(), targetQubitIds.size());
-                for (Integer targetQubitId : targetQubitIds) {
-                    Qubit targetQubit = qubits.get(targetQubitId);
-                    for (String gateName : twoQubitGates) {
-                        Gate gate = new Gate();
-                        gate.setName(gateName);
-                        gate.setQpu(qpu);
-                        // Add gate to supported gates of the qubits it operates on; This sets the operating qubits of the gate automatically
-                        sourceQubit.getSupportedGates().add(gate);
-                        targetQubit.getSupportedGates().add(gate);
-                        gate.addOperatingQubit(sourceQubit);
-                        gate.addOperatingQubit(targetQubit);
-                        qubitRepository.save(sourceQubit);
-                        qubitRepository.save(targetQubit);
-                    }
+                    // Add gate to supported gates of the qubits it operates on; This sets the operating qubits of the gate automatically
+                    gateRepository.save(gate);
+                    sourceQubit.addSupportedGate(gate);
+                    targetQubit.addSupportedGate(gate);
                 }
             }
+            qubitRepository.save(sourceQubit);
         }
     }
 
@@ -473,7 +472,7 @@ public class AWSProvider implements IProvider {
      */
     private void updateQubitCharacteristicsOfQPU(QPU qpu, AWSDevice device, Date calibrationTime) {
         // iterate through all properties and update corresponding Qubit
-        if (device.getConnectivityMap() != null) {
+        if (Objects.nonNull(device.getConnectivityMap())) {
             // We do this in case the qubits are not numbered/named sequentially
             for (Integer qubitId : device.getConnectivityMap().keySet()) {
                 updateQubitCharacteristicsOfQPU(qubitId.toString(), qpu, device, calibrationTime);
@@ -532,15 +531,15 @@ public class AWSProvider implements IProvider {
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode providerNode = mapper.readTree(device.getDeviceCapabilities()).get("provider");
-            if (providerNode == null) {
+            if (Objects.isNull(providerNode)) {
                 logger.warn("The IONQ device json has not the expected format. Cannot find provider node.");
                 return;
             }
             // Fidelities
             JsonNode fidelityNode = providerNode.get("fidelity");
-            if (fidelityNode != null) {
+            if (Objects.nonNull(fidelityNode)) {
                 JsonNode readoutError = fidelityNode.get("spam");
-                if (readoutError == null) {
+                if (Objects.isNull(readoutError)) {
                     logger.warn("The IONQ device json has not the expected format. Cannot find spam/readout error node.");
                 } else {
                     qubitCharacteristics.setReadoutError(BigDecimal.valueOf(1.0).subtract(new BigDecimal(readoutError.get("mean").asText())));
@@ -549,16 +548,16 @@ public class AWSProvider implements IProvider {
                 logger.warn("The IONQ device json has not the expected format. Cannot find fidelity node.");
             }
             JsonNode timingNode = providerNode.get("timing");
-            if (timingNode != null) {
+            if (Objects.nonNull(timingNode)) {
                 JsonNode t1 = timingNode.get("T1");
                 JsonNode t2 = timingNode.get("T2");
-                if (t1 != null) {
+                if (Objects.nonNull(t1)) {
                     // in seconds
                     qubitCharacteristics.setT1Time(BigDecimal.valueOf(t1.asDouble()).scaleByPowerOfTen(6));
                 } else {
                     logger.warn("The IONQ device json has not the expected format. Cannot find t1 timing node.");
                 }
-                if (t2 != null) {
+                if (Objects.nonNull(t2)) {
                     // in seconds
                     qubitCharacteristics.setT2Time(BigDecimal.valueOf(t2.asDouble()).scaleByPowerOfTen(6));
                 } else {
@@ -626,7 +625,7 @@ public class AWSProvider implements IProvider {
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode providerNode = mapper.readTree(device.getDeviceCapabilities()).get("provider");
-            if (providerNode == null) {
+            if (Objects.isNull(providerNode)) {
                 logger.warn("The IONQ device json has not the expected format. Cannot find provider node.");
                 return;
             }
@@ -638,7 +637,6 @@ public class AWSProvider implements IProvider {
             if (is1QubitGateQasm(gateCharacteristics.getGate().getName())) { // 1 Qubit gate
                 gateErrorRate = retrieveGateErrorRate("1Q", fidelityNode);
                 gateTime = retrieveTiming("1Q", timingNode);
-
             } else { // 2 Qubit gate
                 gateErrorRate = retrieveGateErrorRate("2Q", fidelityNode);
                 gateTime = retrieveTiming("2Q", timingNode);
@@ -654,38 +652,32 @@ public class AWSProvider implements IProvider {
 
     // Gate type is 1Q or 2Q for 1 or 2 qubit gates
     private BigDecimal retrieveTiming(String gateType, JsonNode timingNode) {
-        boolean timingAvailable = timingNode != null;
-        if (!timingAvailable) {
+        if (Objects.isNull(timingNode)) {
             logger.warn("The IONQ device json has not the expected format. Cannot find timing node.");
         }
-        if (timingAvailable) {
-            timingNode = timingNode.get(gateType);
-            if (timingNode == null) {
-                logger.warn("The IONQ device json has not the expected format. Cannot find timing node for 1 Qubit gates.");
-            } else {
-                return new BigDecimal(timingNode.asText()).scaleByPowerOfTen(6);
-            }
+        timingNode = timingNode.get(gateType);
+        if (Objects.isNull(timingNode)) {
+            logger.warn("The IONQ device json has not the expected format. Cannot find timing node for 1 Qubit gates.");
+            return null;
         }
-        return null;
+        return new BigDecimal(timingNode.asText()).scaleByPowerOfTen(6);
 
     }
 
     // Gate type is 1Q or 2Q for 1 or 2 qubit gates
     private BigDecimal retrieveGateErrorRate(String gateType, JsonNode fidelityNode) {
-        boolean fidelityAvailable = fidelityNode != null;
-        if (!fidelityAvailable) {
+        if (Objects.isNull(fidelityNode)) {
             logger.warn("The IONQ device json has not the expected format. Cannot find fidelity node.");
+            return null;
         }
-        if (fidelityAvailable) {
-            fidelityNode = fidelityNode.get(gateType);
-            if (fidelityNode == null) {
-                logger.warn("The IONQ device json has not the expected format. Cannot find fidelity node for 1 Qubit gates.");
-            } else {
-                fidelityNode = fidelityNode.get("mean");
-                return BigDecimal.valueOf(1.0).subtract(new BigDecimal(fidelityNode.asText()));
-            }
+        fidelityNode = fidelityNode.get(gateType);
+        if (Objects.isNull(fidelityNode)) {
+            logger.warn("The IONQ device json has not the expected format. Cannot find fidelity node for 1 Qubit gates.");
+            return null;
         }
-        return null;
+        fidelityNode = fidelityNode.get("mean");
+        return BigDecimal.valueOf(1.0).subtract(new BigDecimal(fidelityNode.asText()));
+
     }
 
     private boolean is1QubitGateQasm(String name) {
