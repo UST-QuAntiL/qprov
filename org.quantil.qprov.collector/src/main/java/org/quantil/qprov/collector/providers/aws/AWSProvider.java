@@ -496,7 +496,7 @@ public class AWSProvider implements IProvider {
         final QubitCharacteristics latestCharacteristics =
                 qubitCharacteristicsRepository.findByQubitOrderByCalibrationTimeDesc(currentQubit).stream().findFirst().orElse(null);
         if (Objects.nonNull(latestCharacteristics) && !calibrationTime.after(latestCharacteristics.getCalibrationTime())) {
-            logger.debug("Stored characteristics are up-to-date. No update needed!");
+            logger.trace("Stored characteristics are up-to-date. No update needed!");
             return;
         }
 
@@ -552,13 +552,13 @@ public class AWSProvider implements IProvider {
                 JsonNode t1 = timingNode.get("T1");
                 JsonNode t2 = timingNode.get("T2");
                 if (Objects.nonNull(t1)) {
-                    // in seconds
+                    // convert from seconds to micro seconds
                     qubitCharacteristics.setT1Time(BigDecimal.valueOf(t1.asDouble()).scaleByPowerOfTen(6));
                 } else {
                     logger.warn("The IONQ device json has not the expected format. Cannot find t1 timing node.");
                 }
                 if (Objects.nonNull(t2)) {
-                    // in seconds
+                    // convert from seconds to micro seconds
                     qubitCharacteristics.setT2Time(BigDecimal.valueOf(t2.asDouble()).scaleByPowerOfTen(6));
                 } else {
                     logger.warn("The IONQ device json has not the expected format. Cannot find t2 timing node.");
@@ -596,7 +596,7 @@ public class AWSProvider implements IProvider {
             final GateCharacteristics latestCharacteristics =
                     gateCharacteristicsRepository.findByGateOrderByCalibrationTimeDesc(gate).stream().findFirst().orElse(null);
             if (Objects.nonNull(latestCharacteristics) && !calibrationTime.after(latestCharacteristics.getCalibrationTime())) {
-                // logger.debug("Stored gate characteristics are up-to-date. No update needed!");
+                logger.trace("Stored gate characteristics are up-to-date. No update needed!");
                 continue;
             }
 
@@ -660,7 +660,8 @@ public class AWSProvider implements IProvider {
             logger.warn("The IONQ device json has not the expected format. Cannot find timing node for 1 Qubit gates.");
             return null;
         }
-        return new BigDecimal(timingNode.asText()).scaleByPowerOfTen(6);
+        // convert from seconds to nano seconds
+        return new BigDecimal(timingNode.asText()).scaleByPowerOfTen(9);
 
     }
 

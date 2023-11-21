@@ -319,7 +319,7 @@ public class IBMQProvider implements IProvider {
             final QubitCharacteristics latestCharacteristics =
                     qubitCharacteristicsRepository.findByQubitOrderByCalibrationTimeDesc(currentQubit).stream().findFirst().orElse(null);
             if (Objects.nonNull(latestCharacteristics) && !calibrationTime.after(latestCharacteristics.getCalibrationTime())) {
-                logger.debug("Stored characteristics are up-to-date. No update needed!");
+                logger.trace("Stored characteristics are up-to-date. No update needed!");
                 continue;
             }
 
@@ -328,7 +328,7 @@ public class IBMQProvider implements IProvider {
             qubitCharacteristics.setQubit(currentQubit);
             qubitCharacteristics.setCalibrationTime(calibrationTime);
 
-            // retrieve T1, T2, and readout error
+            // retrieve T1, T2, and readout error - NOTE: T1 and T2 are in micro seconds (us)
             for (Object propertiesOfQubit : propertiesOfQubitList) {
                 final Map<String, String> propertiesMap = IBMQUtility.transformIbmPropertiesToMap(propertiesOfQubit);
 
@@ -377,7 +377,7 @@ public class IBMQProvider implements IProvider {
             final GateCharacteristics latestCharacteristics =
                     gateCharacteristicsRepository.findByGateOrderByCalibrationTimeDesc(gate).stream().findFirst().orElse(null);
             if (Objects.nonNull(latestCharacteristics) && !calibrationTime.after(latestCharacteristics.getCalibrationTime())) {
-                // logger.debug("Stored gate characteristics are up-to-date. No update needed!");
+                logger.trace("Stored gate characteristics are up-to-date. No update needed!");
                 continue;
             }
 
@@ -404,7 +404,7 @@ public class IBMQProvider implements IProvider {
             gateCharacteristics.setGate(gate);
             gateCharacteristics.setCalibrationTime(calibrationTime);
 
-            // retrieve gate time and error rate
+            // retrieve gate time and error rate - NOTE: gate times are in nano seconds (ns)
             for (Parameter characteristicsOfGate : matchingGate.getParameters()) {
 
                 switch (characteristicsOfGate.getName()) {
