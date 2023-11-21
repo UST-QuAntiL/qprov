@@ -13,7 +13,7 @@ spring:
         enable_lazy_load_no_trans: true
   datasource:
 
-    url: "jdbc:postgresql://${POSTGRES_HOSTNAME:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:qprov}"
+    url: "jdbc:postgresql://${POSTGRES_HOSTNAME:localhost}:${POSTGRES_PORT:5060}/${POSTGRES_DB:qprov}"
     driver-class-name: org.postgresql.Driver
     username: "${POSTGRES_USER:qprov}"
     password: "${POSTGRES_PASSWORD:qprov}"
@@ -49,3 +49,10 @@ qprov:
       hostname: "${QISKIT_SERVICE_HOSTNAME:127.0.0.1}"
       port: ${QISKIT_SERVICE_PORT:5013}
       version: "v1.0"
+  aws:
+    token: "${QPROV_AWS_TOKEN:token}"
+    secret-token: "${QPROV_AWS_SECRET_TOKEN:secretToken}"
+    execute-calibration: ${QPROV_AWS_EXECUTE_CIRCUITS:false}
+    auto-collect: ${QPROV_AWS_AUTO_COLLECT:false}
+    auto-collect-interval: ${QPROV_AWS_AUTO_COLLECT_INTERVAL:60}
+    auto-collect-interval-circuits: ${QPROV_AWS_AUTO_COLLECT_INTERVAL_CIRCUITS:180}

@@ -19,39 +19,18 @@
 
 package org.quantil.qprov.core.model.agents;
 
-import java.math.BigDecimal;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import org.quantil.qprov.core.Constants;
-import org.quantil.qprov.core.model.ProvExtension;
-import org.quantil.qprov.core.model.entities.CalibrationMatrix;
-import org.quantil.qprov.core.model.entities.Gate;
-import org.quantil.qprov.core.model.entities.GateCharacteristics;
-import org.quantil.qprov.core.model.entities.Qubit;
-import org.quantil.qprov.core.model.entities.QubitCharacteristics;
-import org.quantil.qprov.core.utils.Utils;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.openprovenance.prov.model.Statement;
+import org.quantil.qprov.core.Constants;
+import org.quantil.qprov.core.model.ProvExtension;
+import org.quantil.qprov.core.model.entities.*;
+import org.quantil.qprov.core.utils.Utils;
+
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -165,7 +144,7 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
                         .min(Comparator.comparing(GateCharacteristics::getCalibrationTime)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateFidelity().doubleValue())
+                .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateErrorRate().doubleValue())
                 .average()
                 .orElse(0));
     }
@@ -181,7 +160,7 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
                         .min(Comparator.comparing(GateCharacteristics::getCalibrationTime)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateFidelity().doubleValue())
+                .mapToDouble(gateCharacteristics -> gateCharacteristics.getGateErrorRate().doubleValue())
                 .average()
                 .orElse(0));
     }

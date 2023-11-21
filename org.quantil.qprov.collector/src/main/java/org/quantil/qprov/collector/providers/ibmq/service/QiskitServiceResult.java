@@ -17,37 +17,23 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.web.dtos;
+package org.quantil.qprov.collector.providers.ibmq.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.quantil.qprov.core.model.entities.GateCharacteristics;
-import org.quantil.qprov.core.model.entities.QubitCharacteristics;
+import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * Data transfer object for qubit characteristics ({@link QubitCharacteristics}).
- */
-@EqualsAndHashCode
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
-public class GateCharacteristicsDto {
+public class QiskitServiceResult {
 
-    private UUID id;
+    private String id;
 
-    private Date calibrationTime;
+    private boolean complete;
 
-    private BigDecimal gateTime;
-
-    private BigDecimal gateErrorRate;
-
-    public static GateCharacteristicsDto createDTO(GateCharacteristics gateCharacteristics) {
-        return new GateCharacteristicsDto(gateCharacteristics.getDatabaseId(), gateCharacteristics.getCalibrationTime(),
-                gateCharacteristics.getGateTime(),
-                gateCharacteristics.getGateErrorRate());
-    }
+    private Map<String, Object> result = new HashMap<>();
 }
