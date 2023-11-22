@@ -345,6 +345,8 @@ public class AWSProvider implements IProvider {
         // create a new QPU object representing the retrieved device
         QPU qpu = new QPU();
         qpu.setName(device.getDeviceName());
+        QPU finalQpu = qpu;
+        qpu.setSimulator(simulators.stream().anyMatch(sim -> sim.getDeviceName().equals(finalQpu.getName())));
 
         qpu.setProvider(provider);
         if (Objects.isNull(device.getMaxShots())) {
