@@ -21,8 +21,16 @@ package org.quantil.qprov.core.services;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+import java.util.stream.IntStream;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,8 +64,39 @@ public class SqlService {
         Connection connection = DriverManager.getConnection(datasourceUrl + "?user=" + datasourceUser + "&password=" + datasourcePassword);
         connection.setReadOnly(true);
 
-        // TODO
+        // retrieve results from database
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(query);
+        connection.close();
+        logger.debug("Retrieved result set from database with size: {}", resultSet.getFetchSize());
 
-       return "TODO";
+        // parse result to JSON including meta data (see https://www.baeldung.com/java-jdbc-convert-resultset-to-json)
+        ResultSetMetaData md = resultSet.getMetaData();
+        int numCols = md.getColumnCount();
+        List<String> colNames = IntStream.range(0, numCols)
+                .mapToObj(i -> {
+                    try {
+                        return md.getColumnName(i + 1);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        return "?";
+                    }
+                })
+                .toList();
+
+        JsonArray resultJson = new JsonArray();
+        while (resultSet.next()) {
+            JsonObject row = new JsonObject();
+            colNames.forEach(cn -> {
+                try {
+                    row.add(cn, (JsonElement) resultSet.getObject(cn));
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            });
+            resultJson.add(row);
+        }
+        logger.debug("Query result: {}", resultJson);
+       return resultJson.toString();
     }
 }

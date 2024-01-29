@@ -85,5 +85,9 @@
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-rest-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
     </dependencies>
 </project>
