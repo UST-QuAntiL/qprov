@@ -37,7 +37,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableJpaRepositories("org.quantil.qprov.*")
 @OpenAPIDefinition(info = @Info(
         title = "QProv API",
-        version = "1.3.0",
+        version = "1.5.0",
         license = @License(name = "Apache 2.0", url = "http://www.apache.org/licenses/LICENSE-2.0.html"),
         contact = @Contact(url = "https://github.com/UST-QuAntiL/QProv", name = "GitHub Repository")))
 public class QProvAPI extends SpringBootServletInitializer {
