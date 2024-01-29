@@ -17,27 +17,12 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.collector.providers.ibmq;
+package org.quantil.qprov.core.services;
 
 import lombok.AllArgsConstructor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Component;
 
+@Component
 @AllArgsConstructor
-public class IBMQRunnableApi implements Runnable {
-    protected static final Logger logger = LogManager.getLogger();
-
-    private IBMQProvider ibmqProvider;
-
-    @Override
-    public void run() {
-        logger.debug("Starting periodic collection from API...");
-        boolean result = false;
-        try {
-            result = ibmqProvider.collectFromApi();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        logger.debug("Finished periodic collection from API with result: {}", result);
-    }
+public class SQLService {
 }
