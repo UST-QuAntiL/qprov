@@ -25,6 +25,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
@@ -93,13 +94,14 @@ public class SqlService {
                 try {
                     if (Objects.nonNull(resultSet.getObject(cn))) {
                         logger.debug("Adding entry: Key: {}, Value: {}", cn, resultSet.getObject(cn).toString());
-                        if (resultSet.getObject(cn) instanceof String) {
+                        if (resultSet.getObject(cn) instanceof String || resultSet.getObject(cn) instanceof Timestamp) {
                             row.addProperty(cn, resultSet.getObject(cn).toString());
                         } else {
                             row.add(cn, JsonParser.parseString(resultSet.getObject(cn).toString()));
                         }
                     } else {
-                        logger.warn("Skipping entry as value is null for key: {}", cn);
+                        logger.warn("Adding entry with null value for key: {}", cn);
+                        row.addProperty(cn, "null");
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
