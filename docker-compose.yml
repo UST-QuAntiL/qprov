@@ -1,0 +1,12 @@
+version: '3'
+services:
+
+  db:
+    image: planqk/db:v1.0.0
+    logging:
+      driver: none
+    environment:
+      POSTGRES_USERS: 'qprov:qprov'
+      POSTGRES_DATABASES: 'qprov:qprov'
+    ports:
+      - '5060:5432'
