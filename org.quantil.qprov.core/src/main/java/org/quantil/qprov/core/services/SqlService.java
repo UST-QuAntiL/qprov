@@ -36,6 +36,12 @@ public class SqlService {
     @Value("${spring.datasource.url}")
     private String datasourceUrl;
 
+    @Value("${spring.datasource.username}")
+    private String datasourceUser;
+
+    @Value("${spring.datasource.password}")
+    private String datasourcePassword;
+
     /**
      * Execute a given SQL query in read only mode against the specified provenance database
      *
@@ -47,7 +53,7 @@ public class SqlService {
         logger.debug("Creating connection for datasource at URL: {}", datasourceUrl);
 
         // create a read only connection to execute select statements
-        Connection connection = DriverManager.getConnection(datasourceUrl);
+        Connection connection = DriverManager.getConnection(datasourceUrl + "?user=" + datasourceUser + "&password=" + datasourcePassword);
         connection.setReadOnly(true);
 
         // TODO

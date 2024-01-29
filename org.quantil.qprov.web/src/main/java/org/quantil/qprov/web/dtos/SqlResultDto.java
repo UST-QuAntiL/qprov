@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+/**
+ * Data transfer object for results of SQL requests.
+ */
 @EqualsAndHashCode
 @Data
 @AllArgsConstructor
