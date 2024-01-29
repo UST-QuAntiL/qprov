@@ -29,6 +29,8 @@ public final class Constants {
 
     public static final String TAG_PROVIDER = "provider";
 
+    public static final String TAG_SQL = "sql";
+
     public static final String TAG_VIRTUAL_MACHINE = "virtual-machine";
 
     public static final String TAG_PROV = "provenance-document";
@@ -57,6 +59,8 @@ public final class Constants {
     public static final String PATH_PROV_PARAMETERS = "parameters";
 
     public static final String PATH_PROVIDERS = "providers";
+
+    public static final String PATH_SQL = "sql";
 
     public static final String PATH_VIRTUAL_MACHINES = "virtual-machines";
 
