@@ -26,11 +26,13 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,7 +70,7 @@ public class SqlService {
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query);
         connection.close();
-        logger.debug("Retrieved result set from database with size: {}", resultSet.getFetchSize());
+        logger.debug("Retrieved result set from database...");
 
         // parse result to JSON including meta data (see https://www.baeldung.com/java-jdbc-convert-resultset-to-json)
         ResultSetMetaData md = resultSet.getMetaData();
@@ -89,7 +91,16 @@ public class SqlService {
             JsonObject row = new JsonObject();
             colNames.forEach(cn -> {
                 try {
-                    row.add(cn, (JsonElement) resultSet.getObject(cn));
+                    if (Objects.nonNull(resultSet.getObject(cn))) {
+                        logger.debug("Adding entry: Key: {}, Value: {}", cn, resultSet.getObject(cn).toString());
+                        if (resultSet.getObject(cn) instanceof String) {
+                            row.addProperty(cn, resultSet.getObject(cn).toString());
+                        } else {
+                            row.add(cn, JsonParser.parseString(resultSet.getObject(cn).toString()));
+                        }
+                    } else {
+                        logger.warn("Skipping entry as value is null for key: {}", cn);
+                    }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
