@@ -1,8 +1,6 @@
 version: '3'
 services:
 
-  #######################
-  ### QProv ###
   db:
     image: planqk/db:v1.0.0
     logging:
