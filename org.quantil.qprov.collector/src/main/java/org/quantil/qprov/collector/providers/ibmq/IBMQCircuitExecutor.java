@@ -19,26 +19,25 @@
 
 package org.quantil.qprov.collector.providers.ibmq;
 
-import java.net.URI;
-import java.util.Date;
-import java.util.Objects;
-import java.util.Vector;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quantil.qprov.collector.Constants;
-import org.quantil.qprov.collector.providers.ibmq.qiskit.service.QiskitServiceRequest;
-import org.quantil.qprov.collector.providers.ibmq.qiskit.service.QiskitServiceResult;
+import org.quantil.qprov.collector.providers.ibmq.service.QiskitServiceRequest;
+import org.quantil.qprov.collector.providers.ibmq.service.QiskitServiceResult;
 import org.quantil.qprov.core.model.agents.Provider;
 import org.quantil.qprov.core.model.agents.QPU;
 import org.quantil.qprov.core.model.entities.CalibrationMatrix;
 import org.quantil.qprov.core.repositories.ProviderRepository;
 import org.quantil.qprov.core.repositories.QPURepository;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
+import java.net.URI;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Vector;
 
 @Component
 public class IBMQCircuitExecutor {

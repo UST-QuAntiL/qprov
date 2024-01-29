@@ -19,24 +19,8 @@
 
 package org.quantil.qprov.collector.providers.ibmq;
 
-import java.math.BigDecimal;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quantil.qprov.collector.Constants;
 import org.quantil.qprov.collector.IProvider;
 import org.quantil.qprov.core.model.agents.Provider;
@@ -45,30 +29,25 @@ import org.quantil.qprov.core.model.entities.Gate;
 import org.quantil.qprov.core.model.entities.GateCharacteristics;
 import org.quantil.qprov.core.model.entities.Qubit;
 import org.quantil.qprov.core.model.entities.QubitCharacteristics;
-import org.quantil.qprov.core.repositories.GateCharacteristicsRepository;
-import org.quantil.qprov.core.repositories.GateRepository;
-import org.quantil.qprov.core.repositories.ProviderRepository;
-import org.quantil.qprov.core.repositories.QPURepository;
-import org.quantil.qprov.core.repositories.QubitCharacteristicsRepository;
-import org.quantil.qprov.core.repositories.QubitRepository;
+import org.quantil.qprov.core.repositories.*;
 import org.quantil.qprov.ibmq.client.ApiClient;
 import org.quantil.qprov.ibmq.client.ApiException;
 import org.quantil.qprov.ibmq.client.Configuration;
 import org.quantil.qprov.ibmq.client.api.GetBackendInformationApi;
 import org.quantil.qprov.ibmq.client.api.LoginApi;
 import org.quantil.qprov.ibmq.client.auth.ApiKeyAuth;
-import org.quantil.qprov.ibmq.client.model.AccessToken;
-import org.quantil.qprov.ibmq.client.model.ApiToken;
-import org.quantil.qprov.ibmq.client.model.BackendStatus;
-import org.quantil.qprov.ibmq.client.model.Device;
-import org.quantil.qprov.ibmq.client.model.DeviceProperties;
-import org.quantil.qprov.ibmq.client.model.DevicePropsGate;
-import org.quantil.qprov.ibmq.client.model.Parameter;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.quantil.qprov.ibmq.client.model.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Component
 public class IBMQProvider implements IProvider {
@@ -300,8 +279,8 @@ public class IBMQProvider implements IProvider {
             for (BigDecimal qubitId : coupling) {
                 final Qubit qubit = qubitRepository.findByQpuAndName(qpu, qubitId.toString()).orElse(null);
                 if (Objects.nonNull(qubit)) {
-                    qubit.getSupportedGates().add(gate);
-                    operatingQubits.add(qubit);
+                    qubit.addSupportedGate(gate);
+                    qubitRepository.save(qubit);
                 }
             }
             gate.setOperatingQubits(operatingQubits);
@@ -340,7 +319,7 @@ public class IBMQProvider implements IProvider {
             final QubitCharacteristics latestCharacteristics =
                     qubitCharacteristicsRepository.findByQubitOrderByCalibrationTimeDesc(currentQubit).stream().findFirst().orElse(null);
             if (Objects.nonNull(latestCharacteristics) && !calibrationTime.after(latestCharacteristics.getCalibrationTime())) {
-                logger.debug("Stored characteristics are up-to-date. No update needed!");
+                logger.trace("Stored characteristics are up-to-date. No update needed!");
                 continue;
             }
 
@@ -349,7 +328,7 @@ public class IBMQProvider implements IProvider {
             qubitCharacteristics.setQubit(currentQubit);
             qubitCharacteristics.setCalibrationTime(calibrationTime);
 
-            // retrieve T1, T2, and readout error
+            // retrieve T1, T2, and readout error - NOTE: T1 and T2 are in micro seconds (us)
             for (Object propertiesOfQubit : propertiesOfQubitList) {
                 final Map<String, String> propertiesMap = IBMQUtility.transformIbmPropertiesToMap(propertiesOfQubit);
 
@@ -398,7 +377,7 @@ public class IBMQProvider implements IProvider {
             final GateCharacteristics latestCharacteristics =
                     gateCharacteristicsRepository.findByGateOrderByCalibrationTimeDesc(gate).stream().findFirst().orElse(null);
             if (Objects.nonNull(latestCharacteristics) && !calibrationTime.after(latestCharacteristics.getCalibrationTime())) {
-                logger.debug("Stored gate characteristics are up-to-date. No update needed!");
+                logger.trace("Stored gate characteristics are up-to-date. No update needed!");
                 continue;
             }
 
@@ -425,12 +404,12 @@ public class IBMQProvider implements IProvider {
             gateCharacteristics.setGate(gate);
             gateCharacteristics.setCalibrationTime(calibrationTime);
 
-            // retrieve gate time and error rate
+            // retrieve gate time and error rate - NOTE: gate times are in nano seconds (ns)
             for (Parameter characteristicsOfGate : matchingGate.getParameters()) {
 
                 switch (characteristicsOfGate.getName()) {
                     case "gate_error":
-                        gateCharacteristics.setGateFidelity(characteristicsOfGate.getValue());
+                        gateCharacteristics.setGateErrorRate(characteristicsOfGate.getValue());
                         break;
                     case "gate_length":
                         gateCharacteristics.setGateTime(characteristicsOfGate.getValue());

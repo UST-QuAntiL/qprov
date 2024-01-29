@@ -25,7 +25,7 @@ package org.quantil.qprov.core;
 public final class Constants {
 
     /**** General constants ****/
-    public static final int BIG_DECIMAL_PRECISION = 20;
+    public static final int BIG_DECIMAL_PRECISION = 30;
 
     public static final int BIG_DECIMAL_SCALE = 15;
 

@@ -19,24 +19,15 @@
 
 package org.quantil.qprov.core.model.entities;
 
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
+import org.jetbrains.annotations.NotNull;
+import org.quantil.qprov.core.Constants;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
-
-import org.quantil.qprov.core.Constants;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-import org.hibernate.annotations.GenericGenerator;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Characteristics of a gate at a certain calibration time
@@ -60,7 +51,7 @@ public class GateCharacteristics implements Comparable<GateCharacteristics> {
     private BigDecimal gateTime;
 
     @Column(precision = Constants.BIG_DECIMAL_PRECISION, scale = Constants.BIG_DECIMAL_SCALE)
-    private BigDecimal gateFidelity;
+    private BigDecimal gateErrorRate;
 
     @ManyToOne
     @EqualsAndHashCode.Exclude

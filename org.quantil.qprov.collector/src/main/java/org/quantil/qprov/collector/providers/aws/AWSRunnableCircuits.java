@@ -17,37 +17,28 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.web.dtos;
+package org.quantil.qprov.collector.providers.aws;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.quantil.qprov.core.model.entities.GateCharacteristics;
-import org.quantil.qprov.core.model.entities.QubitCharacteristics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.UUID;
-
-/**
- * Data transfer object for qubit characteristics ({@link QubitCharacteristics}).
- */
-@EqualsAndHashCode
-@Data
 @AllArgsConstructor
-public class GateCharacteristicsDto {
+public class AWSRunnableCircuits implements Runnable {
 
-    private UUID id;
+    private static final Logger logger = LoggerFactory.getLogger(AWSRunnableCircuits.class);
 
-    private Date calibrationTime;
+    private AWSProvider awsProvider;
 
-    private BigDecimal gateTime;
-
-    private BigDecimal gateErrorRate;
-
-    public static GateCharacteristicsDto createDTO(GateCharacteristics gateCharacteristics) {
-        return new GateCharacteristicsDto(gateCharacteristics.getDatabaseId(), gateCharacteristics.getCalibrationTime(),
-                gateCharacteristics.getGateTime(),
-                gateCharacteristics.getGateErrorRate());
+    @Override
+    public void run() {
+        logger.debug("Starting periodic collection by executing quantum circuits...");
+        boolean result = false;
+        try {
+            result = awsProvider.collectThroughCircuits();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        logger.debug("Finished periodic collection by executing quantum circuits with result: {}", result);
     }
 }

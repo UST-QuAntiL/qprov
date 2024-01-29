@@ -17,18 +17,28 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.quantil.qprov.collector.providers.ibmq.qiskit.service;
+package org.quantil.qprov.collector.providers.aws;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Data
 @AllArgsConstructor
-public class QiskitServiceRequest {
+public class AWSRunnableApi implements Runnable {
 
-    @JsonProperty("qpu-name")
-    private String qpu_name;
+    private static final Logger logger = LoggerFactory.getLogger(AWSRunnableApi.class);
 
-    private String token;
+    private AWSProvider awsProvider;
+
+    @Override
+    public void run() {
+        logger.debug("Starting periodic collection from API...");
+        boolean result = false;
+        try {
+            result = awsProvider.collectFromApi();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        logger.debug("Finished periodic collection from API with result: {}", result);
+    }
 }

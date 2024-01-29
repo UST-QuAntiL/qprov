@@ -19,30 +19,16 @@
 
 package org.quantil.qprov.core.model.entities;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
+import org.openprovenance.prov.model.Statement;
 import org.quantil.qprov.core.model.ProvExtension;
 import org.quantil.qprov.core.model.agents.QPU;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.ToString;
-import org.hibernate.annotations.GenericGenerator;
-import org.openprovenance.prov.model.Statement;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -72,8 +58,7 @@ public class Gate extends org.openprovenance.prov.xml.Entity implements ProvExte
     @ToString.Exclude
     private Set<GateCharacteristics> gateCharacteristics = new HashSet<>();
 
-    @ManyToMany(mappedBy = "supportedGates",
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(mappedBy = "supportedGates")
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Set<Qubit> operatingQubits = new HashSet<>();
