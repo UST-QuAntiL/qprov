@@ -56,10 +56,15 @@ The QProv systems provides a Swagger UI, as well as an HAL browser, which can be
 * Swagger UI: <http://localhost:5020/qprov/swagger-ui>
 * HAL browser: <http://localhost:5020/qprov/explorer>
 
-Furthermore, the OpenAPI specification can be found here:
+Furthermore, the OpenAPI specification can be found here, after starting QProv:
 
 * OpenAPI Json: <http://localhost:5020/qprov/v3/api-docs>
 * OpenAPI Yaml: <http://localhost:5020/qprov/v3/api-docs.yaml>
+
+Additionally, the OpenAPI specification is also statically available:
+
+* [OpenAPI Json](./docs/api/api-docs.json)
+* [OpenAPI Yaml](./docs/api/api-docs.yaml)
 
 ## Haftungsausschluss
 

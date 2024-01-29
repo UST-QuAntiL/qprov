@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 the QProv contributors.
+ * Copyright (c) 2024 the QProv contributors.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -57,6 +57,7 @@ public class RootController {
         responseEntity.add(linkTo(methodOn(ProvTemplateController.class).getProvenanceTemplates()).withRel(Constants.PATH_PROV_TEMPLATE));
         responseEntity.add(linkTo(methodOn(ProvDocumentController.class).getProvenanceDocuments()).withRel(Constants.PATH_PROV));
         responseEntity.add(linkTo(methodOn(VirtualMachineController.class).getVirtualMachines()).withRel(Constants.PATH_VIRTUAL_MACHINES));
+        responseEntity.add(linkTo(methodOn(SqlController.class).executeSQL(null)).withRel(Constants.PATH_SQL));
 
         return ResponseEntity.ok(responseEntity);
     }

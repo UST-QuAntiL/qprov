@@ -1,0 +1,2697 @@
+openapi: 3.0.1
+info:
+  title: QProv API
+  contact:
+    name: GitHub Repository
+    url: https://github.com/UST-QuAntiL/QProv
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.3.0
+servers:
+- url: http://localhost:5020/qprov
+  description: Generated server url
+paths:
+  /virtual-machines/{virtualMachineId}/characteristics:
+    get:
+      tags:
+      - virtual-machine
+      description: "Retrieve the calibration characteristics from the given gate.\
+        \ By using the latest parameter only the latest data is retrieved, otherwise\
+        \ all available data."
+      operationId: getHardwareCharacteristics
+      parameters:
+      - name: virtualMachineId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: latest
+        in: query
+        required: true
+        schema:
+          type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelHardwareCharacteristicsDto'
+        "404":
+          description: No characteristics for this Gate available.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelHardwareCharacteristicsDto'
+    put:
+      tags:
+      - virtual-machine
+      description: "Create a new VirtualMachine and return the link which can then\
+        \ be used to retrieve, update, and delete it."
+      operationId: addHardwareCharacteristics
+      parameters:
+      - name: virtualMachineId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HardwareCharacteristicsDto'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelVirtualMachineDto'
+  /provenance-documents/{provDocumentId}/namespace:
+    get:
+      tags:
+      - provenance-document
+      description: Retrieve the namespace of a specific PROV document.
+      operationId: getProvNamespace
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvNamespaceDto'
+        "404":
+          description: Not Found. PROV document with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvNamespaceDto'
+    put:
+      tags:
+      - provenance-document
+      description: Update the namespace of a specific PROV document.
+      operationId: setProvNamespace
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProvNamespaceDto'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvNamespaceDto'
+        "404":
+          description: Not Found. PROV document with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvNamespaceDto'
+  /provenance-documents/{provDocumentId}/entities/{provEntityId}:
+    get:
+      tags:
+      - provenance-document
+      description: Retrieve a specific PROV entity.
+      operationId: getProvEntity
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: provEntityId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvEntityDto'
+        "404":
+          description: Not Found. PROV entity with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvEntityDto'
+    put:
+      tags:
+      - provenance-document
+      description: Update the entity in a specific PROV document.
+      operationId: setProvEntity
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: provEntityId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProvEntityDto'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvEntityDto'
+        "404":
+          description: Not Found. PROV document or entity with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvEntityDto'
+    delete:
+      tags:
+      - provenance-document
+      description: Delete a PROV entity.
+      operationId: deleteProvEntity
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: provEntityId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found. PROV entity with given ID doesn't exist.
+  /provenance-documents/{provDocumentId}/agents/{provAgentId}:
+    get:
+      tags:
+      - provenance-document
+      description: Retrieve a specific PROV agent.
+      operationId: getProvAgent
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: provAgentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvAgentDto'
+        "404":
+          description: Not Found. PROV agent with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvAgentDto'
+    put:
+      tags:
+      - provenance-document
+      description: Update the agent in a specific PROV document.
+      operationId: setProvAgent
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: provAgentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProvAgentDto'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvAgentDto'
+        "404":
+          description: Not Found. PROV document or agent with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvAgentDto'
+    delete:
+      tags:
+      - provenance-document
+      description: Delete a PROV agent.
+      operationId: deleteProvAgent
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: provAgentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found. PROV agent with given ID doesn't exist.
+  /provenance-documents/{provDocumentId}/activities/{provActivityId}:
+    put:
+      tags:
+      - provenance-document
+      description: Update the activity in a specific PROV document.
+      operationId: setProvActivity
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: provActivityId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProvActivityDto'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvActivityDto'
+        "404":
+          description: Not Found. PROV document or agent with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvActivityDto'
+  /virtual-machines:
+    get:
+      tags:
+      - virtual-machine
+      description: Retrieve all classical hardware virtual machines.
+      operationId: getVirtualMachines
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelVirtualMachineDto'
+    post:
+      tags:
+      - virtual-machine
+      description: "Create a new VirtualMachine and return the link which can then\
+        \ be used to retrieve, update, and delete it."
+      operationId: createVirtualMachine
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VirtualMachineDto'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelVirtualMachineDto'
+  /provenance-templates:
+    get:
+      tags:
+      - provenance-template
+      description: Retrieve all stored PROV templates.
+      operationId: getProvenanceTemplates
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelProvDocumentDto'
+    post:
+      tags:
+      - provenance-template
+      description: Create a new PROV template by uploading the corresponding file.
+      operationId: handleProvTemplateUpload
+      parameters:
+      - name: format
+        in: query
+        required: true
+        schema:
+          type: string
+          enum:
+          - PROVN
+          - PROVX
+          - TURTLE
+          - RDFXML
+          - TRIG
+          - JSON
+          - JSONLD
+          - DOT
+          - JPEG
+          - PNG
+          - SVG
+          - PDF
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+              - file
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvDocumentDto'
+        "500":
+          description: Server error while processing file.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvDocumentDto'
+  /provenance-documents:
+    get:
+      tags:
+      - provenance-document
+      description: Retrieve all stored PROV documents.
+      operationId: getProvenanceDocuments
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelProvDocumentDto'
+    post:
+      tags:
+      - provenance-document
+      description: "Create a new PROV document and return the link which can then\
+        \ be used to retrieve, update, and delete it."
+      operationId: createProvDocument
+      parameters:
+      - name: format
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - PROVN
+          - PROVX
+          - TURTLE
+          - RDFXML
+          - TRIG
+          - JSON
+          - JSONLD
+          - DOT
+          - JPEG
+          - PNG
+          - SVG
+          - PDF
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Created
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvDocumentDto'
+  /provenance-documents/{provDocumentId}/entities:
+    get:
+      tags:
+      - provenance-document
+      description: Retrieve all PROV entities of the PROV document.
+      operationId: getProvEntities
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelProvEntityDto'
+        "404":
+          description: PROV document with the ID not available.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelProvEntityDto'
+    post:
+      tags:
+      - provenance-document
+      description: Create a new PROV entity in the specified PROV document.
+      operationId: addProvEntityToDocument
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProvQualifiedName'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvEntityDto'
+        "404":
+          description: Not Found. PROV document with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvEntityDto'
+  /provenance-documents/{provDocumentId}/agents:
+    get:
+      tags:
+      - provenance-document
+      description: Retrieve all PROV agents of the PROV document.
+      operationId: getProvAgents
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelProvAgentDto'
+        "404":
+          description: PROV document with the ID not available.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelProvAgentDto'
+    post:
+      tags:
+      - provenance-document
+      description: Create a new PROV agent in the specified PROV document.
+      operationId: addProvAgentToDocument
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProvQualifiedName'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvAgentDto'
+        "404":
+          description: Not Found. PROV document with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvAgentDto'
+  /provenance-documents/{provDocumentId}/activities:
+    get:
+      tags:
+      - provenance-document
+      description: Retrieve all PROV activities of the PROV document.
+      operationId: getProvActivities
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelProvActivityDto'
+        "404":
+          description: PROV document with the ID not available.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelProvActivityDto'
+    post:
+      tags:
+      - provenance-document
+      description: Create a new PROV activity in the specified PROV document.
+      operationId: addProvActivityToDocument
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProvQualifiedName'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvActivityDto'
+        "404":
+          description: Not Found. PROV document with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvActivityDto'
+  /virtual-machines/{virtualMachineId}:
+    get:
+      tags:
+      - virtual-machine
+      description: Retrieve a specific VirtualMachine and its basic properties.
+      operationId: getVirtualMachine
+      parameters:
+      - name: virtualMachineId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelVirtualMachineDto'
+        "404":
+          description: Not Found. VirtualMachine with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelVirtualMachineDto'
+  /providers:
+    get:
+      tags:
+      - provider
+      description: Retrieve all quantum hardware providers.
+      operationId: getProviders
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelProviderDto'
+  /providers/{providerId}:
+    get:
+      tags:
+      - provider
+      description: Retrieve a specific provider and its basic properties.
+      operationId: getProvider
+      parameters:
+      - name: providerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProviderDto'
+        "404":
+          description: Not Found. Provider with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProviderDto'
+  /providers/{providerId}/qpus:
+    get:
+      tags:
+      - provider
+      description: Retrieve all QPUs of the provider.
+      operationId: getQPUs
+      parameters:
+      - name: providerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelQpuDto'
+        "404":
+          description: Provider with the ID not available.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelQpuDto'
+  /providers/{providerId}/qpus/{qpuId}:
+    get:
+      tags:
+      - provider
+      description: Retrieve a specific QPU and its basic properties.
+      operationId: getQPU
+      parameters:
+      - name: providerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: qpuId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelQpuDto'
+        "400":
+          description: QPU belongs not to specified provider.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelQpuDto'
+        "404":
+          description: Not Found. QPU with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelQpuDto'
+  /providers/{providerId}/qpus/{qpuId}/qubits:
+    get:
+      tags:
+      - provider
+      description: Retrieve all Qubits of the QPU.
+      operationId: getQubits
+      parameters:
+      - name: providerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: qpuId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelQubitDto'
+        "404":
+          description: Provider or QPU with the ID not available.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelQubitDto'
+  /providers/{providerId}/qpus/{qpuId}/qubits/{qubitId}:
+    get:
+      tags:
+      - provider
+      description: Retrieve a specific Qubit and its basic properties.
+      operationId: getQubit
+      parameters:
+      - name: providerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: qpuId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: qubitId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelQubitDto'
+        "400":
+          description: Qubit belongs not to specified provider and QPU.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelQubitDto'
+        "404":
+          description: Not Found. Qubit with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelQubitDto'
+  /providers/{providerId}/qpus/{qpuId}/qubits/{qubitId}/gates:
+    get:
+      tags:
+      - provider
+      description: Retrieve all Gates that can be executed on the Qubit.
+      operationId: getGates
+      parameters:
+      - name: providerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: qpuId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: qubitId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelGateDto'
+        "404":
+          description: Qubit or QPU not available.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelGateDto'
+  /providers/{providerId}/qpus/{qpuId}/qubits/{qubitId}/gates/{gateId}:
+    get:
+      tags:
+      - provider
+      description: Retrieve a specific Qubit and its basic properties.
+      operationId: getGate
+      parameters:
+      - name: providerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: qpuId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: qubitId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: gateId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelGateDto'
+        "404":
+          description: Not Found. Gate with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelGateDto'
+  /providers/{providerId}/qpus/{qpuId}/qubits/{qubitId}/gates/{gateId}/characteristics:
+    get:
+      tags:
+      - provider
+      description: "Retrieve the calibration characteristics from the given gate.\
+        \ By using the latest parameter only the latest data is retrieved, otherwise\
+        \ all available data."
+      operationId: getGateCharacterisitcs
+      parameters:
+      - name: providerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: qpuId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: qubitId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: gateId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: latest
+        in: query
+        required: true
+        schema:
+          type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelGateCharacteristicsDto'
+        "404":
+          description: No characteristics for this Gate available.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelGateCharacteristicsDto'
+  /providers/{providerId}/qpus/{qpuId}/qubits/{qubitId}/characteristics:
+    get:
+      tags:
+      - provider
+      description: "Retrieve the calibration characteristics from the given qubit.\
+        \ By using the latest parameter only the latest data is retrieved, otherwise\
+        \ all available data."
+      operationId: getQubitCharacterisitcs
+      parameters:
+      - name: providerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: qpuId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: qubitId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: latest
+        in: query
+        required: true
+        schema:
+          type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelQubitCharacteristicsDto'
+        "404":
+          description: No characteristics for this Qubit available.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelQubitCharacteristicsDto'
+  /providers/{providerId}/qpus/{qpuId}/aggregated-data:
+    get:
+      tags:
+      - provider
+      operationId: getLinksToAggregatedData
+      parameters:
+      - name: providerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: qpuId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RepresentationModelObject'
+        "404":
+          description: Provider or QPU not found.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RepresentationModelObject'
+  /providers/{providerId}/qpus/{qpuId}/aggregated-data/calibration-matrix:
+    get:
+      tags:
+      - provider
+      operationId: getCalibrationMatrix
+      parameters:
+      - name: providerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: qpuId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: latest
+        in: query
+        required: true
+        schema:
+          type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelCalibrationMatrixDto'
+        "404":
+          description: Provider or QPU not found or no calibration matrix available
+            for this QPU.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/CollectionModelEntityModelCalibrationMatrixDto'
+  /provenance-templates/{provTemplateId}:
+    get:
+      tags:
+      - provenance-template
+      description: Retrieve a specific PROV template.
+      operationId: getProvTemplate
+      parameters:
+      - name: provTemplateId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvDocumentDto'
+        "404":
+          description: Not Found. PROV document with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvDocumentDto'
+    delete:
+      tags:
+      - provenance-template
+      description: Delete a PROV template.
+      operationId: deleteProvTemplate
+      parameters:
+      - name: provTemplateId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found. PROV template with given ID doesn't exist.
+  /provenance-templates/{provTemplateId}/xml-document:
+    get:
+      tags:
+      - provenance-template
+      description: Retrieve a specific PROV template and return it as serialized XML
+        document.
+      operationId: getProvTemplateXml
+      parameters:
+      - name: provTemplateId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: response
+        in: query
+        required: true
+        schema:
+          type: object
+          properties:
+            headerNames:
+              type: array
+              items:
+                type: string
+            status:
+              type: integer
+              format: int32
+            locale:
+              type: object
+              properties:
+                language:
+                  type: string
+                displayName:
+                  type: string
+                country:
+                  type: string
+                variant:
+                  type: string
+                script:
+                  type: string
+                unicodeLocaleAttributes:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                unicodeLocaleKeys:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                displayLanguage:
+                  type: string
+                displayScript:
+                  type: string
+                displayCountry:
+                  type: string
+                displayVariant:
+                  type: string
+                extensionKeys:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                iso3Language:
+                  type: string
+                iso3Country:
+                  type: string
+            outputStream:
+              type: object
+            contentType:
+              type: string
+            contentLength:
+              type: integer
+              format: int32
+              writeOnly: true
+            bufferSize:
+              type: integer
+              format: int32
+            committed:
+              type: boolean
+            writer:
+              type: object
+            characterEncoding:
+              type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RepresentationModelObject'
+        "404":
+          description: Not Found. PROV template with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RepresentationModelObject'
+  /provenance-templates/{provTemplateId}/pdf:
+    get:
+      tags:
+      - provenance-template
+      description: Retrieve a specific PROV template and return it as PDF.
+      operationId: getProvTemplatePDF
+      parameters:
+      - name: provTemplateId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: response
+        in: query
+        required: true
+        schema:
+          type: object
+          properties:
+            headerNames:
+              type: array
+              items:
+                type: string
+            status:
+              type: integer
+              format: int32
+            locale:
+              type: object
+              properties:
+                language:
+                  type: string
+                displayName:
+                  type: string
+                country:
+                  type: string
+                variant:
+                  type: string
+                script:
+                  type: string
+                unicodeLocaleAttributes:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                unicodeLocaleKeys:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                displayLanguage:
+                  type: string
+                displayScript:
+                  type: string
+                displayCountry:
+                  type: string
+                displayVariant:
+                  type: string
+                extensionKeys:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                iso3Language:
+                  type: string
+                iso3Country:
+                  type: string
+            outputStream:
+              type: object
+            contentType:
+              type: string
+            contentLength:
+              type: integer
+              format: int32
+              writeOnly: true
+            bufferSize:
+              type: integer
+              format: int32
+            committed:
+              type: boolean
+            writer:
+              type: object
+            characterEncoding:
+              type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RepresentationModelObject'
+        "404":
+          description: Not Found. PROV template with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RepresentationModelObject'
+  /provenance-templates/{provTemplateId}/parameters:
+    get:
+      tags:
+      - provenance-template
+      description: Retrieve the parameters that are required to instantiate a PROV
+        document from a PROV template.
+      operationId: getProvTemplateParameters
+      parameters:
+      - name: provTemplateId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RepresentationModelObject'
+        "404":
+          description: Not Found. PROV template with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RepresentationModelObject'
+  /provenance-templates/{provTemplateId}/jpeg:
+    get:
+      tags:
+      - provenance-template
+      description: Retrieve a specific PROV template and return it as JPEG image.
+      operationId: getProvTemplateJPEG
+      parameters:
+      - name: provTemplateId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: response
+        in: query
+        required: true
+        schema:
+          type: object
+          properties:
+            headerNames:
+              type: array
+              items:
+                type: string
+            status:
+              type: integer
+              format: int32
+            locale:
+              type: object
+              properties:
+                language:
+                  type: string
+                displayName:
+                  type: string
+                country:
+                  type: string
+                variant:
+                  type: string
+                script:
+                  type: string
+                unicodeLocaleAttributes:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                unicodeLocaleKeys:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                displayLanguage:
+                  type: string
+                displayScript:
+                  type: string
+                displayCountry:
+                  type: string
+                displayVariant:
+                  type: string
+                extensionKeys:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                iso3Language:
+                  type: string
+                iso3Country:
+                  type: string
+            outputStream:
+              type: object
+            contentType:
+              type: string
+            contentLength:
+              type: integer
+              format: int32
+              writeOnly: true
+            bufferSize:
+              type: integer
+              format: int32
+            committed:
+              type: boolean
+            writer:
+              type: object
+            characterEncoding:
+              type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RepresentationModelObject'
+        "404":
+          description: Not Found. PROV template with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RepresentationModelObject'
+  /provenance-documents/{provDocumentId}:
+    get:
+      tags:
+      - provenance-document
+      description: Retrieve a specific PROV document.
+      operationId: getProvDocument
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvDocumentDto'
+        "404":
+          description: Not Found. PROV document with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvDocumentDto'
+    delete:
+      tags:
+      - provenance-document
+      description: Delete a PROV document.
+      operationId: deleteProvDocument
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found. PROV document with given ID doesn't exist.
+  /provenance-documents/{provDocumentId}/xml-document:
+    get:
+      tags:
+      - provenance-document
+      description: Retrieve a specific PROV document and return it as serialized XML
+        document.
+      operationId: getProvDocumentXml
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: response
+        in: query
+        required: true
+        schema:
+          type: object
+          properties:
+            headerNames:
+              type: array
+              items:
+                type: string
+            status:
+              type: integer
+              format: int32
+            locale:
+              type: object
+              properties:
+                language:
+                  type: string
+                displayName:
+                  type: string
+                country:
+                  type: string
+                variant:
+                  type: string
+                script:
+                  type: string
+                unicodeLocaleAttributes:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                unicodeLocaleKeys:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                displayLanguage:
+                  type: string
+                displayScript:
+                  type: string
+                displayCountry:
+                  type: string
+                displayVariant:
+                  type: string
+                extensionKeys:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                iso3Language:
+                  type: string
+                iso3Country:
+                  type: string
+            outputStream:
+              type: object
+            contentType:
+              type: string
+            contentLength:
+              type: integer
+              format: int32
+              writeOnly: true
+            bufferSize:
+              type: integer
+              format: int32
+            committed:
+              type: boolean
+            writer:
+              type: object
+            characterEncoding:
+              type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RepresentationModelObject'
+        "404":
+          description: Not Found. PROV document with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RepresentationModelObject'
+  /provenance-documents/{provDocumentId}/pdf:
+    get:
+      tags:
+      - provenance-document
+      description: Retrieve a specific PROV document and return it as PDF.
+      operationId: getProvDocumentPDF
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: response
+        in: query
+        required: true
+        schema:
+          type: object
+          properties:
+            headerNames:
+              type: array
+              items:
+                type: string
+            status:
+              type: integer
+              format: int32
+            locale:
+              type: object
+              properties:
+                language:
+                  type: string
+                displayName:
+                  type: string
+                country:
+                  type: string
+                variant:
+                  type: string
+                script:
+                  type: string
+                unicodeLocaleAttributes:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                unicodeLocaleKeys:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                displayLanguage:
+                  type: string
+                displayScript:
+                  type: string
+                displayCountry:
+                  type: string
+                displayVariant:
+                  type: string
+                extensionKeys:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                iso3Language:
+                  type: string
+                iso3Country:
+                  type: string
+            outputStream:
+              type: object
+            contentType:
+              type: string
+            contentLength:
+              type: integer
+              format: int32
+              writeOnly: true
+            bufferSize:
+              type: integer
+              format: int32
+            committed:
+              type: boolean
+            writer:
+              type: object
+            characterEncoding:
+              type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RepresentationModelObject'
+        "404":
+          description: Not Found. PROV document with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RepresentationModelObject'
+  /provenance-documents/{provDocumentId}/jpeg:
+    get:
+      tags:
+      - provenance-document
+      description: Retrieve a specific PROV document and return it as JPEG image.
+      operationId: getProvDocumentJPEG
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: response
+        in: query
+        required: true
+        schema:
+          type: object
+          properties:
+            headerNames:
+              type: array
+              items:
+                type: string
+            status:
+              type: integer
+              format: int32
+            locale:
+              type: object
+              properties:
+                language:
+                  type: string
+                displayName:
+                  type: string
+                country:
+                  type: string
+                variant:
+                  type: string
+                script:
+                  type: string
+                unicodeLocaleAttributes:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                unicodeLocaleKeys:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                displayLanguage:
+                  type: string
+                displayScript:
+                  type: string
+                displayCountry:
+                  type: string
+                displayVariant:
+                  type: string
+                extensionKeys:
+                  uniqueItems: true
+                  type: array
+                  items:
+                    type: string
+                iso3Language:
+                  type: string
+                iso3Country:
+                  type: string
+            outputStream:
+              type: object
+            contentType:
+              type: string
+            contentLength:
+              type: integer
+              format: int32
+              writeOnly: true
+            bufferSize:
+              type: integer
+              format: int32
+            committed:
+              type: boolean
+            writer:
+              type: object
+            characterEncoding:
+              type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RepresentationModelObject'
+        "404":
+          description: Not Found. PROV document with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RepresentationModelObject'
+  /provenance-documents/{provDocumentId}/activities/{provActitvityId}:
+    get:
+      tags:
+      - provenance-document
+      description: Retrieve a specific PROV activity.
+      operationId: getProvActivity
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: provActitvityId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvActivityDto'
+        "404":
+          description: Not Found. PROV activity with given ID doesn't exist.
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/EntityModelProvActivityDto'
+    delete:
+      tags:
+      - provenance-document
+      description: Delete a PROV activity.
+      operationId: deleteProvActivity
+      parameters:
+      - name: provDocumentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: provActitvityId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found. PROV activity with given ID doesn't exist.
+  /:
+    get:
+      tags:
+      - root
+      operationId: root
+      responses:
+        "200":
+          description: OK
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RepresentationModelObject'
+components:
+  schemas:
+    HardwareCharacteristicsDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        recordingTime:
+          type: string
+          format: date-time
+        cpuUsage:
+          type: number
+          format: float
+        clockSpeed:
+          type: number
+          format: float
+        ramUsage:
+          type: number
+          format: float
+        diskUsage:
+          type: number
+          format: float
+    EntityModelVirtualMachineDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+        cpu:
+          type: string
+        cpuCores:
+          type: integer
+          format: int32
+        ramSize:
+          type: integer
+          format: int32
+        diskSize:
+          type: integer
+          format: int32
+        _links:
+          $ref: '#/components/schemas/Links'
+    Links:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/Link'
+    VirtualMachineDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+        cpu:
+          type: string
+        cpuCores:
+          type: integer
+          format: int32
+        ramSize:
+          type: integer
+          format: int32
+        diskSize:
+          type: integer
+          format: int32
+    ProvNamespaceDto:
+      type: object
+      properties:
+        prefixes:
+          type: object
+          additionalProperties:
+            type: string
+        namespaces:
+          type: object
+          additionalProperties:
+            type: string
+    EntityModelProvNamespaceDto:
+      type: object
+      properties:
+        prefixes:
+          type: object
+          additionalProperties:
+            type: string
+        namespaces:
+          type: object
+          additionalProperties:
+            type: string
+        _links:
+          $ref: '#/components/schemas/Links'
+    LangString:
+      type: object
+      properties:
+        value:
+          type: string
+        lang:
+          type: string
+    Location:
+      type: object
+      properties:
+        value:
+          type: object
+        type:
+          $ref: '#/components/schemas/QualifiedName'
+        convertedValue:
+          type: object
+        valueFromObject:
+          type: object
+          writeOnly: true
+        elementName:
+          $ref: '#/components/schemas/QualifiedName'
+        kind:
+          type: string
+          enum:
+          - PROV_TYPE
+          - PROV_LABEL
+          - PROV_ROLE
+          - PROV_LOCATION
+          - PROV_VALUE
+          - PROV_KEY
+          - OTHER
+    Other:
+      type: object
+      properties:
+        elementName:
+          $ref: '#/components/schemas/QualifiedName'
+        value:
+          type: object
+        type:
+          $ref: '#/components/schemas/QualifiedName'
+        convertedValue:
+          type: object
+        valueFromObject:
+          type: object
+          writeOnly: true
+        kind:
+          type: string
+          enum:
+          - PROV_TYPE
+          - PROV_LABEL
+          - PROV_ROLE
+          - PROV_LOCATION
+          - PROV_VALUE
+          - PROV_KEY
+          - OTHER
+    ProvEntityDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/QualifiedName'
+        label:
+          type: array
+          items:
+            $ref: '#/components/schemas/LangString'
+        location:
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
+        type:
+          type: array
+          items:
+            $ref: '#/components/schemas/Type'
+        value:
+          $ref: '#/components/schemas/Value'
+        others:
+          type: array
+          items:
+            $ref: '#/components/schemas/Other'
+    QualifiedName:
+      type: object
+      properties:
+        prefix:
+          type: string
+        namespaceURI:
+          type: string
+        localPart:
+          type: string
+        uri:
+          type: string
+    Type:
+      type: object
+      properties:
+        value:
+          type: object
+        type:
+          $ref: '#/components/schemas/QualifiedName'
+        convertedValue:
+          type: object
+        valueFromObject:
+          type: object
+          writeOnly: true
+        elementName:
+          $ref: '#/components/schemas/QualifiedName'
+        kind:
+          type: string
+          enum:
+          - PROV_TYPE
+          - PROV_LABEL
+          - PROV_ROLE
+          - PROV_LOCATION
+          - PROV_VALUE
+          - PROV_KEY
+          - OTHER
+    Value:
+      type: object
+      properties:
+        value:
+          type: object
+        type:
+          $ref: '#/components/schemas/QualifiedName'
+        convertedValue:
+          type: object
+        valueFromObject:
+          type: object
+          writeOnly: true
+        elementName:
+          $ref: '#/components/schemas/QualifiedName'
+        kind:
+          type: string
+          enum:
+          - PROV_TYPE
+          - PROV_LABEL
+          - PROV_ROLE
+          - PROV_LOCATION
+          - PROV_VALUE
+          - PROV_KEY
+          - OTHER
+    EntityModelProvEntityDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/QualifiedName'
+        label:
+          type: array
+          items:
+            $ref: '#/components/schemas/LangString'
+        location:
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
+        type:
+          type: array
+          items:
+            $ref: '#/components/schemas/Type'
+        value:
+          $ref: '#/components/schemas/Value'
+        others:
+          type: array
+          items:
+            $ref: '#/components/schemas/Other'
+        _links:
+          $ref: '#/components/schemas/Links'
+    Attribute:
+      type: object
+      properties:
+        value:
+          type: object
+        type:
+          $ref: '#/components/schemas/QualifiedName'
+        elementName:
+          $ref: '#/components/schemas/QualifiedName'
+        kind:
+          type: string
+          enum:
+          - PROV_TYPE
+          - PROV_LABEL
+          - PROV_ROLE
+          - PROV_LOCATION
+          - PROV_VALUE
+          - PROV_KEY
+          - OTHER
+        convertedValue:
+          type: object
+        valueFromObject:
+          type: object
+          writeOnly: true
+    ProvAgentDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/QualifiedName'
+        label:
+          type: array
+          items:
+            $ref: '#/components/schemas/LangString'
+        location:
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
+        type:
+          type: array
+          items:
+            $ref: '#/components/schemas/Type'
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attribute'
+        others:
+          type: array
+          items:
+            $ref: '#/components/schemas/Other'
+    EntityModelProvAgentDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/QualifiedName'
+        label:
+          type: array
+          items:
+            $ref: '#/components/schemas/LangString'
+        location:
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
+        type:
+          type: array
+          items:
+            $ref: '#/components/schemas/Type'
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attribute'
+        others:
+          type: array
+          items:
+            $ref: '#/components/schemas/Other'
+        _links:
+          $ref: '#/components/schemas/Links'
+    ProvActivityDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/QualifiedName'
+        label:
+          type: array
+          items:
+            $ref: '#/components/schemas/LangString'
+        location:
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
+        type:
+          type: array
+          items:
+            $ref: '#/components/schemas/Type'
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attribute'
+        others:
+          type: array
+          items:
+            $ref: '#/components/schemas/Other'
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+    EntityModelProvActivityDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/QualifiedName'
+        label:
+          type: array
+          items:
+            $ref: '#/components/schemas/LangString'
+        location:
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
+        type:
+          type: array
+          items:
+            $ref: '#/components/schemas/Type'
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attribute'
+        others:
+          type: array
+          items:
+            $ref: '#/components/schemas/Other'
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        _links:
+          $ref: '#/components/schemas/Links'
+    EntityModelProvDocumentDto:
+      type: object
+      properties:
+        databaseId:
+          type: integer
+          format: int64
+        namespace:
+          $ref: '#/components/schemas/Namespace'
+        statementOrBundle:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatementOrBundle'
+        _links:
+          $ref: '#/components/schemas/Links'
+    Namespace:
+      type: object
+      properties:
+        prefixes:
+          type: object
+          additionalProperties:
+            type: string
+        namespaces:
+          type: object
+          additionalProperties:
+            type: string
+        defaultNamespace:
+          type: string
+        parent:
+          $ref: '#/components/schemas/Namespace'
+    StatementOrBundle:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+          - PROV_ENTITY
+          - PROV_ACTIVITY
+          - PROV_AGENT
+          - PROV_USAGE
+          - PROV_GENERATION
+          - PROV_INVALIDATION
+          - PROV_START
+          - PROV_END
+          - PROV_COMMUNICATION
+          - PROV_DERIVATION
+          - PROV_ASSOCIATION
+          - PROV_ATTRIBUTION
+          - PROV_DELEGATION
+          - PROV_INFLUENCE
+          - PROV_ALTERNATE
+          - PROV_SPECIALIZATION
+          - PROV_MENTION
+          - PROV_MEMBERSHIP
+          - PROV_BUNDLE
+          - PROV_DICTIONARY_INSERTION
+          - PROV_DICTIONARY_REMOVAL
+          - PROV_DICTIONARY_MEMBERSHIP
+    ProvQualifiedName:
+      type: object
+      properties:
+        pk:
+          type: integer
+          format: int64
+        uri:
+          type: string
+        prefix:
+          type: string
+        namespaceURI:
+          type: string
+        localPart:
+          type: string
+        refItem:
+          type: string
+    CollectionModelEntityModelVirtualMachineDto:
+      type: object
+      properties:
+        _embedded:
+          type: object
+          properties:
+            virtualMachineDtoes:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityModelVirtualMachineDto'
+        _links:
+          $ref: '#/components/schemas/Links'
+    CollectionModelEntityModelHardwareCharacteristicsDto:
+      type: object
+      properties:
+        _embedded:
+          type: object
+          properties:
+            hardwareCharacteristicsDtoes:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityModelHardwareCharacteristicsDto'
+        _links:
+          $ref: '#/components/schemas/Links'
+    EntityModelHardwareCharacteristicsDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        recordingTime:
+          type: string
+          format: date-time
+        cpuUsage:
+          type: number
+          format: float
+        clockSpeed:
+          type: number
+          format: float
+        ramUsage:
+          type: number
+          format: float
+        diskUsage:
+          type: number
+          format: float
+        _links:
+          $ref: '#/components/schemas/Links'
+    CollectionModelEntityModelProviderDto:
+      type: object
+      properties:
+        _embedded:
+          type: object
+          properties:
+            providerDtoes:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityModelProviderDto'
+        _links:
+          $ref: '#/components/schemas/Links'
+    EntityModelProviderDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        offeringURL:
+          type: string
+          format: url
+        _links:
+          $ref: '#/components/schemas/Links'
+    CollectionModelEntityModelQpuDto:
+      type: object
+      properties:
+        _embedded:
+          type: object
+          properties:
+            qpuDtoes:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityModelQpuDto'
+        _links:
+          $ref: '#/components/schemas/Links'
+    EntityModelQpuDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        version:
+          type: string
+        lastUpdated:
+          type: string
+          format: date-time
+        lastCalibrated:
+          type: string
+          format: date-time
+        maxShots:
+          type: integer
+          format: int32
+        queueSize:
+          type: integer
+          format: int32
+        numberOfQubits:
+          type: integer
+          format: int32
+        avgT1Time:
+          type: number
+        avgT2Time:
+          type: number
+        avgReadoutError:
+          type: number
+        avgMultiQubitGateError:
+          type: number
+        avgSingleQubitGateError:
+          type: number
+        avgMultiQubitGateTime:
+          type: number
+        avgSingleQubitGateTime:
+          type: number
+        maxGateTime:
+          type: number
+        simulator:
+          type: boolean
+        _links:
+          $ref: '#/components/schemas/Links'
+    CollectionModelEntityModelQubitDto:
+      type: object
+      properties:
+        _embedded:
+          type: object
+          properties:
+            qubitDtoes:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityModelQubitDto'
+        _links:
+          $ref: '#/components/schemas/Links'
+    EntityModelQubitDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        _links:
+          $ref: '#/components/schemas/Links'
+    CollectionModelEntityModelGateDto:
+      type: object
+      properties:
+        _embedded:
+          type: object
+          properties:
+            gateDtoes:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityModelGateDto'
+        _links:
+          $ref: '#/components/schemas/Links'
+    EntityModelGateDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        multiQubitGate:
+          type: boolean
+        operatingQubits:
+          type: array
+          items:
+            type: string
+            format: uuid
+        _links:
+          $ref: '#/components/schemas/Links'
+    CollectionModelEntityModelGateCharacteristicsDto:
+      type: object
+      properties:
+        _embedded:
+          type: object
+          properties:
+            gateCharacteristicsDtoes:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityModelGateCharacteristicsDto'
+        _links:
+          $ref: '#/components/schemas/Links'
+    EntityModelGateCharacteristicsDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        calibrationTime:
+          type: string
+          format: date-time
+        gateTime:
+          type: number
+        gateErrorRate:
+          type: number
+        _links:
+          $ref: '#/components/schemas/Links'
+    CollectionModelEntityModelQubitCharacteristicsDto:
+      type: object
+      properties:
+        _embedded:
+          type: object
+          properties:
+            qubitCharacteristicsDtoes:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityModelQubitCharacteristicsDto'
+        _links:
+          $ref: '#/components/schemas/Links'
+    EntityModelQubitCharacteristicsDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        calibrationTime:
+          type: string
+          format: date-time
+        t1Time:
+          type: number
+        t2Time:
+          type: number
+        readoutError:
+          type: number
+        _links:
+          $ref: '#/components/schemas/Links'
+    RepresentationModelObject:
+      type: object
+      properties:
+        _links:
+          $ref: '#/components/schemas/Links'
+    CollectionModelEntityModelCalibrationMatrixDto:
+      type: object
+      properties:
+        _embedded:
+          type: object
+          properties:
+            calibrationMatrixDtoes:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityModelCalibrationMatrixDto'
+        _links:
+          $ref: '#/components/schemas/Links'
+    EntityModelCalibrationMatrixDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        calibrationTime:
+          type: string
+          format: date-time
+        calibrationMatrix:
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+              format: double
+        _links:
+          $ref: '#/components/schemas/Links'
+    CollectionModelEntityModelProvDocumentDto:
+      type: object
+      properties:
+        _embedded:
+          type: object
+          properties:
+            provDocumentDtoes:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityModelProvDocumentDto'
+        _links:
+          $ref: '#/components/schemas/Links'
+    CollectionModelEntityModelProvEntityDto:
+      type: object
+      properties:
+        _embedded:
+          type: object
+          properties:
+            provEntityDtoes:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityModelProvEntityDto'
+        _links:
+          $ref: '#/components/schemas/Links'
+    CollectionModelEntityModelProvAgentDto:
+      type: object
+      properties:
+        _embedded:
+          type: object
+          properties:
+            provAgentDtoes:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityModelProvAgentDto'
+        _links:
+          $ref: '#/components/schemas/Links'
+    CollectionModelEntityModelProvActivityDto:
+      type: object
+      properties:
+        _embedded:
+          type: object
+          properties:
+            provActivityDtoes:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityModelProvActivityDto'
+        _links:
+          $ref: '#/components/schemas/Links'
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+        hreflang:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+        deprecation:
+          type: string
+        profile:
+          type: string
+        name:
+          type: string
+        templated:
+          type: boolean
