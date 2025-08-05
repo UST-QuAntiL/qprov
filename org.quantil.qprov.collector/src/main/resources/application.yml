@@ -40,7 +40,8 @@ logging:
 # config
 qprov:
   ibmq:
-    token: "${QPROV_IBMQ_TOKEN:token}"
+    apikey: "${QPROV_IBM_CLOUD_APIKEY:key}"
+    service-crn: "${QPROV_IBM_QUANTUM_SERVICE_CRN}:crn"
     execute-calibration: ${QPROV_IBMQ_EXECUTE_CIRCUITS:false}
     auto-collect: ${QPROV_IBMQ_AUTO_COLLECT:false}
     auto-collect-interval: ${QPROV_IBMQ_AUTO_COLLECT_INTERVAL:60}

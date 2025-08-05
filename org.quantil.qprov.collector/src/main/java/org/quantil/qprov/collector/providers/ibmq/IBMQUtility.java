@@ -19,14 +19,12 @@
 
 package org.quantil.qprov.collector.providers.ibmq;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import org.quantil.qprov.core.model.entities.Gate;
 import org.quantil.qprov.core.model.entities.Qubit;
-import org.quantil.qprov.ibmq.client.model.DevicePropsGate;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,30 +34,6 @@ public abstract class IBMQUtility {
     protected static final Logger logger = LogManager.getLogger();
 
     /**
-     * Parse the objects returned by IBM to a Java Map
-     *
-     * @param propertiesList the propertiesList as provided by the IBM API
-     * @return the Map containing the data from the provided properties list
-     */
-    public static Map<String, String> transformIbmPropertiesToMap(Object propertiesList) {
-        final String[] propertiesArray = propertiesList.toString()
-                .replaceAll("\\s+", "")
-                .replaceAll("\\{", "")
-                .replaceAll("}", "")
-                .split(",");
-
-        final Map<String, String> map = new HashMap<>();
-        for (String property : propertiesArray) {
-            final String[] propertyParts = property.split("=");
-            if (propertyParts.length != 2) {
-                continue;
-            }
-            map.put(propertyParts[0], propertyParts[1]);
-        }
-        return map;
-    }
-
-    /**
      * Check whether the given gate from the QProv data model operates on the same set of qubits than the gate for which the characteristics were
      * retrieved from IBM
      *
@@ -67,14 +41,15 @@ public abstract class IBMQUtility {
      * @param gate              the gate from the QPov data model
      * @return <code>true</code> if the two gates operate on the same set of qubits, <code>false</code> otherwise
      */
-    public static boolean operatesOnSameQubits(DevicePropsGate ibmGateProperties, Gate gate) {
+    public static boolean operatesOnSameQubits(Map<String, Object> ibmGateProperties, Gate gate) {
+        var qubits = (List<Integer>) ibmGateProperties.get("qubits");
 
-        if (Objects.isNull(ibmGateProperties.getQubits())) {
+        if (Objects.isNull(qubits)) {
             logger.warn("Qubits in IBM gate properties are null for gate with name: {}!", gate.getName());
             return false;
         }
 
-        if (ibmGateProperties.getQubits().size() != gate.getOperatingQubits().size()) {
+        if (qubits.size() != gate.getOperatingQubits().size()) {
             logger.debug("Gates operate on different qubits!");
             return false;
         }
@@ -82,7 +57,7 @@ public abstract class IBMQUtility {
         // check if the stored gate and the gate for which the information was retrieved operate on the same qubit
         for (Qubit operatingQubit : gate.getOperatingQubits()) {
             boolean foundMatchingQubit = false;
-            for (BigDecimal ibmOperatingQubit : ibmGateProperties.getQubits()) {
+            for (Integer ibmOperatingQubit : qubits) {
                 if (ibmOperatingQubit.toString().equals(operatingQubit.getName())) {
                     foundMatchingQubit = true;
                 }
