@@ -101,7 +101,7 @@ public class IBMQProvider implements IProvider {
         this.iamClient = org.quantil.qprov.ibm.iam.client.Configuration.getDefaultApiClient();
         this.iamClient.setBasePath("https://iam.cloud.ibm.com");
         this.ibmClient = org.quantil.qprov.ibm.quantum.client.Configuration.getDefaultApiClient();
-        this.ibmClient.setBasePath("https://quantum.cloud.ibm.com/api/v1");
+        this.ibmClient.setBasePath("https://quantum.cloud.ibm.com/api");
 
         logger.debug("Started IBMQ Provider with auto collect: {}", autoCollect);
 
@@ -188,7 +188,7 @@ public class IBMQProvider implements IProvider {
             logger.debug("QPU already present, updating information.");
             QPU qpu = qpuOptional.get();
             qpu.setVersion((String) deviceProperties.get("backend_version"));
-            qpu.setMaxShots((int) deviceConfiguration.get("max_shots"));
+            qpu.setMaxShots(((Double) deviceConfiguration.get("max_shots")).intValue());
             qpu = qpuRepository.save(qpu);
             return qpu;
         }
@@ -198,17 +198,17 @@ public class IBMQProvider implements IProvider {
         qpu.setName(device.getName());
         qpu.setProvider(provider);
         qpu.setVersion((String) deviceProperties.get("backend_version"));
-        qpu.setMaxShots((int) deviceConfiguration.get("max_shots"));
+        qpu.setMaxShots(((Double) deviceConfiguration.get("max_shots")).intValue());
         qpu.setSimulator(Objects.nonNull(device.getIsSimulator()) && device.getIsSimulator());
         qpu = qpuRepository.save(qpu);
 
         // add qubits
         final Map<String, Qubit> qubits = new HashMap<>();
         if (Objects.nonNull(deviceConfiguration.get("coupling_map"))) {
-            for (List<Integer> coupling : (List<List<Integer>>) deviceConfiguration.get("coupling_map")) {
+            for (List<Double> coupling : (List<List<Double>>) deviceConfiguration.get("coupling_map")) {
                 final List<Qubit> alreadyAdded = new ArrayList<>();
-                for (Integer qubitId : coupling) {
-                    final String qubitName = qubitId.toString();
+                for (Double qubitId : coupling) {
+                    final String qubitName = Integer.toString(qubitId.intValue());
 
                     // create new qubit if not already done
                     Qubit qubit = qubits.get(qubitName);
@@ -244,7 +244,7 @@ public class IBMQProvider implements IProvider {
         }
 
         // add gates to the qubits on which they can be executed
-        if (Objects.nonNull(device.getIsSimulator()) && !device.getIsSimulator() && Objects.nonNull(deviceConfiguration.get("gates"))) {
+        if (Objects.nonNull(deviceConfiguration.get("gates"))) {
             for (var ibmGate : (List<Map<String, Object>>) deviceConfiguration.get("gates")) {
                 addGateFromDevice(ibmGate, qpu);
             }
@@ -263,12 +263,12 @@ public class IBMQProvider implements IProvider {
     public void addGateFromDevice(Map<String, Object> ibmGate, QPU qpu) {
 
         // remove duplicates in coupling map
-        final List<List<Integer>> distinctList =
-                ((List<List<Integer>>) ibmGate.get("coupling_map")).stream().map(listToSort -> listToSort.stream().sorted().collect(Collectors.toList())).distinct()
+        final List<List<Double>> distinctList =
+                ((List<List<Double>>) ibmGate.get("coupling_map")).stream().map(listToSort -> listToSort.stream().sorted().collect(Collectors.toList())).distinct()
                         .collect(Collectors.toList());
 
         // each gate is instantiated for each coupling map, as the gate on different qubits has different characteristics
-        for (List<Integer> coupling : distinctList) {
+        for (List<Double> coupling : distinctList) {
             Gate gate = new Gate();
             gate.setName((String) ibmGate.get("name"));
             gate.setQpu(qpu);
@@ -276,14 +276,14 @@ public class IBMQProvider implements IProvider {
 
             // add gate to each qubit in the coupling if it operates on multiple qubits
             final Set<Qubit> operatingQubits = new HashSet<>();
-            for (Integer qubitId : coupling) {
-                final Qubit qubit = qubitRepository.findByQpuAndName(qpu, qubitId.toString()).orElse(null);
+            for (Double qubitId : coupling) {
+                final Qubit qubit = qubitRepository.findByQpuAndName(qpu, Integer.toString(qubitId.intValue())).orElse(null);
                 if (Objects.nonNull(qubit)) {
                     qubit.addSupportedGate(gate);
                     qubitRepository.save(qubit);
                 }
             }
-            gate.setOperatingQubits(operatingQubits);
+
             gateRepository.save(gate);
         }
     }
@@ -333,13 +333,13 @@ public class IBMQProvider implements IProvider {
             for (var propertiesOfQubit : propertiesOfQubitList) {
                 switch ((String) propertiesOfQubit.get("name")) {
                     case "T1":
-                        qubitCharacteristics.setT1Time(new BigDecimal((Integer) propertiesOfQubit.get("value")));
+                        qubitCharacteristics.setT1Time(new BigDecimal((Double) propertiesOfQubit.get("value")));
                         break;
                     case "T2":
-                        qubitCharacteristics.setT2Time(new BigDecimal((Integer) propertiesOfQubit.get("value")));
+                        qubitCharacteristics.setT2Time(new BigDecimal((Double) propertiesOfQubit.get("value")));
                         break;
                     case "readout_error":
-                        qubitCharacteristics.setReadoutError(new BigDecimal((Integer) propertiesOfQubit.get("value")));
+                        qubitCharacteristics.setReadoutError(new BigDecimal((Double) propertiesOfQubit.get("value")));
                         break;
                     default:
                 }
@@ -406,12 +406,12 @@ public class IBMQProvider implements IProvider {
             // retrieve gate time and error rate - NOTE: gate times are in nano seconds (ns)
             for (Map<String, Object> characteristicsOfGate : (List<Map<String, Object>>) matchingGate.get("parameters")) {
 
-                switch ((String) characteristicsOfGate.get("Name")) {
+                switch ((String) characteristicsOfGate.get("name")) {
                     case "gate_error":
-                        gateCharacteristics.setGateErrorRate(BigDecimal.valueOf((Float) characteristicsOfGate.get("Value")));
+                        gateCharacteristics.setGateErrorRate(BigDecimal.valueOf((Double) characteristicsOfGate.get("value")));
                         break;
                     case "gate_length":
-                        gateCharacteristics.setGateTime(BigDecimal.valueOf((Integer) characteristicsOfGate.get("Value")));
+                        gateCharacteristics.setGateTime(BigDecimal.valueOf((Double) characteristicsOfGate.get("value")));
                         break;
                     default:
                 }
@@ -453,7 +453,7 @@ public class IBMQProvider implements IProvider {
                 logger.debug("Current queue size: {}", queueSize);
 
                 // skip simulators in further analysis as they do not provide calibration data
-                if (Objects.isNull(device.getIsSimulator()) || device.getIsSimulator()) {
+                if ((!Objects.isNull(device.getIsSimulator())) && device.getIsSimulator()) {
                     logger.debug("Device is simulator. Skipping data retrieval!");
                     qpuRepository.save(qpu);
                     continue;

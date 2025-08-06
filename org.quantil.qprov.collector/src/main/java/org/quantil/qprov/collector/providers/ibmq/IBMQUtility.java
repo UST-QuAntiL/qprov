@@ -42,7 +42,7 @@ public abstract class IBMQUtility {
      * @return <code>true</code> if the two gates operate on the same set of qubits, <code>false</code> otherwise
      */
     public static boolean operatesOnSameQubits(Map<String, Object> ibmGateProperties, Gate gate) {
-        var qubits = (List<Integer>) ibmGateProperties.get("qubits");
+        var qubits = (List<Double>) ibmGateProperties.get("qubits");
 
         if (Objects.isNull(qubits)) {
             logger.warn("Qubits in IBM gate properties are null for gate with name: {}!", gate.getName());
@@ -57,8 +57,8 @@ public abstract class IBMQUtility {
         // check if the stored gate and the gate for which the information was retrieved operate on the same qubit
         for (Qubit operatingQubit : gate.getOperatingQubits()) {
             boolean foundMatchingQubit = false;
-            for (Integer ibmOperatingQubit : qubits) {
-                if (ibmOperatingQubit.toString().equals(operatingQubit.getName())) {
+            for (Double ibmOperatingQubit : qubits) {
+                if (Integer.toString(ibmOperatingQubit.intValue()).equals(operatingQubit.getName())) {
                     foundMatchingQubit = true;
                 }
             }
