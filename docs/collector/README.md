@@ -20,10 +20,16 @@ the [configuration file](../../org.quantil.qprov.collector/src/main/resources/ap
 executed locally or by setting the corresponding environment variables if a dockerized setup is used.
 It defines the following properties:
 
-* `QPROV_IBMQ_TOKEN`:
-  The access token to enable accessing the API from IBMQ, as well as executing circuits on QPUs available over IBMQ.
-  Thus, this property has to be set for the successful provenance data collection.
-  The token can be retrieved in the account settings from the [IBMQ website](https://quantum-computing.ibm.com/).
+* `QPROV_IBM_CLOUD_APIKEY`:
+  
+  This is the API key of your IBM cloud account
+  Thus, this property has to be set for successful provenance data collection.
+  The key can be generated in the account settings on the [IBM cloud website](https://cloud.ibm.com/iam/apikeys).
+
+* `QPROV_IBM_QUANTUM_SERVICE_CRN`
+
+  The CRN of your IBM Quantum instance that you can create on the [IBM Quantum website](https://quantum.cloud.ibm.com/instances).
+  This has to be provided for successful provenance data collection.
 
 * `QPROV_IBMQ_EXECUTE_CIRCUITS` (default: `false`):
   This property can be used to define if the provenance data should only be collected by accessing the APIs (set
