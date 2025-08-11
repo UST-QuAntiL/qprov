@@ -94,10 +94,12 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
      * @return the average T1 time of all qubits, or 0 if no calibration data is available
      */
     public BigDecimal getAvgT1Time() {
-        return BigDecimal.valueOf(qubits.stream().map(qubit -> qubit.getQubitCharacteristics().stream()
+        return BigDecimal.valueOf(qubits.stream()
+                .map(qubit -> qubit.getQubitCharacteristics().stream()
                         .min(Comparator.comparing(QubitCharacteristics::getCalibrationTime)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .filter(qubitCharacteristics -> qubitCharacteristics.getT1Time() != null)
                 .mapToDouble(qubitCharacteristics -> qubitCharacteristics.getT1Time().doubleValue())
                 .average()
                 .orElse(0));
@@ -113,6 +115,7 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
                         .min(Comparator.comparing(QubitCharacteristics::getCalibrationTime)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .filter(qubitCharacteristics -> qubitCharacteristics.getT2Time() != null)
                 .mapToDouble(qubitCharacteristics -> qubitCharacteristics.getT2Time().doubleValue())
                 .average()
                 .orElse(0));
