@@ -21,7 +21,7 @@ package org.quantil.qprov.core.model.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 import org.jetbrains.annotations.NotNull;
 import org.quantil.qprov.core.Constants;
 
@@ -40,8 +40,7 @@ public class GateCharacteristics implements Comparable<GateCharacteristics> {
     @Id
     @Getter
     @Setter
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @UuidGenerator
     @Column(name = "databaseId", updatable = false, nullable = false)
     private UUID databaseId;
 

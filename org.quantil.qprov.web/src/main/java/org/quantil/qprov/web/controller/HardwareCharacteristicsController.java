@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
-import javax.ws.rs.QueryParam;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import org.quantil.qprov.core.model.agents.VirtualMachine;
 import org.quantil.qprov.core.model.entities.HardwareCharacteristics;
@@ -71,7 +71,7 @@ public class HardwareCharacteristicsController {
                     "By using the latest parameter only the latest data is retrieved, otherwise all available data.")
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<HardwareCharacteristicsDto>>> getHardwareCharacteristics(
-            @PathVariable UUID virtualMachineId, @QueryParam("latest") boolean latest) {
+            @PathVariable UUID virtualMachineId, @RequestParam(name = "latest", defaultValue = "false") boolean latest) {
 
         // check availability of virtual machine
         final Optional<VirtualMachine> virtualMachineOptional = virtualMachineRepository.findById(virtualMachineId);

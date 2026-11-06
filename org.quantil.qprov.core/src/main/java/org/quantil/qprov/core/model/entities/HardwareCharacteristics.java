@@ -26,7 +26,6 @@ import org.quantil.qprov.core.model.agents.VirtualMachine;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import lombok.Data;
@@ -34,7 +33,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -48,8 +47,7 @@ public class HardwareCharacteristics implements Comparable<HardwareCharacteristi
     @Id
     @Getter
     @Setter
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @UuidGenerator
     @Column(name = "databaseId", updatable = false, nullable = false)
     private UUID databaseId;
 

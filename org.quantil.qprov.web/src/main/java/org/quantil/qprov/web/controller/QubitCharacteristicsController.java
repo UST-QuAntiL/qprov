@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
-import javax.ws.rs.QueryParam;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import org.quantil.qprov.core.model.agents.Provider;
 import org.quantil.qprov.core.model.agents.QPU;
@@ -77,7 +77,7 @@ public class QubitCharacteristicsController {
     public ResponseEntity<CollectionModel<EntityModel<QubitCharacteristicsDto>>> getQubitCharacterisitcs(@PathVariable UUID providerId,
                                                                                                          @PathVariable UUID qpuId,
                                                                                                          @PathVariable UUID qubitId,
-                                                                                                         @QueryParam("latest") boolean latest) {
+                                                                                                         @RequestParam(name = "latest", defaultValue = "false") boolean latest) {
 
         // check availability of provider
         final Optional<Provider> provider = providerRepository.findById(providerId);

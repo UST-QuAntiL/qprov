@@ -2,7 +2,7 @@
 spring:
   output: { ansi: { enabled: ALWAYS } }
   mvc: { log-request-details: true }
-  jackson: { serialization: { WRITE_DATES_AS_TIMESTAMPS: false } }
+  jackson: { datatype: { datetime: { WRITE_DATES_AS_TIMESTAMPS: false } } }
   jpa:
     generate-ddl: true
     hibernate: { use-new-id-generator-mappings: false, ddl-auto: update }
@@ -38,7 +38,8 @@ logging:
 springdoc:
   default-produces-media-type: "application/hal+json"
   model-and-view-allowed: true
-  show-actuator: true
+  # the web app ships no actuator; with springdoc 3 enabling this fails startup
+  show-actuator: false
   swagger-ui:
     display-request-duration: true
     path: "/swagger-ui"

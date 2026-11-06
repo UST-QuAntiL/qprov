@@ -1,12 +1,47 @@
-version: '3'
 services:
 
   db:
-    image: planqk/db:v1.0.0
-    logging:
-      driver: none
+    image: postgres:18
     environment:
-      POSTGRES_USERS: 'qprov:qprov'
-      POSTGRES_DATABASES: 'qprov:qprov'
+      POSTGRES_USER: qprov
+      POSTGRES_PASSWORD: qprov
+      POSTGRES_DB: qprov
     ports:
       - '5060:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U qprov -d qprov']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  qprov:
+    build:
+      context: .
+      dockerfile: Dockerfile-Web
+    image: qprov
+    environment:
+      POSTGRES_HOSTNAME: db
+      POSTGRES_PORT: 5432
+    ports:
+      - '5020:5020'
+    depends_on:
+      db:
+        condition: service_healthy
+
+  collector:
+    build:
+      context: .
+      dockerfile: Dockerfile-Collector
+    image: collector
+    environment:
+      POSTGRES_HOSTNAME: db
+      POSTGRES_PORT: 5432
+      QPROV_IBM_CLOUD_APIKEY: ${QPROV_IBM_CLOUD_APIKEY}
+      QPROV_IBM_QUANTUM_SERVICE_CRN: ${QPROV_IBM_QUANTUM_SERVICE_CRN}
+      QPROV_IBMQ_AUTO_COLLECT: ${QPROV_IBMQ_AUTO_COLLECT}
+    ports:
+      - '5021:5021'
+    depends_on:
+      db:
+        condition: service_healthy
+
