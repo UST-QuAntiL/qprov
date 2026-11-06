@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.quantil.qprov.core.model.ProvTemplate;
 import org.quantil.qprov.core.repositories.prov.ProvTemplateRepository;

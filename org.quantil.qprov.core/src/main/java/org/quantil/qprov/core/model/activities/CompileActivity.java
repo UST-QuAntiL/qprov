@@ -32,13 +32,12 @@ import org.quantil.qprov.core.utils.Utils;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 import org.openprovenance.prov.model.Statement;
 
 @EqualsAndHashCode(callSuper = true)
@@ -49,8 +48,7 @@ public class CompileActivity extends org.openprovenance.prov.xml.Activity implem
     @Id
     @Getter
     @Setter
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @UuidGenerator
     @Column(name = "databaseId", updatable = false, nullable = false)
     private UUID databaseId;
 

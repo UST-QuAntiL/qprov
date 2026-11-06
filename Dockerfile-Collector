@@ -1,20 +1,18 @@
-FROM openjdk:17-jdk-bullseye as builder
+FROM maven:3.9-eclipse-temurin-25 AS builder
 COPY . /tmp/qprov
 WORKDIR /tmp/qprov
-RUN wget https://dlcdn.apache.org/maven/maven-3/3.8.8/binaries/apache-maven-3.8.8-bin.zip
-RUN unzip apache-maven-3.8.8-bin.zip
-RUN PATH=$PATH:/tmp/qprov/apache-maven-3.8.8/bin mvn package -DskipTests
+RUN --mount=type=cache,target=/root/.m2 mvn -B package -DskipTests
 
-FROM eclipse-temurin:17-jdk
-LABEL maintainer = "Benjamin Weder <benjamin.weder@iaas.uni-stuttgart.de>"
+FROM eclipse-temurin:25-jre
+LABEL maintainer="Benjamin Weder <benjamin.weder@iaas.uni-stuttgart.de>"
 
-ENV SERVER_PORT 5021
-ENV QPROV_IBMQ_EXECUTE_CIRCUITS false
-ENV QPROV_IBMQ_AUTO_COLLECT false
-ENV QPROV_IBMQ_AUTO_COLLECT_INTERVAL 60
-ENV QPROV_IBMQ_AUTO_COLLECT_INTERVAL_CIRCUITS 180
-ENV QISKIT_SERVICE_HOSTNAME qiskit-service
-ENV QISKIT_SERVICE_PORT 5000
+ENV SERVER_PORT=5021
+ENV QPROV_IBMQ_EXECUTE_CIRCUITS=false
+ENV QPROV_IBMQ_AUTO_COLLECT=false
+ENV QPROV_IBMQ_AUTO_COLLECT_INTERVAL=60
+ENV QPROV_IBMQ_AUTO_COLLECT_INTERVAL_CIRCUITS=180
+ENV QISKIT_SERVICE_HOSTNAME=qiskit-service
+ENV QISKIT_SERVICE_PORT=5000
 
 COPY --from=builder /tmp/qprov/org.quantil.qprov.collector/target/org.quantil.qprov.collector.jar /app/
 

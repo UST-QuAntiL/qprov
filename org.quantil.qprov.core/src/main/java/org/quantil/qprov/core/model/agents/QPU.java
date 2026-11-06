@@ -21,7 +21,7 @@ package org.quantil.qprov.core.model.agents;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 import org.openprovenance.prov.model.Statement;
 import org.quantil.qprov.core.Constants;
 import org.quantil.qprov.core.model.ProvExtension;
@@ -40,8 +40,7 @@ public class QPU extends org.openprovenance.prov.xml.Agent implements ProvExtens
     @Id
     @Getter
     @Setter
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @UuidGenerator
     @Column(name = "databaseId", updatable = false, nullable = false)
     private UUID databaseId;
 

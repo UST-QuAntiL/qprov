@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.quantil.qprov.core.model.prov.ProvDocument;
 import org.quantil.qprov.core.repositories.prov.ProvDocumentRepository;

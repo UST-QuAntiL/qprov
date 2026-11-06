@@ -1,18 +1,18 @@
-FROM openjdk:17-jdk-bullseye as builder
+FROM maven:3.9-eclipse-temurin-25 AS builder
 COPY . /tmp/qprov
 WORKDIR /tmp/qprov
-RUN wget https://dlcdn.apache.org/maven/maven-3/3.8.8/binaries/apache-maven-3.8.8-bin.zip
-RUN unzip apache-maven-3.8.8-bin.zip
-RUN PATH=$PATH:/tmp/qprov/apache-maven-3.8.8/bin mvn package -DskipTests
+RUN --mount=type=cache,target=/root/.m2 mvn -B package -DskipTests
 
-FROM eclipse-temurin:17-jdk
-LABEL maintainer = "Benjamin Weder <benjamin.weder@iaas.uni-stuttgart.de>"
+FROM eclipse-temurin:25-jre
+LABEL maintainer="Benjamin Weder <benjamin.weder@iaas.uni-stuttgart.de>"
 
-ENV SERVER_PORT 5020
+ENV SERVER_PORT=5020
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends graphviz \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /tmp/qprov/org.quantil.qprov.web/target/org.quantil.qprov.web.jar /app/
-
-RUN apt update && apt install -y graphviz
 
 WORKDIR /app
 
